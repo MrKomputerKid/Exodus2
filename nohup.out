@@ -1,0 +1,268 @@
+Traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 19, in <module>
+    import mysql.connector
+ModuleNotFoundError: No module named 'mysql'
+[2023-07-16 15:45:28] [INFO    ] discord.client: logging in using static token
+[2023-07-16 15:45:29] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: fa634c1107179687781a0a83de832551).
+[2023-07-16 16:35:17] [INFO    ] discord.client: logging in using static token
+[2023-07-16 16:35:19] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: f5b681c2fbed159c629fe839a8de06a3).
+Traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 23, in <module>
+    import youtube_dl
+ModuleNotFoundError: No module named 'youtube_dl'
+[2023-07-16 16:54:45] [INFO    ] discord.client: logging in using static token
+[2023-07-16 16:54:49] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: 1f8fe170fe3a452195acc00486442c2a).
+[2023-07-16 16:57:49] [INFO    ] discord.client: logging in using static token
+[2023-07-16 16:57:50] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: 30234f2db3414da364638fdfa3fa081b).
+DEBUG:mysql.connector:# _do_auth(): self._auth_plugin: 
+INFO:mysql.connector:package: mysql.connector.plugins
+INFO:mysql.connector:plugin_name: mysql_native_password
+INFO:mysql.connector:AUTHENTICATION_PLUGIN_CLASS: MySQLNativePasswordAuthPlugin
+DEBUG:mysql.connector:new_auth_plugin: mysql_native_password
+DEBUG:discord.client:on_command_error has successfully been registered as an event
+DEBUG:asyncio:Using selector: EpollSelector
+[2023-07-16 17:21:35] [INFO    ] discord.client: logging in using static token
+INFO:discord.client:logging in using static token
+[2023-07-16 17:21:41] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: 432914dcc37322ae09df599ef9925e78).
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 432914dcc37322ae09df599ef9925e78).
+[2023-07-16 17:22:09] [INFO    ] discord.voice_client: Connecting to voice...
+INFO:discord.voice_client:Connecting to voice...
+[2023-07-16 17:22:09] [INFO    ] discord.voice_client: Starting voice handshake... (connection attempt 1)
+INFO:discord.voice_client:Starting voice handshake... (connection attempt 1)
+[2023-07-16 17:22:09] [INFO    ] discord.voice_client: Voice handshake complete. Endpoint found seattle6700.discord.media
+INFO:discord.voice_client:Voice handshake complete. Endpoint found seattle6700.discord.media
+DEBUG:pytube.helpers:matched regex search: (?:v=|\/)([0-9A-Za-z_-]{11}).*
+DEBUG:pytube.extract:applying descrambler
+DEBUG:pytube.extract:finding initial function name
+DEBUG:pytube.extract:Pattern failed: ytplayer\.config\s*=\s*
+DEBUG:pytube.extract:Could not parse object.
+DEBUG:pytube.extract:finished regex search, matched: (/s/player/[\w\d]+/[\w\d_/.]+/base\.js)
+DEBUG:pytube.cipher:finding initial function name
+DEBUG:pytube.cipher:finished regex search, matched: (?P<sig>[a-zA-Z0-9$]+)\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)
+DEBUG:pytube.cipher:getting transform plan
+DEBUG:pytube.helpers:matched regex search: Zsa=function\(\w\){[a-z=\.\(\"\)]*;(.*);(?:.+)}
+DEBUG:pytube.cipher:getting transform object
+DEBUG:pytube.cipher:Finding throttling function name
+DEBUG:pytube.cipher:finished regex search, matched: a\.[a-zA-Z]\s*&&\s*\([a-z]\s*=\s*a\.get\("n"\)\)\s*&&\s*\([a-z]\s*=\s*([a-zA-Z0-9$]+)(\[\d+\])?\([a-z]\)
+DEBUG:pytube.cipher:Finding throttling function name
+DEBUG:pytube.cipher:finished regex search, matched: a\.[a-zA-Z]\s*&&\s*\([a-z]\s*=\s*a\.get\("n"\)\)\s*&&\s*\([a-z]\s*=\s*([a-zA-Z0-9$]+)(\[\d+\])?\([a-z]\)
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+DEBUG:pytube.extract:signature found, skip decipher
+[2023-07-16 17:23:26] [WARNING ] discord.gateway: Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 657, in _send_frame
+    if self._output_size > self._limit:
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 664, in _write
+    self.transport.write(data)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 218, in write
+    self._ssl_protocol._write_appdata((data,))
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 689, in _write_appdata
+    self._do_write()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 708, in _do_write
+    self._process_outgoing()
+  File "/usr/lib/python3.11/ssl.py", line 930, in write
+    return self._sslobj.write(data)
+
+WARNING:discord.gateway:Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 657, in _send_frame
+    if self._output_size > self._limit:
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 664, in _write
+    self.transport.write(data)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 218, in write
+    self._ssl_protocol._write_appdata((data,))
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 689, in _write_appdata
+    self._do_write()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 708, in _do_write
+    self._process_outgoing()
+  File "/usr/lib/python3.11/ssl.py", line 930, in write
+    return self._sslobj.write(data)
+
+[2023-07-16 17:23:29] [ERROR   ] discord.client: Attempting a reconnect in 1.91s
+Traceback (most recent call last):
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 659, in connect
+    await self.ws.poll_event()
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/gateway.py", line 646, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+ERROR:discord.client:Attempting a reconnect in 1.91s
+Traceback (most recent call last):
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 659, in connect
+    await self.ws.poll_event()
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/gateway.py", line 646, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+[2023-07-16 17:23:30] [WARNING ] discord.gateway: Shard ID None heartbeat blocked for more than 10 seconds.
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+  File "/usr/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 640, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 607, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 1922, in _run_once
+    handle._run()
+  File "/usr/lib/python3.11/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/gateway.py", line 667, in send_heartbeat
+    await self.socket.send_str(utils._to_json(data))
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/client_ws.py", line 151, in send_str
+    await self._writer.send(data, binary=False, compress=compress)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 690, in send
+    await self._send_frame(message, WSMsgType.TEXT, compress)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 646, in _send_frame
+    self._write(header + mask + message)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 664, in _write
+    self.transport.write(data)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 218, in write
+    self._ssl_protocol._write_appdata((data,))
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 689, in _write_appdata
+    self._do_write()
+
+WARNING:discord.gateway:Shard ID None heartbeat blocked for more than 10 seconds.
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+  File "/usr/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 640, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 607, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 1922, in _run_once
+    handle._run()
+  File "/usr/lib/python3.11/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/gateway.py", line 667, in send_heartbeat
+    await self.socket.send_str(utils._to_json(data))
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/client_ws.py", line 151, in send_str
+    await self._writer.send(data, binary=False, compress=compress)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 690, in send
+    await self._send_frame(message, WSMsgType.TEXT, compress)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 646, in _send_frame
+    self._write(header + mask + message)
+  File "/home/pi/exodus2/lib/python3.11/site-packages/aiohttp/http_websocket.py", line 664, in _write
+    self.transport.write(data)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 218, in write
+    self._ssl_protocol._write_appdata((data,))
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 689, in _write_appdata
+    self._do_write()
+
+[2023-07-16 17:24:14] [WARNING ] discord.gateway: Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+  File "/usr/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 640, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 607, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 1923, in _run_once
+    handle = None  # Needed to break cycles when an exception occurs.
+  File "/usr/lib/python3.11/asyncio/events.py", line 95, in _run
+    self = None  # Needed to break cycles when an exception occurs.
+  File "/usr/lib/python3.11/asyncio/selector_events.py", line 952, in _read_ready
+    self._read_ready_cb()
+  File "/usr/lib/python3.11/asyncio/selector_events.py", line 984, in _read_ready__get_buffer
+    self._protocol.buffer_updated(nbytes)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 438, in buffer_updated
+    self._do_read()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 737, in _do_read
+    self._control_ssl_reading()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 795, in _do_read__copied
+    if not chunk:
+  File "/usr/lib/python3.11/ssl.py", line 922, in read
+    return v
+
+WARNING:discord.gateway:Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+  File "/usr/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 640, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 607, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 1923, in _run_once
+    handle = None  # Needed to break cycles when an exception occurs.
+  File "/usr/lib/python3.11/asyncio/events.py", line 95, in _run
+    self = None  # Needed to break cycles when an exception occurs.
+  File "/usr/lib/python3.11/asyncio/selector_events.py", line 952, in _read_ready
+    self._read_ready_cb()
+  File "/usr/lib/python3.11/asyncio/selector_events.py", line 984, in _read_ready__get_buffer
+    self._protocol.buffer_updated(nbytes)
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 438, in buffer_updated
+    self._do_read()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 737, in _do_read
+    self._control_ssl_reading()
+  File "/usr/lib/python3.11/asyncio/sslproto.py", line 795, in _do_read__copied
+    if not chunk:
+  File "/usr/lib/python3.11/ssl.py", line 922, in read
+    return v
+
+[2023-07-16 17:24:44] [WARNING ] discord.gateway: Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+  File "/usr/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 640, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 607, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.11/asyncio/base_events.py", line 1922, in _run_once
+    handle._run()
+  File "/usr/lib/python3.11/asyncio/events.py", line 95, in _run
+    self = None  # Needed to break cycles when an exception occurs.
+  File "/usr/lib/python3.11/asyncio/selector_events.py", line 126, in _read_from_self
+    break
+
+WARNING:discord.gateway:Shard ID None voice heartbeat blocked for more than 10 seconds
+Loop thread traceback (most recent call last):
+  File "/home/pi/exodus2/main.py", line 495, in <module>
+    bot.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+  File "/home/pi/exodus2/lib/python3.11/site-packages/discord/client.py", line 860, in run
+    asyncio.run(runner())
+  File "/usr/li
