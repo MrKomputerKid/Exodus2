@@ -36,10 +36,10 @@ tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 db = mysql.connector.connect(
-    host='localhost',
-    user='exodus',
-    password='exodus',
-    database='exodus'
+    host='YOURDBHOST',
+    user='YOURDBUSER',
+    password='YOURDBPASSWORD',
+    database='YOURDB'
 )
 
 cursor = db.cursor()
@@ -292,7 +292,7 @@ async def poker(interaction):
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
     # Replace YOUR_API_KEY with your own OpenWeatherMap API key
-    api_key = '6f4180e9a396857f9c5e5e31f97be7e0'
+    api_key = 'YOUR_API_KEY'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
@@ -427,4 +427,4 @@ async def shutdown(interaction, reboot: bool = False):
 async def on_ready():
     await tree.sync()
     print("Ready!")
-client.run('MTEyOTk4NTIwMjE3Mzc4NDE4NA.GOhyg_.se1h7bafhFpyaI-VZa1M-aasBA0xraJKkk-6YE')
+client.run('YOUR API KEY')
