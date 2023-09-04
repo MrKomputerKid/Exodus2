@@ -38,9 +38,9 @@ tree = app_commands.CommandTree(client)
 # Connect to the MariaDB database.
 db = mysql.connector.connect(
     host='localhost',
-    user='exodus',
-    password='exodus',
-    database='exodus'
+    user='your_db_user',
+    password='your_db_pass',
+    database='your_db'
 )
 
 cursor = db.cursor()
@@ -193,6 +193,20 @@ class Poker:
         elif 2 in rank_counts.values():
             score += 50
         return score
+    
+class Roulette:
+    def __init__(self, bullets=1):
+        self.bullets = bullets
+        self.chamber = [False] * 6
+        for i in range(bullets):
+            self.chamber[i] = True
+        self.spin_chamber()
+
+    def spin_chamber(self):
+        random.shuffle(self.chamber)
+
+    def pull_trigger(self):
+        return self.chamber.pop()
 
 # Commands begin here.
 
@@ -288,12 +302,52 @@ async def poker(interaction):
         if msg.content.lower() != 'y':
             play_again = False
 
+# Russian Roulette Command
+
+@tree.command(name="russian_roulette", description="Challenge another player to Russian Roulette!")
+async def russian_roulette(interaction, opponent: discord.Member):
+    # Get the challenger and opponent
+    challenger = interaction.user  # The user who invoked the command
+    if opponent is None:
+        await interaction.response.send_message("You dingleberry! You need to specify an opponent.")
+        return
+
+    # Make sure the challenger is not playing against themselves
+    if challenger == opponent:
+        await interaction.response.send_message("Oh no you don't! Go blow your brains out somewhere else!")
+        return
+
+    game = Roulette()
+    await interaction.response.send_message(f'{challenger.mention} has challenged {opponent.mention} to a game of Russian Roulette with a revolver of {game.bullets} bullets. {opponent.mention}, do you accept the challenge? Type `y` for yes or `n` for no.')
+    
+    # Allow the opponent to accept or refuse the challenge
+    msg = await client.wait_for('message', check=lambda m: m.author == opponent)
+    if msg.content.lower() == 'n':
+        await interaction.followup.send(f'{opponent.mention} has rejected the challenge.')
+        return
+     
+    # Each player takes turns until someone loses or quits
+    players = [challenger, opponent]
+    for player in players:
+        await interaction.followup.send(f'{player.mention}, it\'s your turn. Type `s` to spin the chamber and pull the trigger or `q` to quit.')
+        msg = await client.wait_for('message', check=lambda m: m.author == player)
+        if msg.content.lower() == 's':
+            result = game.pull_trigger()
+            if result:
+                await interaction.followup.send(f'**BLAMMO**! {player.mention} falls to the floor lifeless.')
+                break
+            else:
+                await interaction.followup.send('*Click*! The game continues.')
+        elif msg.content.lower() == 'q':
+            await interaction.followup.send(f'{player.mention} has quit the game.')
+            break
+
 # Weather command. Pulls data from Openweathermap API and stores data in a MariaDB database.
 
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
     # Replace YOUR_API_KEY with your own OpenWeatherMap API key
-    api_key = 'YOUR_API_KEY'
+    api_key = 'API_KEY'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
@@ -383,24 +437,6 @@ async def _flip(interaction):
     response = random.choice(responses)
     await interaction.response.send_message(response)
 
-# Russian Roulette Command
-
-@tree.command(name='roulette', description='Play Russian Roulette!')
-async def russian_roulette(interaction, player1: discord.Member, player2: discord.Member):
-    if player1 == player2:
-        await interaction.response.send_message("Oh no you don't! Go blow your brains out somewhere else!")
-        return
-    players = [player1, player2]    
-    random.shuffle(players)
-    bullet = random.randint(1, 6)
-    chamber = 1
-    while bullet != chamber:
-        await interaction.response.send_message(f'{players[0].mention} pulls the trigger... *click*')
-        players.reverse()
-        chamber += 1
-    await interaction.response.send_message(f'{players[0].mention} pulls the trigger... **BLAMMO!**')
-    await interaction.response.send_message(f'{players[0].mention} falls lifeless to the floor!')
-
 # About this bot.
 
 @tree.command(name='about', description='About this bot')
@@ -430,4 +466,4 @@ async def help(interaction):
 async def on_ready():
     await tree.sync()
     print("Ready!")
-client.run('YOUR_BOT_TOKEN')
+client.run('BOT_TOKEN')
