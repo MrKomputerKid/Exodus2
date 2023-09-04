@@ -20,6 +20,7 @@ import logging
 import re
 import asyncio
 import os
+import signal
 from discord import app_commands
 from discord.ext import tasks
 
@@ -36,10 +37,10 @@ tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 db = mysql.connector.connect(
-    host='YOURDBHOST',
-    user='YOURDBUSER',
-    password='YOURDBPASSWORD',
-    database='YOURDB'
+    host='localhost',
+    user='exodus',
+    password='exodus',
+    database='exodus'
 )
 
 cursor = db.cursor()
@@ -95,10 +96,10 @@ def get_user_location(user_id):
     return None
 
 def set_user_location(user_id, location):
-    cursor.execute('UPDATE users SET location = %s WHERE id = %s', (user_id, location))
+    cursor.execute('UPDATE users SET location = %s WHERE id = %s', (location, user_id))
     if cursor.rowcount == 0:
-        cursor.execute ('INSERT INTO users (id, location) VALUES (%s, %s)', (user_id,location))
-    db.commit() 
+        cursor.execute('INSERT INTO users (id, location) VALUES (%s, %s)', (user_id, location))
+    db.commit()
 
 def get_user_unit(user_id):
     cursor.execute('SELECT unit FROM users WHERE id = %s', (user_id,))
@@ -360,7 +361,7 @@ async def _quote(interaction):
 
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction, *, location: str):
-    set_user_location(interaction.author.id, location)
+    set_user_location(interaction.user.id, location)
     await interaction.response.send_message(f'Your location has been set to {location}.')
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
@@ -370,7 +371,7 @@ async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
         await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
         return
-    set_user_unit(interaction.author.id, unit.upper())
+    set_user_unit(interaction.user.id, unit.upper())
     await interaction.response.send_message(f'Your preferred temperature unit has been set to {unit.upper()}.')
 
 # Coin Flip Command
@@ -381,6 +382,24 @@ async def _flip(interaction):
                  'Tails']
     response = random.choice(responses)
     await interaction.response.send_message(response)
+
+# Russian Roulette Command
+
+@tree.command(name='roulette', description='Play Russian Roulette!')
+async def russian_roulette(interaction, player1: discord.Member, player2: discord.Member):
+    if player1 == player2:
+        await interaction.response.send_message("Oh no you don't! Go blow your brains out somewhere else!")
+        return
+    players = [player1, player2]    
+    random.shuffle(players)
+    bullet = random.randint(1, 6)
+    chamber = 1
+    while bullet != chamber:
+        await interaction.response.send_message(f'{players[0].mention} pulls the trigger... *click*')
+        players.reverse()
+        chamber += 1
+    await interaction.response.send_message(f'{players[0].mention} pulls the trigger... **BLAMMO!**')
+    await interaction.response.send_message(f'{players[0].mention} falls lifeless to the floor!')
 
 # About this bot.
 
@@ -405,26 +424,10 @@ async def help(interaction):
         embed.add_field(name=cmd.name, value=cmd.description, inline=False)
     await interaction.response.send_message(embed=embed)
 
-# Shutdown or reboot the bot. Only Craig can do this.
-
-@tree.command(name="shutdown", description="Shutdown the bot", guild=discord.Object(id=931196188550627419))
-async def shutdown(interaction, reboot: bool = False):
-    # Check if the user is the bot owner
-    app_info = await client.application_info()
-    if interaction.user.id == app_info.owner.id:
-        # Shutdown or reboot the bot
-        if reboot:
-            await interaction.response.send_message("Rebooting...")
-            # Add your reboot logic here
-        else:
-            await interaction.response.send_message("Shutting down...")
-            # Add your shutdown logic here
-    else:
-        await interaction.response.send_message("You do not have permission to use this command.")
 # Events begin here
 
 @client.event
 async def on_ready():
     await tree.sync()
     print("Ready!")
-client.run('YOUR API KEY')
+client.run('YOUR_BOT_TOKEN')
