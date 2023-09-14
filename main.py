@@ -23,6 +23,7 @@ import os
 import signal
 import datetime
 from discord import app_commands
+from discord.app_commands import Option, OptionType
 from discord.ext import tasks
 from discord.ext import commands
 
@@ -37,19 +38,12 @@ client = discord.Client(intents=intents)
 
 tree = app_commands.CommandTree(client)
 
-bot = commands.Bot(command_prefix='!', intents=intents)
-
-@bot.group()
-async def tree(ctx):
-    if ctx.invoked_subcommand is None:
-        await ctx.send('Invalid tree command passed...')
-
 # Connect to the MariaDB database.
 db = mysql.connector.connect(
-    host='your_host',
-    user='your_db_user',
-    password='your_db_pass',
-    database='your_db'
+    host='UR_HOST',
+    user='UR_USER',
+    password='UR_PW',
+    database='UR_DB'
 )
 
 cursor = db.cursor()
@@ -359,8 +353,8 @@ async def russian_roulette(interaction, opponent: discord.Member):
 
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
-    # Replace YOUR_API_KEY with your own OpenWeatherMap API key
-    api_key = 'PUT_UR_TOKEN_HERE'
+    # Replace UR_API_KEY with your own OpenWeatherMap API key
+    api_key = 'UR_API_KEY'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
@@ -399,7 +393,12 @@ async def remind(ctx, reminder_time: str, *, reminder: str):
     db.commit()
     await ctx.send(f'Reminder set! I will remind you at {reminder_time}.')
 
-@bot.listen('on_ready')
+@client.event
+async def on_ready():
+    await tree.sync(guild=discord.Object(id=YOUR_GUILD_ID))
+    print("Ready!")
+    await check_reminders()
+
 async def check_reminders():
     while True:
         now = datetime.now()
@@ -408,12 +407,11 @@ async def check_reminders():
         reminders = mycursor.fetchall()
         for row in reminders:
             user_id, reminder_message, _ = row
-            user = bot.get_user(user_id)
-            await user.send(f'Here is your reminder: {reminder_message}')
+            user = client.get_user(user_id)
+            await user.send(f'DO IT: {reminder_message}')
             mycursor.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s", (user_id, reminder_message))
             db.commit()
         await asyncio.sleep(1)
-
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
 @tree.command(name='8ball', description='Magic 8ball!')
@@ -504,5 +502,6 @@ async def help(interaction):
 
 @client.event
 async def on_ready():
+    await tree.sync()
     print("Ready!")
-client.run('PUT_UR_TOKEN_HERE')
+client.run('UR_API_KEY')
