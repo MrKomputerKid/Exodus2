@@ -21,8 +21,10 @@ import re
 import asyncio
 import os
 import signal
+import datetime
 from discord import app_commands
 from discord.ext import tasks
+from discord.ext import commands
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -35,9 +37,16 @@ client = discord.Client(intents=intents)
 
 tree = app_commands.CommandTree(client)
 
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+@bot.group()
+async def tree(ctx):
+    if ctx.invoked_subcommand is None:
+        await ctx.send('Invalid tree command passed...')
+
 # Connect to the MariaDB database.
 db = mysql.connector.connect(
-    host='localhost',
+    host='your_host',
     user='your_db_user',
     password='your_db_pass',
     database='your_db'
@@ -72,9 +81,9 @@ quotes=[
     "<erno> Hmmm. I've lost a machine. Literally LOST. It responds to ping, it works completely, I just can't figure out where in my apartment it is.",
     "<Ubre> I'M RETARDED!",
     "<KK> Immo go rape my eyes.",
-    "<KomputerKid> Hey did you know if you type your password in it shows up as stars! *********** See?"
-    " <JacobGuy7800> mariospro"
-    " <JacobGuy7800> Wait, DAMMIT",
+    "<KomputerKid> Hey did you know if you type your password in it shows up as stars! *********** See? "
+    "<JacobGuy7800> mariospro "
+    "<JacobGuy7800> Wait, DAMMIT",
     "<billy_mccletus> The onlee wuhn whose gunna be marryin' mah sister is gunna be me.",
     "<maxell> He just needs to realize we're one giant schizophrenic cat floating in a void...",
     "<Sony> Hello. We are from Sony Pictures",
@@ -83,7 +92,11 @@ quotes=[
     "<Kim Jong Un> HAHAHAHAHA YES! "
     "<picky1004> Guys! Kim jong un is here!",
     "<KomputerKid> Why are you gae?",
-    "<DDX>ITS A FEATURE NOT A BUG /hurrdurr"
+    "<DDX> ITS A FEATURE NOT A BUG /hurrdurr",
+    "<jakejh> But what if you are already gae?",
+    "<JelleTheWhale> Whelp! It's official. Tower Brdige is no more. "
+    "<KomputerKid> Hu - DID SHE DIE? "
+    "<KomputerKid> IS LONDON BRIDGE DOWN?"
 ]
 
 # Definitions for the weather database.
@@ -207,7 +220,7 @@ class Roulette:
 
     def pull_trigger(self):
         return self.chamber.pop()
-
+    
 # Commands begin here.
 
 # Blackjack command.
@@ -347,7 +360,7 @@ async def russian_roulette(interaction, opponent: discord.Member):
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
     # Replace YOUR_API_KEY with your own OpenWeatherMap API key
-    api_key = 'API_KEY'
+    api_key = 'PUT_UR_TOKEN_HERE'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
@@ -373,6 +386,33 @@ async def weather(interaction, location: str = None, unit: str = None):
             await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
+
+# Remind Me Command
+
+@tree.command()
+async def remind(ctx, reminder_time: str, *, reminder: str):
+    remind_time = datetime.strptime(reminder_time, '%Y-%m-%d %H:%M:%S')
+    mycursor = mariadb.cursor()
+    sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
+    val = (ctx.author.id, reminder, remind_time)
+    mycursor.execute(sql, val)
+    db.commit()
+    await ctx.send(f'Reminder set! I will remind you at {reminder_time}.')
+
+@bot.listen('on_ready')
+async def check_reminders():
+    while True:
+        now = datetime.now()
+        mycursor = db.cursor()
+        mycursor.execute("SELECT * FROM reminders WHERE remind_time <= %s", (now,))
+        reminders = mycursor.fetchall()
+        for row in reminders:
+            user_id, reminder_message, _ = row
+            user = bot.get_user(user_id)
+            await user.send(f'Here is your reminder: {reminder_message}')
+            mycursor.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s", (user_id, reminder_message))
+            db.commit()
+        await asyncio.sleep(1)
 
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
@@ -407,7 +447,7 @@ async def _8ball(interaction, *, question: str = None):
 # Quote command. Pulls from quotes above.
 
 @tree.command(name='quote', description='Get a random quote from the old IRC Days')
-async def _quote(interaction):
+async def quote(interaction):
     random_quote = random.choice(quotes)
     await interaction.response.send_message(random_quote)
 
@@ -431,7 +471,7 @@ async def setunit(interaction, *, unit: str):
 # Coin Flip Command
 
 @tree.command(name='flip', description='Flip a coin')
-async def _flip(interaction):
+async def flip(interaction):
     responses = ['Heads',
                  'Tails']
     response = random.choice(responses)
@@ -440,14 +480,14 @@ async def _flip(interaction):
 # About this bot.
 
 @tree.command(name='about', description='About this bot')
-async def _about(interaction):
+async def about(interaction):
     response = 'A stupid bot written by KomputerKid.'
     await interaction.response.send_message(response)
 
 # Ping.
 
 @tree.command(name='ping', description='Ping command')
-async def _ping(interaction):
+async def ping(interaction):
     response = 'PONG!'
     await interaction.response.send_message(response)
 
@@ -464,6 +504,5 @@ async def help(interaction):
 
 @client.event
 async def on_ready():
-    await tree.sync()
     print("Ready!")
-client.run('BOT_TOKEN')
+client.run('PUT_UR_TOKEN_HERE')
