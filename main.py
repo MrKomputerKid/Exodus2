@@ -23,9 +23,7 @@ import os
 import signal
 import datetime
 from discord import app_commands
-from discord.app_commands import Option, OptionType
 from discord.ext import tasks
-from discord.ext import commands
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -383,7 +381,7 @@ async def weather(interaction, location: str = None, unit: str = None):
 
 # Remind Me Command
 
-@tree.command()
+@tree.command(name='remind', description='Set a Reminder!')
 async def remind(ctx, reminder_time: str, *, reminder: str):
     remind_time = datetime.strptime(reminder_time, '%Y-%m-%d %H:%M:%S')
     mycursor = mariadb.cursor()
@@ -504,4 +502,4 @@ async def help(interaction):
 async def on_ready():
     await tree.sync()
     print("Ready!")
-client.run('UR_API_KEY')
+client.run('UR_BOT_TKN')
