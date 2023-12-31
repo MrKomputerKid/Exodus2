@@ -199,20 +199,6 @@ class Poker:
             score += 50
         return score
     
-class Roulette:
-    def __init__(self, bullets=1):
-        self.bullets = bullets
-        self.chamber = [False] * 6
-        for i in range(bullets):
-            self.chamber[i] = True
-        self.spin_chamber()
-
-    def spin_chamber(self):
-        random.shuffle(self.chamber)
-
-    def pull_trigger(self):
-        return self.chamber.pop()
-    
 # Commands begin here.
 
 # Blackjack command.
@@ -307,46 +293,6 @@ async def poker(interaction):
         if msg.content.lower() != 'y':
             play_again = False
 
-# Russian Roulette Command
-
-@tree.command(name="russian_roulette", description="Challenge another player to Russian Roulette!")
-async def russian_roulette(interaction, opponent: discord.Member):
-    # Get the challenger and opponent
-    challenger = interaction.user  # The user who invoked the command
-    if opponent is None:
-        await interaction.response.send_message("You dingleberry! You need to specify an opponent.")
-        return
-
-    # Make sure the challenger is not playing against themselves
-    if challenger == opponent:
-        await interaction.response.send_message("Oh no you don't! Go blow your brains out somewhere else!")
-        return
-
-    game = Roulette()
-    await interaction.response.send_message(f'{challenger.mention} has challenged {opponent.mention} to a game of Russian Roulette with a revolver of {game.bullets} bullets. {opponent.mention}, do you accept the challenge? Type `y` for yes or `n` for no.')
-    
-    # Allow the opponent to accept or refuse the challenge
-    msg = await client.wait_for('message', check=lambda m: m.author == opponent)
-    if msg.content.lower() == 'n':
-        await interaction.followup.send(f'{opponent.mention} has rejected the challenge.')
-        return
-     
-    # Each player takes turns until someone loses or quits
-    players = [challenger, opponent]
-    for player in players:
-        await interaction.followup.send(f'{player.mention}, it\'s your turn. Type `s` to spin the chamber and pull the trigger or `q` to quit.')
-        msg = await client.wait_for('message', check=lambda m: m.author == player)
-        if msg.content.lower() == 's':
-            result = game.pull_trigger()
-            if result:
-                await interaction.followup.send(f'**BLAMMO**! {player.mention} falls to the floor lifeless.')
-                break
-            else:
-                await interaction.followup.send('*Click*! The game continues.')
-        elif msg.content.lower() == 'q':
-            await interaction.followup.send(f'{player.mention} has quit the game.')
-            break
-
 # Weather command. Pulls data from Openweathermap API and stores data in a MariaDB database.
 
 @tree.command(name="weather", description="Fetch the weather!")
@@ -384,18 +330,12 @@ async def weather(interaction, location: str = None, unit: str = None):
 @tree.command(name='remind', description='Set a Reminder!')
 async def remind(ctx, reminder_time: str, *, reminder: str):
     remind_time = datetime.strptime(reminder_time, '%Y-%m-%d %H:%M:%S')
-    mycursor = mariadb.cursor()
+    mycursor = db.cursor()
     sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
     val = (ctx.author.id, reminder, remind_time)
     mycursor.execute(sql, val)
     db.commit()
     await ctx.send(f'Reminder set! I will remind you at {reminder_time}.')
-
-@client.event
-async def on_ready():
-    await tree.sync(guild=discord.Object(id=YOUR_GUILD_ID))
-    print("Ready!")
-    await check_reminders()
 
 async def check_reminders():
     while True:
@@ -477,7 +417,7 @@ async def flip(interaction):
 
 @tree.command(name='about', description='About this bot')
 async def about(interaction):
-    response = 'A stupid bot written by KomputerKid.'
+    response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
     await interaction.response.send_message(response)
 
 # Ping.
@@ -500,6 +440,9 @@ async def help(interaction):
 
 @client.event
 async def on_ready():
-    await tree.sync()
+    # Replace YOUR_GUILD_ID with your actual Guild ID
+    await tree.sync(guild=discord.Object(id=YOUR_GUILD_ID))
     print("Ready!")
+    await check_reminders()
+    # Replace UR_BOT_TKN with your bot's token!
 client.run('UR_BOT_TKN')
