@@ -15,13 +15,13 @@
 import discord
 import random
 import requests
-import mysql.connector
+import aiomysql
 import logging
 import re
 import asyncio
 import os
 import signal
-import datetime
+from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
 
@@ -29,7 +29,6 @@ from discord.ext import tasks
 logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.default()
-
 intents.members = True
 
 client = discord.Client(intents=intents)
@@ -37,32 +36,38 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
-db = mysql.connector.connect(
-    host='UR_HOST',
-    user='UR_USER',
-    password='UR_PW',
-    database='UR_DB'
-)
 
-cursor = db.cursor()
+async def connect_to_db():
+    pool = await aiomysql.create_pool(
+        host='UR_HOST',
+        port=3306,
+        user='UR_USER',
+        password='UR_PASS',
+        db='UR_DB',
+        autocommit=True
+    )
+    connection = await pool.acquire()
+    return pool, connection
 
-# Keep the MariaDB Connection Alive 
+# Keep the MariaDB Connection Alive
 @tasks.loop(minutes=5)
-async def keep_alive():
-    cursor.execute("SELECT 1")
-    result = cursor.fetchone()
-    if result is None:
-        db.ping(reconnect=True)
+async def keep_alive(pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT 1")
 
 # Create the users table if it doesn't already exist
+async def create_users_table(pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id BIGINT PRIMARY KEY,
+                    location VARCHAR(255),
+                    unit CHAR(1)
+                )
+            ''')
 
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id BIGINT PRIMARY KEY,
-        location VARCHAR(255),
-        unit CHAR(1)
-    )
-''')
 
 # Quotes for the Quote Command
 
@@ -92,32 +97,37 @@ quotes=[
 ]
 
 # Definitions for the weather database.
+async def get_user_location(user_id, pool):
+    async with pool.acquire() as conn:
+        cur = await conn.cursor()
+        await cur.execute('SELECT location FROM users WHERE id = %s', (user_id,))
+        location = await cur.fetchone()
+        return location[0] if location else None
 
-def get_user_location(user_id):
-    cursor.execute('SELECT location FROM users WHERE id = %s', (user_id,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    return None
+async def set_user_location(user_id, location, pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute('UPDATE users SET location = %s WHERE id = %s', (location, user_id))
+            if cur.rowcount == 0:
+                await cur.execute('INSERT INTO users (id, location) VALUES (%s, %s)', (user_id, location))
+        await conn.commit()
 
-def set_user_location(user_id, location):
-    cursor.execute('UPDATE users SET location = %s WHERE id = %s', (location, user_id))
-    if cursor.rowcount == 0:
-        cursor.execute('INSERT INTO users (id, location) VALUES (%s, %s)', (user_id, location))
-    db.commit()
+async def get_user_unit(user_id, pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute('SELECT unit FROM users WHERE id = %s', (user_id,))
+            result = await cur.fetchone()
+            if result:
+                return result[0]
+        return None
 
-def get_user_unit(user_id):
-    cursor.execute('SELECT unit FROM users WHERE id = %s', (user_id,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    return None
-
-def set_user_unit(user_id, unit):
-    cursor.execute('UPDATE users SET unit = %s WHERE id = %s', (unit, user_id))
-    if cursor.rowcount == 0:
-        cursor.execute('INSERT INTO users (id, unit) VALUES (%s, %s)', (user_id, unit))
-    db.commit()
+async def set_user_unit(user_id, unit, pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute('UPDATE users SET unit = %s WHERE id = %s', (unit, user_id))
+            if cur.rowcount == 0:
+                await cur.execute('INSERT INTO users (id, unit) VALUES (%s, %s)', (user_id, unit))
+        await conn.commit()
 
 # Classes and scripting for the Blackjack, poker, and play commands.
 
@@ -198,7 +208,7 @@ class Poker:
         elif 2 in rank_counts.values():
             score += 50
         return score
-    
+
 # Commands begin here.
 
 # Blackjack command.
@@ -303,14 +313,16 @@ async def weather(interaction, location: str = None, unit: str = None):
     response = requests.get(url)
     data = response.json()
     if location is None:
-        location = get_user_location(interaction.user.id)
+        pool, connection = await connect_to_db()
+        location = await get_user_location(interaction.user.id, pool)
         if not location:
             await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
             return
         if unit is None:
-            unit = get_user_unit(interaction.user.id)
+            unit = await get_user_unit(interaction.user.id, pool)
             if not unit:
                 unit = 'C'
+        await pool.release(connection)  # Release the connection back to the pool
     if data['cod'] == 200:
         temp_celsius = data['main']['temp']
         description = data['weather'][0]['description']
@@ -330,26 +342,27 @@ async def weather(interaction, location: str = None, unit: str = None):
 @tree.command(name='remind', description='Set a Reminder!')
 async def remind(ctx, reminder_time: str, *, reminder: str):
     remind_time = datetime.strptime(reminder_time, '%Y-%m-%d %H:%M:%S')
-    mycursor = db.cursor()
+    cursor = db.cursor()
     sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
     val = (ctx.author.id, reminder, remind_time)
-    mycursor.execute(sql, val)
+    cursor.execute(sql, val)
     db.commit()
     await ctx.send(f'Reminder set! I will remind you at {reminder_time}.')
 
-async def check_reminders():
+async def check_reminders(pool):
     while True:
         now = datetime.now()
-        mycursor = db.cursor()
-        mycursor.execute("SELECT * FROM reminders WHERE remind_time <= %s", (now,))
-        reminders = mycursor.fetchall()
-        for row in reminders:
-            user_id, reminder_message, _ = row
-            user = client.get_user(user_id)
-            await user.send(f'DO IT: {reminder_message}')
-            mycursor.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s", (user_id, reminder_message))
-            db.commit()
-        await asyncio.sleep(1)
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("SELECT user_id, reminder, remind_time FROM reminders WHERE remind_time <= %s", (now,))
+                reminders = await cur.fetchall()
+                for row in reminders:
+                    user_id, reminder_message, remind_time = row
+                    user = client.get_user(user_id)
+                    await user.send(f'DO IT: {reminder_message}')
+                    await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s", (user_id, reminder_message, remind_time))
+                    await conn.commit()
+        await asyncio.sleep(60)
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
 @tree.command(name='8ball', description='Magic 8ball!')
@@ -440,9 +453,11 @@ async def help(interaction):
 
 @client.event
 async def on_ready():
-    # Replace YOUR_GUILD_ID with your actual Guild ID
-    await tree.sync(guild=discord.Object(id=YOUR_GUILD_ID))
+    pool, connection = await connect_to_db()
+    await create_users_table(pool)
+    await tree.sync(guild=discord.Object(id='931196188550627419'))
     print("Ready!")
-    await check_reminders()
-    # Replace UR_BOT_TKN with your bot's token!
+    keep_alive.start(pool)  # Start the keep-alive task
+    await check_reminders(pool)
+
 client.run('UR_BOT_TKN')
