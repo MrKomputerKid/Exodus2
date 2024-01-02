@@ -131,6 +131,23 @@ async def set_user_unit(user_id, unit, pool):
 
 # Classes and scripting for the Blackjack, poker, and play commands.
 
+class Roulette:
+    def __init__(self):
+        self.gun = []
+        self.bullets = [1]
+        self.chambers = 6
+
+        self.create_game()
+        self.spin_chamber()
+
+    def create_game(self):
+        for bullet in self.bullets:
+            for chamber in range(1, self.chambers + 1):
+                self.gun.append((bullet, chamber))
+
+    def spin_chamber(self):
+        random.shuffle(self.gun)
+
 class Blackjack:
     def __init__(self):
         self.deck = []
@@ -303,6 +320,25 @@ async def poker(interaction):
         if msg.content.lower() != 'y':
             play_again = False
 
+# Russian Roulette Command
+
+@tree.command(name='roulette', description='Play Russian Roulette!')
+async def roulette(interaction):
+        game = Roulette()
+
+        await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
+
+        msg = await client.wait_for('message')
+
+        if msg.content.lower() != 'q':
+            bullet, chamber = game.gun.pop(0)
+            if bullet == 1 and chamber == 1:
+                await interaction.followup.send("BLAMMO! You are dead!")
+            else:
+                await interaction.followup.send("Click! You survived!")
+        else:
+            await interaction.followup.send("WIMP! You pussied out!")
+
 # Weather command. Pulls data from Openweathermap API and stores data in a MariaDB database.
 
 @tree.command(name="weather", description="Fetch the weather!")
@@ -400,6 +436,7 @@ async def check_reminders(pool):
                     await user.send(f'DO IT: {reminder_message}')
                     await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s", (user_id, reminder_message, remind_time))
                     await conn.commit()
+
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
 @tree.command(name='8ball', description='Magic 8ball!')
@@ -477,8 +514,8 @@ async def ping(interaction):
     response = 'PONG!'
     await interaction.response.send_message(response)
 
-
 # Help
+
 @tree.command(name="help", description="Show help information")
 async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
