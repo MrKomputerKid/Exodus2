@@ -10,7 +10,8 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
-from discord.ext import tasks, commands, app_commands
+from discord import app_commands
+from discord.ext import tasks, commands
 from dotenv import load_dotenv
 
 load_dotenv()
