@@ -10,7 +10,7 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
-from discord.ext import tasks, commands, app_commands
+from discord.ext import tasks, commands
 
 logging.basicConfig(level=logging.DEBUG)
 
