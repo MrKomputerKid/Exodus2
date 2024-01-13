@@ -323,11 +323,14 @@ async def roulette(interaction):
 async def weather(interaction, location: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
 # Make the API request with the correct location
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-    response = requests.get(url)
-    data = response.json()
-    print(f"DEBUG: API Request URL: {url}")
-    print(f"DEBUG: API Response: {data}")
+    if location is not None:
+        url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
+        response = requests.get(url)
+        data = response.json()
+        print(f"DEBUG: API Response: {data}")
+    else:
+        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+
     if location is None:
         pool, connection = await connect_to_db()
         location = await get_user_location(interaction.user.id, pool)
@@ -342,7 +345,6 @@ async def weather(interaction, location: str = None, unit: str = None):
         if not unit:
             unit = 'C'
     await pool.release(connection)  # Release the connection back to the pool
-
 
     if data['cod'] == 200:
         temp_celsius = data['main']['temp']
