@@ -324,6 +324,8 @@ async def weather(interaction, location: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
 # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
+    print(f"DEBUG: API Request URL: {url}")
+    print(f"DEBUG: API Response: {data}")
     response = requests.get(url)
     data = response.json()
     if location is None:
