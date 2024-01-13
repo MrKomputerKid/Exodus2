@@ -344,14 +344,14 @@ async def weather(interaction, location: str = None, unit: str = None):
                 await interaction.followup.send(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
             return  # Stop the command execution after responding
 
-    await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.')
+    await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
 
     if location is None:
         pool, connection = await connect_to_db()
         location = await get_user_location(interaction.user.id, pool)
         print(f"DEBUG: Location retrieved from the database: {location}")
         if not location:
-            await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.')
+            await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
             await pool.release(connection)
             return
         if unit is None:
