@@ -317,12 +317,12 @@ async def roulette(interaction):
         else:
             await interaction.followup.send("WIMP! You pussied out!")
 
-# Weather command. Pulls data from Openweathermap API and stores data in a MariaDB database.
-
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-# Make the API request with the correct location
+    data = None  # Initialize data variable
+
+    # Make the API request with the correct location
     if location is not None:
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
         response = requests.get(url)
@@ -335,18 +335,18 @@ async def weather(interaction, location: str = None, unit: str = None):
         pool, connection = await connect_to_db()
         location = await get_user_location(interaction.user.id, pool)
         print(f"DEBUG: Location retrieved from the database: {location}")
-    if not location:
-        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-        await pool.release(connection)
-        return
-    if unit is None:
-        unit = await get_user_unit(interaction.user.id, pool)
-        print(f"DEBUG: Unit retrieved from the database: {unit}")
-        if not unit:
-            unit = 'C'
-    await pool.release(connection)  # Release the connection back to the pool
+        if not location:
+            await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+            await pool.release(connection)
+            return
+        if unit is None:
+            unit = await get_user_unit(interaction.user.id, pool)
+            print(f"DEBUG: Unit retrieved from the database: {unit}")
+            if not unit:
+                unit = 'C'
+        await pool.release(connection)  # Release the connection back to the pool
 
-    if data['cod'] == 200:
+    if data is not None and data['cod'] == 200:
         temp_celsius = data['main']['temp']
         description = data['weather'][0]['description']
         if unit == 'F':
@@ -359,6 +359,7 @@ async def weather(interaction, location: str = None, unit: str = None):
             await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
+
 
 # Remind Me Command
 
