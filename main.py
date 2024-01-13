@@ -1,17 +1,6 @@
 # Copyright <2023> <Craig J. Wessel>
-#
-# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-#
-# 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Import the required modules.s
-
+# Import the required modules.
 import discord
 import random
 import requests
@@ -20,11 +9,8 @@ import logging
 import re
 import asyncio
 import os
-import signal
 from datetime import datetime, timedelta
-from discord import app_commands
 from discord.ext import commands, tasks
-
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -39,15 +25,16 @@ tree = app_commands.CommandTree(client)
 
 async def connect_to_db():
     pool = await aiomysql.create_pool(
-        host='DB_HOST',
+        host=os.getenv('DB_HOST'),
         port=3306,
-        user='DB_USER',
-        password='DB_PASS',
-        db='DB',
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        db=os.getenv('DB_DATABASE'),
         autocommit=True
     )
     connection = await pool.acquire()
     return pool, connection
+
 
 # Keep the MariaDB Connection Alive
 @tasks.loop(minutes=5)
@@ -332,8 +319,7 @@ async def roulette(interaction):
 
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, unit: str = None):
-    # Replace UR_API_KEY with your own OpenWeatherMap API key
-    api_key = 'UR_API_KEY'
+    api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
@@ -523,4 +509,4 @@ async def on_ready():
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
 
-client.run('UR_BOT_TKN')
+client.run(os.getenv('DISCORD_TOKEN'))
