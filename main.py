@@ -455,7 +455,9 @@ async def quote(interaction):
 
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction, *, location: str):
-    set_user_location(interaction.user.id, location)
+    pool, connection = await connect_to_db()
+    await set_user_location(interaction.user.id, location, pool)
+    await pool.release(connection)
     await interaction.response.send_message(f'Your location has been set to {location}.')
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
@@ -465,7 +467,9 @@ async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
         await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
         return
-    set_user_unit(interaction.user.id, unit.upper())
+    pool, connection = await connect_to_db()
+    await set_user_unit(interaction.user.id, unit.upper(), pool)
+    await pool.release(connection)
     await interaction.response.send_message(f'Your preferred temperature unit has been set to {unit.upper()}.')
 
 # Coin Flip Command
