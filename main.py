@@ -2,7 +2,6 @@
 
 # Import the required modules.
 import discord
-from discord import app_commands
 import random
 import requests
 import aiomysql
@@ -11,7 +10,7 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
-from discord.ext import tasks, commands
+from discord.ext import tasks, commands, app_commands
 
 logging.basicConfig(level=logging.DEBUG)
 
