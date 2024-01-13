@@ -351,16 +351,18 @@ async def weather(interaction, location: str = None, unit: str = None):
         pool, connection = await connect_to_db()
         location = await get_user_location(interaction.user.id, pool)
         print(f"DEBUG: Location retrieved from the database: {location}")
-        if not location:
-            await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-            await pool.release(connection)
-            return
+    if location:
         if unit is None:
             unit = await get_user_unit(interaction.user.id, pool)
             print(f"DEBUG: Unit retrieved from the database: {unit}")
             if not unit:
                 unit = 'C'
-        await pool.release(connection)  # Release the connection back to the pool
+    else:
+        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+        await pool.release(connection)
+        return
+
+    await pool.release(connection)  # Release the connection back to the pool
 
     if data is not None and data['cod'] == 200:
         temp_celsius = data['main']['temp']
