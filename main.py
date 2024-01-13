@@ -339,12 +339,13 @@ async def weather(interaction, location: str = None, unit: str = None):
                 await interaction.response.send_message(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
             elif unit == 'K':
                 temp_kelvin = temp_celsius + 273.15
-                await interaction.followup.send(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
+                await interaction.response.send_message(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
             else:
-                await interaction.followup.send(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
-            return  # Stop the command execution after responding
+                await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+        else:
+            await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
 
-    await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+        return  # Stop the command execution after responding
 
     if location is None:
         pool, connection = await connect_to_db()
@@ -366,15 +367,14 @@ async def weather(interaction, location: str = None, unit: str = None):
         description = data['weather'][0]['description']
         if unit == 'F':
             temp_fahrenheit = temp_celsius * 9/5 + 32
-            await interaction.followup.send(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
+            await interaction.response.send_message(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
         elif unit == 'K':
             temp_kelvin = temp_celsius + 273.15
-            await interaction.followup.send(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
+            await interaction.response.send_message(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
         else:
-            await interaction.followup.send(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+            await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
     else:
-        await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {location}.')
-
+        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
 
 # Remind Me Command
 
