@@ -83,26 +83,9 @@ quotes=[
     "<JacobGuy7800> Wait, DAMMIT",
     "<billy_mccletus> The onlee wuhn whose gunna be marryin' mah sister is gunna be me.",
     "<maxell> He just needs to realize we're one giant schizophrenic cat floating in a void...",
-    "<Sony> Hello. We are from Sony Pictures",
-    "Kim Jong Un has joined! "
-    "<picky1004> WTF!!!! KIM JONG UN???? "
-    "<Kim Jong Un> HAHAHAHAHA YES! "
-    "<picky1004> Guys! Kim jong un is here!",
-    "<KomputerKid> Why are you gae?",
-    "<DDX> ITS A FEATURE NOT A BUG /hurrdurr",
-    "<jakejh> But what if you are already gae?",
-    "<JelleTheWhale> Whelp! It's official. Tower Brdige is no more. "
-    "<KomputerKid> Hu - DID SHE DIE? "
-    "<KomputerKid> IS LONDON BRIDGE DOWN?"
 ]
 
 # Definitions for the weather database.
-async def get_user_location(user_id, pool):
-    async with pool.acquire() as conn:
-        cur = await conn.cursor()
-        await cur.execute('SELECT location FROM users WHERE id = %s', (user_id,))
-        location = await cur.fetchone()
-        return location[0] if location else None
 
 async def set_user_location(user_id, location, pool):
     async with pool.acquire() as conn:
@@ -112,15 +95,6 @@ async def set_user_location(user_id, location, pool):
                 await cur.execute('INSERT INTO users (id, location) VALUES (%s, %s)', (user_id, location))
         await conn.commit()
 
-async def get_user_unit(user_id, pool):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute('SELECT unit FROM users WHERE id = %s', (user_id,))
-            result = await cur.fetchone()
-            if result:
-                return result[0]
-        return None
-
 async def set_user_unit(user_id, unit, pool):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -128,6 +102,21 @@ async def set_user_unit(user_id, unit, pool):
             if cur.rowcount == 0:
                 await cur.execute('INSERT INTO users (id, unit) VALUES (%s, %s)', (user_id, unit))
         await conn.commit()
+
+async def get_user_location(user_id, pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT location FROM users WHERE id = %s", (user_id,))
+            result = await cur.fetchone()
+            return result[0] if result else None
+
+async def get_user_unit(user_id, pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT unit FROM users WHERE id = %s", (user_id,))
+            result = await cur.fetchone()
+            return result[0] if result else None
+
 
 # Classes and scripting for the Blackjack, poker, and play commands.
 
