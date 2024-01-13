@@ -2,6 +2,7 @@
 
 # Import the required modules.
 import discord
+from discord import app_commands
 import random
 import requests
 import aiomysql
@@ -10,15 +11,13 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
-from discord.ext import tasks, commands as app_commands
+from discord.ext import tasks, commands
 
 logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.default()
 intents.members = True
-
 client = discord.Client(intents=intents)
-
 tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
