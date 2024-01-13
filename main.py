@@ -10,14 +10,17 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
-from discord.ext import tasks, commands
+from discord.ext import tasks, commands, app_commands
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
-tree = commands.CommandTree(client)
+tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 
