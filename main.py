@@ -506,7 +506,7 @@ async def help(interaction):
 async def on_ready():
     pool, connection = await connect_to_db()
     await create_users_table(pool)
-    await tree.sync(guild=discord.Object(id='UR_GUILD_ID'))
+    await tree.sync(guild=discord.Object(id=os.getenv('GUILD_ID')))
     print("Ready!")
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
