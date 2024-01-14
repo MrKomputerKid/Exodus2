@@ -356,8 +356,8 @@ async def weather(interaction, location: str = None, state_province: str = None,
     async with aiohttp.ClientSession() as session:
         full_location = f"{location}, {state_province}, {country}" if state_province and country else f"{location}, {country}"
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-        async with session.get(url) as response:
-            data = await response.json()
+    async with session.get(url) as response:
+        data = await response.json()
 
     if data and data.get('cod') == 200:
         temp_celsius = data['main']['temp']
