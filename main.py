@@ -353,10 +353,9 @@ async def weather(interaction, location: str = None, state_province: str = None,
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
-    full_location = await get_most_populous_location(location, state_province, country)
-
     # Make the API request with aiohttp
     async with aiohttp.ClientSession() as session:
+        full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
         async with session.get(url) as response:
             data = await response.json()
@@ -380,48 +379,10 @@ async def weather(interaction, location: str = None, state_province: str = None,
             else:
                 await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
         else:
-            await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {location}.')
+            await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {full_location}.')
     except Exception as e:
         print(f"Error in weather command: {e}")
         await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
-
-async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
-    opencage_api_key = os.getenv('OPENCAGE_API_KEY')
-    if state_province and country:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
-    else:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(opencage_url) as response:
-            opencage_data = await response.json()
-
-    print(f"DEBUG: OpenCage API Response: {opencage_data}")
-
-    if 'results' in opencage_data and opencage_data['results']:
-        lat = opencage_data['results'][0]['geometry']['lat']
-        lon = opencage_data['results'][0]['geometry']['lng']
-
-        openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweathermap_api_key}'
-
-        async with session.get(openweathermap_url) as response:
-            openweathermap_data = await response.json()
-
-    print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
-
-    if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
-        city = openweathermap_data['name']
-        country_code = openweathermap_data['sys']['country']
-        state_result = openweathermap_data.get('state', state_province)
-
-        # Explicitly handle the case for Australia
-        if country_code == 'AU':
-            state_result = 'WA'
-
-        # Check if state_result is None
-        if state_result is not None:
-            return f'{city}, {state_result}, {country_code}'
 
 
 
