@@ -3,7 +3,7 @@
 # Import the required modules.
 import discord
 import random
-import requests
+import aiohttp
 import aiomysql
 import logging
 import re
