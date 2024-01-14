@@ -413,6 +413,8 @@ async def get_most_populous_location(location: str, state_province: str, country
                         country_code = openweathermap_data['list'][0]['sys']['country']
                         state_result = openweathermap_data['list'][0].get('state', state_province)
 
+                        print(f"DEBUG: lat={lat}, lon={lon}, city={city}, state_result={state_result}, country_code={country_code}")
+
                         # Check if state_result is None
                         if state_result is not None:
                             return f'{city}, {state_result}, {country_code}'
