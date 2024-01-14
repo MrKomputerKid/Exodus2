@@ -407,21 +407,16 @@ async def get_most_populous_location(location: str, state_province: str, country
         openweathermap_data = openweathermap_response.json()
         print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
 
-        if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
-            city = openweathermap_data['name']
+        if 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
             country_code = openweathermap_data['sys']['country']
             state_result = openweathermap_data.get('state', state_province)
 
-            # Explicitly handle the case for Australia
-            if country_code == 'AU':
-                state_result = 'WA'
-
             # Check if state_result is None
             if state_result is not None:
-                return f'{city}, {state_result}, {country_code}'
+                return f'{location}, {state_result}, {country_code}'
 
-    # If the user-specified location is not valid, fall back to the most populous location
-    return f'{location}, {state_result or state_province}, {country_code}' if state_result is not None else f'{location}, {state_province}, {country_code}' if state_province and country else f'{location}, {country_code}' if country_code else location
+    # Return the original location with state_province and country codes
+    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
 
 
 
