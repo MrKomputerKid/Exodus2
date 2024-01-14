@@ -20,9 +20,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-tree = bot.tree()
-
+client = discord.Client(intents=intents)
+tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 
@@ -526,7 +525,6 @@ async def sync(interaction: discord.Interaction):
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
-
 # Events begin here
 
 @client.event
@@ -534,8 +532,8 @@ async def on_ready():
     pool, connection = await connect_to_db()
     await create_users_table(pool)
     await tree.sync()
-    print("Ready!")
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
+    print('Ready!')
 
 client.run(os.getenv('DISCORD_TOKEN'))
