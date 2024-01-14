@@ -385,11 +385,12 @@ def get_most_populous_location(city, country):
     print(f"DEBUG: GeoNames API Response: {data}")
 
     if 'geonames' in data and data['geonames']:
-        city_name = data['geonames'][0]['name']
-        country_code = data['geonames'][0]['adminCodes1']['ISO3166_2']
-        return f"{city_name}, {country_code}"
-    else:
-        return f"{city}, {country}"
+        if data['geonames'][0]['fclName'] not in ['parks', 'area', 'reserve']:
+            city_name = data['geonames'][0]['name']
+            country_code = data['geonames'][0]['adminCodes1']['ISO3166_2']
+            return f"{city_name}, {country_code}"
+
+    return f"{city}, {country}"
 
 # Remind Me Command
 
