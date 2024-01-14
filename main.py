@@ -322,7 +322,7 @@ async def roulette(interaction):
                 await interaction.followup.send("Click! You survived!")
         else:
             await interaction.followup.send("WIMP! You pussied out!")
-
+            
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
@@ -414,9 +414,8 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
-    
     if state_province and country:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
+        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&,{state_province},{country}&key={opencage_api_key}'
     else:
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
@@ -430,22 +429,32 @@ async def get_most_populous_location(location: str, state_province: str, country
         result = opencage_data['results'][0]
         lat = result['geometry']['lat']
         lon = result['geometry']['lng']
-        city = result.get('components', {}).get('city', location)
-        country_code = result.get('components', {}).get('country_code', country)
-        state_result = result.get('components', {}).get('state', state_province)
+        city = location if 'components' in result and 'city' in result['components'] else result['components'].get('city', None)
+        openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?q={city}&lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
-        # Check if state_result is 'None' (string) or None (NoneType)
-        if state_result and state_result.lower() != 'none':
-            return f'{city}, {state_result}, {country_code}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(openweathermap_url) as openweathermap_response:
+                openweathermap_data = await openweathermap_response.json()
 
+        print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
+
+        if 'list' in openweathermap_data and openweathermap_data['list']:
+            city = openweathermap_data['list'][0]['name']
+            country_code = openweathermap_data['list'][0]['sys']['country']
+            state_result = openweathermap_data['list'][0].get('state', state_province)
+
+            # Check if state_result is 'None' (string) or None (NoneType)
+            if state_result and state_result.lower() != 'none':
+                return f'{city}, {state_result}, {country_code}'
+    
     # Return the original location with state_province and country codes
     if state_province and country:
-        return f'{location}, {state_province}, {country}'
+        return f'{location}, {state_province}, {country.upper()}'
     elif country:
-        return f'{location}, {country}'
+        return f'{location}, {country.upper()}'
     else:
         return location
-
 
 # Remind Me Command
 
