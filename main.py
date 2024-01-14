@@ -401,25 +401,26 @@ async def get_most_populous_location(location: str, state_province: str, country
         lon = opencage_data['results'][0]['geometry']['lng']
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweathermap_api_key}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
         openweathermap_response = requests.get(openweathermap_url)
         openweathermap_data = openweathermap_response.json()
         print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
 
-        if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
-            city = openweathermap_data['name']
-            country_code = openweathermap_data['sys']['country']
-            state_result = openweathermap_data.get('state', state_province)
+        if 'list' in openweathermap_data and openweathermap_data['list']:
+            city = openweathermap_data['list'][0]['name']
+            country_code = openweathermap_data['list'][0]['sys']['country']
+            state_result = openweathermap_data['list'][0].get('state', state_province)
 
-            # Explicitly handle the case for Australia
-            if country_code == 'AU':
-                state_result = 'WA'
-
-            # Check if state_result is None
-            if state_result is not None:
+            # Check if state_result is 'None' (string) or None (NoneType)
+            if state_result and state_result.lower() != 'none':
                 return f'{city}, {state_result}, {country_code}'
             
+            # Check if there's state information in the OpenCage results
+            state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
+            if state_result_oc and state_result_oc.lower() != 'none':
+                return f'{city}, {state_result_oc}, {country_code}'
+
     # Return the original location with state_province and country codes
     if state_province and country:
         return f'{location}, {state_province}, {country}'
