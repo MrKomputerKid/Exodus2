@@ -542,6 +542,11 @@ async def on_ready():
     await create_users_table(pool)
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
-    print('Ready!')
+    print(f'We have logged in as {client.user}')
+    try:
+        await tree.sync()
+        print('Synced')
+    except Exception as e:
+        print(e)
 
 client.run(os.getenv('DISCORD_TOKEN'))
