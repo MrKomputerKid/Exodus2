@@ -402,7 +402,7 @@ async def get_most_populous_location(location: str, state_province: str, country
                 lon = opencage_data['results'][0]['geometry']['lng']
 
                 openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-                openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+                openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}&units=metric'
 
                 print(f"DEBUG: OpenWeatherMap API URL: {openweathermap_url}")
 
