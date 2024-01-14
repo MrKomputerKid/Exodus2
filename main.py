@@ -34,8 +34,7 @@ async def connect_to_db():
         db=os.getenv('DB_DATABASE'),
         autocommit=True
     )
-    connection = await pool.acquire()
-    return pool, connection
+    return pool
 
 
 # Keep the MariaDB Connection Alive
@@ -47,8 +46,8 @@ async def keep_alive(pool):
 
 # Create the users table if it doesn't already exist
 async def create_users_table(pool):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
+    async with pool.acquire() as connection:
+        async with connection.cursor() as cur:
             await cur.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id BIGINT PRIMARY KEY,
@@ -529,14 +528,13 @@ async def sync(interaction: discord.Interaction):
 
 @client.event
 async def on_ready():
-    pool, connection = await connect_to_db()
+    pool = await connect_to_db()
     await create_users_table(pool)
-    
     logging.info("Before tree sync")
     await tree.sync()
     logging.info("After tree sync")
-
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
+    print('Ready!')
 
 client.run(os.getenv('DISCORD_TOKEN'))
