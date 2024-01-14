@@ -415,6 +415,10 @@ async def get_most_populous_location(location: str, state_province: str, country
             # Explicitly handle the case for Australia
             if country_code == 'AU':
                 state_result = 'WA'
+
+            # Check if state_result is None
+            if state_result is not None:
+                return f'{city}, {state_result}, {country_code}'
         return f'{city}, {state_result}, {country_code}'
 
     # Return the original location with state_province and country codes
