@@ -329,6 +329,7 @@ async def roulette(interaction):
 async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
+    pool = {} # Initialize pool
 
     if location is None:
         await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
