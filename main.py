@@ -412,12 +412,21 @@ async def get_most_populous_location(location: str, state_province: str, country
             country_code = openweathermap_data['sys']['country']
             state_result = openweathermap_data.get('state', state_province)
 
+            # Explicitly handle the case for Australia
+            if country_code == 'AU':
+                state_result = 'WA'
+
             # Check if state_result is None
             if state_result is not None:
                 return f'{city}, {state_result}, {country_code}'
             
     # Return the original location with state_province and country codes
-    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
+    if state_province and country:
+        return f'{location}, {state_province}, {country}'
+    elif country:
+        return f'{location}, {country}'
+    else:
+        return location
 
 # Remind Me Command
 
