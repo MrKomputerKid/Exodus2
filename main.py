@@ -20,8 +20,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-tree = app_commands.CommandTree(bot)
+client = commands.Bot(command_prefix="!", intents=intents)
+tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 
@@ -540,7 +540,7 @@ async def sync_tree(ctx):
 
 # Events begin here
 
-@bot.event
+@client.event
 async def on_ready():
     pool, connection = await connect_to_db()
     await create_users_table(pool)
@@ -549,4 +549,4 @@ async def on_ready():
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
 
-bot.run(os.getenv('DISCORD_TOKEN'))
+client.run(os.getenv('DISCORD_TOKEN'))
