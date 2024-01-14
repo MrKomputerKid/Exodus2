@@ -530,8 +530,6 @@ async def sync(interaction: discord.Interaction):
 async def on_ready():
     pool = await connect_to_db()
     await create_users_table(pool)
-    logging.info("Before tree sync")
-    logging.info("After tree sync")
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
     print('Ready!')
@@ -541,7 +539,7 @@ async def on_message(message):
         return
 
     if message.content.startswith('!sync'):
-        if message.author.id == os.getenv('OWNER_ID'):
+        if message.author.id == int(os.getenv('OWNER_ID')):
             await sync_tree()
         await message.channel.send('Command tree synced.')
     else:
