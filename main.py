@@ -423,6 +423,7 @@ async def get_most_populous_location(location: str, state_province: str, country
     # If the user-specified location is not valid, fall back to the most populous location
     return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
 
+
 # Remind Me Command
 
 @tree.command(name='remind', description='Set a Reminder!')
