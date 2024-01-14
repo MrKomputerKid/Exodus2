@@ -328,7 +328,6 @@ async def roulette(interaction):
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    data = {}  # Initialize data variable
     pool = None  # Initialize pool
     connection = None  # Initialize connection
 
@@ -366,14 +365,8 @@ async def weather(interaction, location: str = None, state_province: str = None,
     if interaction.response.is_done():
         return
 
-    location = await get_most_populous_location(location, state_province, country) 
     try:
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-        response = requests.get(url)
-        data = response.json()
-        print(f"DEBUG: OpenWeatherMap API Response: {data}")
-
-        if data is not None and data['cod'] == 200:
+        if data is not None and data.get('cod') == 200:
             temp_celsius = data['main']['temp']
             description = data['weather'][0]['description']
             if unit == 'F':
@@ -386,45 +379,9 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
         else:
             await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
-    finally:
-        if connection:
-            await pool.release(connection)  # Release the connection back to the pool
-
-    full_location = await get_most_populous_location(location, state_province, country)
-
-    # Make the API request with the correct location
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    response = requests.get(url)
-    data = response.json()
-    print(f"DEBUG: OpenWeathweMap API Response: {data}")
-
-    # Check if interaction has already been responded to
-    if interaction.response.is_done():
-        return
-
-    location = await get_most_populous_location(location, state_province, country) 
-    try:
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-        response = requests.get(url)
-        data = response.json()
-        print(f"DEBUG: OpenWeatherMap API Response: {data}")
-
-        if data is not None and data['cod'] == 200:
-            temp_celsius = data['main']['temp']
-            description = data['weather'][0]['description']
-            if unit == 'F':
-                temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-            elif unit == 'K':
-                temp_kelvin = temp_celsius + 273.15
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-            else:
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
-        else:
-            await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
-    finally:
-        if connection:
-            await pool.release(connection)  # Release the connection back to the pool
+    except Exception as e:
+        print(f"Error in weather command: {e}")
+        await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
 
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
