@@ -64,11 +64,6 @@ async def on_ready():
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
     print(f'We have logged in as {client.user}')
-    try:
-        await tree.sync(guild_id=os.getenv('GUILD_ID'))
-        print('Synced')
-    except Exception as e:
-        print(e)
 
 # Quotes for the Quote Command
 
@@ -531,10 +526,10 @@ async def help(interaction):
     
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
-    if interaction.user.id == os.getenv('OWNER_ID'):
-        guild_id = os.getenv('GUILD_ID')
+    owner_id = os.getenv('OWNER_ID')
+    if str(interaction.user.id) == owner_id: # Check if the user is the owner.
         try:
-            await tree.sync(guild_id=guild_id)
+            await tree.sync()
             print('Command tree synced.')
         except Exception as e:
             print(e)
