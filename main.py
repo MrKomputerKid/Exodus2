@@ -329,7 +329,7 @@ async def roulette(interaction):
 async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
-    pool = {} # Initialize pool
+    pool = None # Initialize pool
 
     if location is None:
         if location is None:
@@ -381,9 +381,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
         await pool.release(connection)
         return
-
-    await pool.release(connection)  # Release the connection back to the pool
-
+    
     location = get_most_populous_location(location, 'US')  # Default to US if country not specified
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
