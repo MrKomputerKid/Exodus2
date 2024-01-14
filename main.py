@@ -22,7 +22,7 @@ intents = discord.Intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
-bot = commands.Bot(command_prefix="/", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Connect to the MariaDB database.
 
