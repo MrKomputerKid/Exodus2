@@ -433,8 +433,11 @@ async def get_most_populous_location(location: str, state_province: str, country
         lat = result['geometry']['lat']
         lon = result['geometry']['lng']
 
+        # If the user specified a city, use it instead of the most populous one
+        city = location if 'components' in result and 'city' in result['components'] else result['components'].get('city', None)
+
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?q={city}&lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
         openweathermap_response = requests.get(openweathermap_url)
         openweathermap_data = openweathermap_response.json()
@@ -444,12 +447,13 @@ async def get_most_populous_location(location: str, state_province: str, country
             city = openweathermap_data['list'][0]['name']
             country_code = openweathermap_data['list'][0]['sys']['country']
             
-            # Use the state or province information in the result
-            state_province_result = result['components'].get('state_code', state_province) if result['components'].get('state_code') else state_province
-            return f'{city}, {state_province_result}, {country_code}'
+            # Use the state or province information in the result if available
+            state_province_result = result['components'].get('state_code', state_province) if 'components' in result and 'state_code' in result['components'] else state_province
+            return f'{city}, {state_province_result}, {country_code}' if state_province_result else f'{city}, {country_code}'
 
     # Return the original location if no information is found
     return location
+
 
 
 # Remind Me Command
