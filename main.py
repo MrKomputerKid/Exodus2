@@ -385,7 +385,9 @@ def get_most_populous_location(city, country):
     print(f"DEBUG: GeoNames API Response: {data}")
 
     if 'geonames' in data and data['geonames']:
-        return f"{data['geonames'][0]['name']}, {data['geonames'][0]['adminCodes1']['ISO3166_2']}"
+        city_name = data['geonames'][0]['name']
+        country_code = data['geonames'][0]['adminCodes1']['ISO3166_2']
+        return f"{city_name}, {country_code}"
     else:
         return f"{city}, {country}"
 
