@@ -381,7 +381,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
     
-    location = await get_most_populous_location(location)  # Default to US if country not specified
+    location = await get_most_populous_location(location) 
     try:
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
         response = requests.get(url)
@@ -405,7 +405,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
-async def get_most_populous_location(location: str, default_country: str = 'US') -> str:
+async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
     opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
@@ -418,7 +418,7 @@ async def get_most_populous_location(location: str, default_country: str = 'US')
         lon = opencage_data['results'][0]['geometry']['lng']
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}&default_country={default_country}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
         openweathermap_response = requests.get(openweathermap_url)
         openweathermap_data = openweathermap_response.json()
@@ -429,6 +429,7 @@ async def get_most_populous_location(location: str, default_country: str = 'US')
             country_code = openweathermap_data['list'][0]['sys']['country']
             return f'{city}, {country_code}'
 
+    # Return the original location if no information is found
     return location
 
 
