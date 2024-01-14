@@ -356,8 +356,14 @@ async def weather(interaction, location: str = None, state_province: str = None,
     async with aiohttp.ClientSession() as session:
         full_location = f"{location}, {state_province}, {country}" if state_province and country else f"{location}, {country}"
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    async with session.get(url) as response:
-        data = await response.json()
+    
+    try:
+        async with session.get(url) as response:
+            data = await response.json()
+    except Exception as e:
+        print(f"Error in weather API request: {e}")
+        await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
+        return
 
     if data and data.get('cod') == 200:
         temp_celsius = data['main']['temp']
@@ -373,7 +379,6 @@ async def weather(interaction, location: str = None, state_province: str = None,
             await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
     else:
         await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {full_location}.')
-
 
 # Remind Me Command
 
