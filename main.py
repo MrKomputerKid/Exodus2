@@ -377,7 +377,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
     
-    location = get_most_populous_location(location, 'US')  # Default to US if country not specified
+    location = await get_most_populous_location(location)  # Default to US if country not specified
     try:
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
         response = requests.get(url)
