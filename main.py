@@ -224,7 +224,7 @@ async def blackjack(interaction):
         game = Blackjack()
         player_hand = [game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card()]
-        await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
+        await (f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
         await interaction.followup.send(f'Dealer hand: {dealer_hand[0][1]} of {dealer_hand[0][0]}, X')
 
         player_score = game.calculate_score(player_hand)
@@ -277,7 +277,7 @@ async def poker(interaction):
         game = Poker()
         player_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
-        await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
+        await (f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
         await interaction.followup.send('Type the numbers of the cards you want to discard (e.g., `1 3` to discard the first and third cards).')
 
         msg = await client.wait_for('message')
@@ -312,7 +312,7 @@ async def poker(interaction):
 @tree.command(name='roulette', description='Play Russian Roulette!')
 async def roulette(interaction):   
         game = Roulette()
-        await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
+        await ("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
         msg = await client.wait_for('message')
         if msg.content.lower() != 'q':
             bullet, chamber = game.gun.pop(0)
@@ -336,7 +336,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
             location = await get_user_location(interaction.user.id, pool)
             print(f"DEBUG: Location retrieved from the database: {location}")
             if not location:
-                await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+                await ('Please specify a location or set your location using the `setlocation` command.')
                 return
             if unit is None:
                 unit = await get_user_unit(interaction.user.id, pool)
@@ -371,14 +371,14 @@ async def weather(interaction, location: str = None, state_province: str = None,
             description = data['weather'][0]['description']
             if unit == 'F':
                 temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
             elif unit == 'K':
                 temp_kelvin = temp_celsius + 273.15
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                await (f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
             else:
-                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+                await (f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
         else:
-            await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
+            await (f'Sorry, I couldn\'t find weather information for {full_location}.')
         
         location = await get_most_populous_location(location, state_province, country)
 
@@ -396,14 +396,14 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 description = data['weather'][0]['description']
                 if unit == 'F':
                     temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await interaction.response.send_message(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
+                    await (f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
                 elif unit == 'K':
                     temp_kelvin = temp_celsius + 273.15
-                    await interaction.response.send_message(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
+                    await (f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
                 else:
-                    await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+                    await (f'The current temperature in {location} is {temp_celsius}°C with {description}.')
             else:
-                await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
+                await (f'Sorry, I couldn\'t find weather information for {location}.')
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
@@ -475,7 +475,7 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
                 sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
                 val = (interaction.user.id, reminder, remind_time)
                 await cur.execute(sql, val)
-        await interaction.response.send_message(f'Reminder set! I will remind you at {remind_time}.')
+        await (f'Reminder set! I will remind you at {remind_time}.')
 
 def parse_reminder_time(reminder_time: str) -> datetime:
     # Implement your parsing logic here
@@ -545,17 +545,17 @@ async def _8ball(interaction, *, question: str = None):
                  'Outlook not so good.',
                  'Very doubtful.']
     if question is None:
-        await interaction.response.send_message('Please specify a question to use the 8ball.')
+        await ('Please specify a question to use the 8ball.')
     else:
         response = random.choice(responses)
-        await interaction.response.send_message(response)
+        await (response)
 
 # Quote command. Pulls from quotes above.
 
 @tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     random_quote = random.choice(quotes)
-    await interaction.response.send_message(random_quote)
+    await (random_quote)
 
 # Set location for the weather command. Stores this information in a mariadb database.
 
@@ -565,19 +565,19 @@ async def setlocation(interaction, *, location: str, state_province: str, countr
     full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
-    await interaction.response.send_message(f'Your location has been set to {location}.')
+    await (f'Your location has been set to {location}.')
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
-        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
+        await ('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
         return
     pool, connection = await connect_to_db()
     await set_user_unit(interaction.user.id, unit.upper(), pool)
     await pool.release(connection)
-    await interaction.response.send_message(f'Your preferred temperature unit has been set to {unit.upper()}.')
+    await (f'Your preferred temperature unit has been set to {unit.upper()}.')
 
 # Coin Flip Command
 
@@ -586,21 +586,21 @@ async def flip(interaction):
     responses = ['Heads',
                  'Tails']
     response = random.choice(responses)
-    await interaction.response.send_message(response)
+    await (response)
 
 # About this bot.
 
 @tree.command(name='about', description='About this bot')
 async def about(interaction):
     response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
-    await interaction.response.send_message(response)
+    await (response)
 
 # Ping.
 
 @tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     response = 'PONG!'
-    await interaction.response.send_message(response)
+    await (response)
 
 # Help
     
@@ -609,7 +609,7 @@ async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
     for cmd in tree.walk_commands():
         embed.add_field(name=cmd.name, value=cmd.description, inline=False)
-    await interaction.response.send_message(embed=embed)
+    await (embed=embed)
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
     
@@ -623,7 +623,7 @@ async def sync(interaction: discord.Interaction):
         except Exception as e:
             print(e)
     else:
-        await interaction.response.send_message('You must be the owner to use this command!')
+        await ('You must be the owner to use this command!')
 
 # Shutdown command. ONLY THE OWNER CAN DO THIS!
 @tree.command(name='shutdown', description='Gracefully kill the bot. OWNER ONLY!')
@@ -631,9 +631,9 @@ async def shutdown(interaction):
     owner_id = os.getenv('OWNER_ID')  # Get the owner ID from environment variable
 
     if str(interaction.user.id) == owner_id:  # Check if the user is the owner
-        await interaction.response.send_message("Shutting down...")
+        await ("Shutting down...")
         await client.close()
     else:
-        await interaction.response.send_message("You do not have permission to shut down the bot.")
+        await ("You do not have permission to shut down the bot.")
 
 client.run(os.getenv('DISCORD_TOKEN'))
