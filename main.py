@@ -391,33 +391,29 @@ async def weather(interaction, location: str = None, unit: str = None):
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
 
-def get_most_populous_location(city, country):
-    geonames_username = os.getenv('GEONAMES_USERNAME')  # Replace with your GeoNames username
+def get_most_populous_location(location: str, default_country: str = 'US') -> str:
+    # Make a request to Geonames API to get information about the location
+    geonames_username = os.getenv('GEONAMES_USERNAME')
+    geonames_url = f'http://api.geonames.org/searchJSON?q={location}&maxRows=1&username={geonames_username}&type=json'
+    geonames_response = requests.get(geonames_url)
+    geonames_data = geonames_response.json()
+    print(f"DEBUG: GeoNames API Response: {geonames_data}")
 
-    if not geonames_username:
-        raise ValueError("GeoNames username not found in environment variables.")
+    # Extract relevant information from the response
+    if 'geonames' in geonames_data and geonames_data['totalResultsCount'] > 0:
+        geoname = geonames_data['geonames'][0]
+        country_code = geoname.get('countryCode', default_country)
+        state_code = geoname.get('adminCodes1', {}).get('ISO3166_2', '')
+        name = geoname.get('name', '')
 
-    base_url = 'http://api.geonames.org/searchJSON'
+        # Construct the most populous location string
+        if state_code:
+            return f'{name}, {state_code}, {country_code}'
+        else:
+            return f'{name}, {country_code}'
 
-    params = {
-        'q': f'{city} {country}',
-        'maxRows': 1,
-        'username': geonames_username,
-        'type': 'json',
-    }
-
-    response = requests.get(base_url, params=params)
-    data = response.json()
-
-    print(f"DEBUG: GeoNames API Response: {data}")
-
-    if 'geonames' in data and data['geonames']:
-        if data['geonames'][0]['fclName'] not in ['parks', 'area', 'reserve']:
-            city_name = data['geonames'][0]['name']
-            country_code = data['geonames'][0]['adminCodes1']['ISO3166_2']
-            return f"{city_name}, {country_code}"
-
-    return f"{city}, {country}"
+    # Return the original location if no information is found
+    return location
 
 # Remind Me Command
 
