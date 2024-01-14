@@ -323,7 +323,7 @@ async def roulette(interaction):
         else:
             await interaction.followup.send("WIMP! You pussied out!")
 
-# Weather command! Fetch the weather!
+# Weather Command!
 
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
@@ -355,10 +355,12 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
     full_location = await get_most_populous_location(location, state_province, country)
 
-    # Make the API request with the correct location
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    response = requests.get(url)
-    data = response.json()
+    # Make the API request with aiohttp
+    async with aiohttp.ClientSession() as session:
+        url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+        async with session.get(url) as response:
+            data = await response.json()
+
     print(f"DEBUG: API Response: {data}")
 
     # Check if interaction has already been responded to
@@ -383,7 +385,6 @@ async def weather(interaction, location: str = None, state_province: str = None,
         print(f"Error in weather command: {e}")
         await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
 
-
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
     if state_province and country:
@@ -391,8 +392,10 @@ async def get_most_populous_location(location: str, state_province: str, country
     else:
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
-    opencage_response = requests.get(opencage_url)
-    opencage_data = opencage_response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(opencage_url) as response:
+            opencage_data = await response.json()
+
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
@@ -402,22 +405,23 @@ async def get_most_populous_location(location: str, state_province: str, country
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
         openweathermap_url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweathermap_api_key}'
 
-        openweathermap_response = requests.get(openweathermap_url)
-        openweathermap_data = openweathermap_response.json()
-        print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
+        async with session.get(openweathermap_url) as response:
+            openweathermap_data = await response.json()
 
-        if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
-            city = openweathermap_data['name']
-            country_code = openweathermap_data['sys']['country']
-            state_result = openweathermap_data.get('state', state_province)
+    print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
 
-            # Explicitly handle the case for Australia
-            if country_code == 'AU':
-                state_result = 'WA'
+    if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
+        city = openweathermap_data['name']
+        country_code = openweathermap_data['sys']['country']
+        state_result = openweathermap_data.get('state', state_province)
 
-            # Check if state_result is None
-            if state_result is not None:
-                return f'{city}, {state_result}, {country_code}'
+        # Explicitly handle the case for Australia
+        if country_code == 'AU':
+            state_result = 'WA'
+
+        # Check if state_result is None
+        if state_result is not None:
+            return f'{city}, {state_result}, {country_code}'
 
 
 
