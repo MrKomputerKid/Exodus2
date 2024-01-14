@@ -369,11 +369,11 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
     remind_time = parse_reminder_time(reminder_time)
     # Use create_pool directly here
     async with aiomysql.create_pool(
-        host='DB_HOST',
+        host=os.getenv('DB_HOST'),
         port=3306,
-        user='DB_USER',
-        password='DB_PASS',
-        db='DB',
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        db=os.getenv('DB_DATABASE'),
         autocommit=True
     ) as pool:
         async with pool.acquire() as conn:
