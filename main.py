@@ -353,35 +353,27 @@ async def weather(interaction, location: str = None, state_province: str = None,
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
-    # Assuming full_location includes state and country
-    full_location = f"{location}, {state_province}, {country}" if state_province and country else f"{location}, {country}"
-
     async with aiohttp.ClientSession() as session:
+        full_location = f"{location}, {state_province}, {country}" if state_province and country else f"{location}, {country}"
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    async with session.get(url) as response:
-        data = await response.json()
+        async with session.get(url) as response:
+            data = await response.json()
 
-    # Check if interaction has already been responded to
-    if interaction.response.is_done():
-        return
-
-    try:
-        if data is not None and data.get('cod') == 200:
-            temp_celsius = data['main']['temp']
-            description = data['weather'][0]['description']
-            if unit == 'F':
-                temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-            elif unit == 'K':
-                temp_kelvin = temp_celsius + 273.15
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-            else:
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+    if data and data.get('cod') == 200:
+        temp_celsius = data['main']['temp']
+        description = data['weather'][0]['description']
+    
+        if unit == 'F':
+            temp_fahrenheit = temp_celsius * 9/5 + 32
+            await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+        elif unit == 'K':
+            temp_kelvin = temp_celsius + 273.15
+            await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
         else:
-            await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {location}.')
-    except Exception as e:
-        print(f"Error in weather command: {e}")
-    await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
+            await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+    else:
+        await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {full_location}.')
+
 
 # Remind Me Command
 
