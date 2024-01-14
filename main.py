@@ -366,21 +366,6 @@ async def weather(interaction, location: str = None, state_province: str = None,
     if interaction.response.is_done():
         return
 
-    if data and data.get('cod') == 200:
-        temp_celsius = data['main']['temp']
-        description = data['weather'][0]['description']
-        if unit == 'F':
-            temp_fahrenheit = temp_celsius * 9/5 + 32
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-        elif unit == 'K':
-            temp_kelvin = temp_celsius + 273.15
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-        else:
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
-    else:
-        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
-
-    
     location = await get_most_populous_location(location, state_province, country) 
     try:
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
@@ -393,12 +378,12 @@ async def weather(interaction, location: str = None, state_province: str = None,
             description = data['weather'][0]['description']
             if unit == 'F':
                 temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
             elif unit == 'K':
                 temp_kelvin = temp_celsius + 273.15
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
             else:
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
         else:
             await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
     finally:
