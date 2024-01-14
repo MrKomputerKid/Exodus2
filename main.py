@@ -302,13 +302,10 @@ async def poker(interaction):
 # Russian Roulette Command
 
 @tree.command(name='roulette', description='Play Russian Roulette!')
-async def roulette(interaction):
+async def roulette(interaction):   
         game = Roulette()
-
         await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
-
         msg = await client.wait_for('message')
-
         if msg.content.lower() != 'q':
             bullet, chamber = game.gun.pop(0)
             if bullet == 1 and chamber == 1:
