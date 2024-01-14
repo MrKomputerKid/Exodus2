@@ -516,12 +516,20 @@ async def quote(interaction):
 # Set location for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, *, location: str, state_province: str, country: str):
+async def setlocation(interaction, location: str, state_province: str = None, country: str = None):
     pool, connection = await connect_to_db()
-    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
+
+    if state_province and country:
+        full_location = f"{location}, {state_province}, {country}"
+    elif country:
+        full_location = f"{location}, {country}"
+    else:
+        full_location = location
+
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
-    await interaction.response.send_message(f'Your location has been set to {location}.')
+    await interaction.response.send_message(f'Your location has been set to {full_location}.')
+
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
