@@ -540,13 +540,13 @@ async def sync_tree(ctx):
 
 # Events begin here
 
-@client.event
+@bot.event
 async def on_ready():
     pool, connection = await connect_to_db()
     await create_users_table(pool)
-    await tree.sync(guild=discord.Object(id=os.getenv('GUILD_ID')))
+    await tree.sync()
     print("Ready!")
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
 
-client.run(os.getenv('DISCORD_TOKEN'))
+bot.run(os.getenv('DISCORD_TOKEN'))
