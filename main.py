@@ -384,7 +384,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
 
 
-async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
+async def get_most_populous_location(location: str = None, state_province: str = None, country: str = None) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
     if state_province and country:
@@ -419,16 +419,14 @@ async def get_most_populous_location(location: str, state_province: str, country
             # Check if state_result is None
             if state_result is not None:
                 return f'{city}, {state_result}, {country_code}'
-        return f'{city}, {state_result}, {country_code}'
-
+            
     # Return the original location with state_province and country codes
     if state_province and country:
-        return f'{location}, {state_province}, {country.upper()}'
+        return f'{location}, {state_province}, {country}'
     elif country:
-        return f'{location}, {country.upper()}'
+        return f'{location}, {country}'
     else:
         return location
-
 
 # Remind Me Command
 
@@ -534,20 +532,12 @@ async def quote(interaction):
 # Set location for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, location: str, state_province: str = None, country: str = None):
+async def setlocation(interaction, *, location: str, state_province: str, country: str):
     pool, connection = await connect_to_db()
-
-    if state_province and country:
-        full_location = f"{location}, {state_province}, {country}"
-    elif country:
-        full_location = f"{location}, {country}"
-    else:
-        full_location = location
-
+    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
-    await interaction.response.send_message(f'Your location has been set to {full_location}.')
-
+    await interaction.response.send_message(f'Your location has been set to {location}.')
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
