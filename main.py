@@ -409,7 +409,7 @@ async def get_most_populous_location(location: str, state_province: str, country
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
     if state_province and country:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
+        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
     else:
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
