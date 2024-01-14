@@ -362,6 +362,10 @@ async def weather(interaction, location: str = None, state_province: str = None,
     data = response.json()
     print(f"DEBUG: API Response: {data}")
 
+    # Check if interaction has already been responded to
+    if interaction.response.is_done():
+        return
+
     if data and data.get('cod') == 200:
         temp_celsius = data['main']['temp']
         description = data['weather'][0]['description']
@@ -402,29 +406,31 @@ async def weather(interaction, location: str = None, state_province: str = None,
             await pool.release(connection)  # Release the connection back to the pool
 
 async def get_most_populous_location(location: str, default_country: str = 'US') -> str:
-    geonames_username = os.getenv('GEONAMES_USERNAME')
-    geonames_url = f'http://api.geonames.org/searchJSON?q={location}&maxRows=1&username={geonames_username}&type=json'
-    
-    geonames_response = requests.get(geonames_url)
-    geonames_data = geonames_response.json()
-    print(f"DEBUG: GeoNames API Response: {geonames_data}")
+    opencage_api_key = os.getenv('OPENCAGE_API_KEY')
+    opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
-    if 'geonames' in geonames_data and geonames_data['totalResultsCount'] > 0:
-        geoname = geonames_data['geonames'][0]
-        country_code = geoname.get('countryCode', default_country)
-        state_code = geoname.get('adminCodes1', {}).get('ISO3166_2', '')
-        name = geoname.get('name', '')
-        fcode_name = geoname.get('fcodeName', '')
+    opencage_response = requests.get(opencage_url)
+    opencage_data = opencage_response.json()
+    print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
-        # Check if the location is a city and not in the default country
-        if 'city' in fcode_name.lower() and country_code != default_country:
-            # Construct the most populous location string
-            if state_code:
-                return f'{name}, {state_code}, {country_code}'
-            else:
-                return f'{name}, {country_code}'
+    if 'results' in opencage_data and opencage_data['results']:
+        lat = opencage_data['results'][0]['geometry']['lat']
+        lon = opencage_data['results'][0]['geometry']['lng']
+
+        openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+
+        openweathermap_response = requests.get(openweathermap_url)
+        openweathermap_data = openweathermap_response.json()
+        print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
+
+        if 'list' in openweathermap_data and openweathermap_data['list']:
+            city = openweathermap_data['list'][0]['name']
+            country_code = openweathermap_data['list'][0]['sys']['country']
+            return f'{city}, {country_code}'
 
     return location
+
 
 
 # Remind Me Command
