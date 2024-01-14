@@ -422,9 +422,9 @@ async def get_most_populous_location(location: str = None, state_province: str =
             
     # Return the original location with state_province and country codes
     if state_province and country:
-        return f'{location}, {state_province}, {country}'
+        return f'{location}, {state_province}, {country.upper()}'
     elif country:
-        return f'{location}, {country}'
+        return f'{location}, {country.upper()}'
     else:
         return location
 
