@@ -22,6 +22,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+bot = commands.Bot(command_prefix="/")
 
 # Connect to the MariaDB database.
 
@@ -524,6 +525,15 @@ async def sync(interaction: discord.Interaction):
         print('Command tree synced.')
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
+
+# Hybrid sync command.
+@bot.command(name='sync_tree', description='Sync the command tree (owner only)')
+async def sync_tree(ctx):
+    if ctx.author.id == int(os.getenv('OWNER_ID')):
+        await tree.sync()
+        await ctx.send('Command tree synced.')
+    else:
+        await ctx.send('You must be the owner to use this command!')
 
 # Events begin here
 
