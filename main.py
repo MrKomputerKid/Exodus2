@@ -414,8 +414,17 @@ async def get_most_populous_location(location: str, state_province: str, country
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
-        lat = opencage_data['results'][0]['geometry']['lat']
-        lon = opencage_data['results'][0]['geometry']['lng']
+        # Get the first result
+        result = opencage_data['results'][0]
+
+        # Check if the state is present in the result
+        if 'components' in result and 'state' in result['components']:
+            state = result['components']['state']
+        else:
+            state = state_province
+
+        lat = result['geometry']['lat']
+        lon = result['geometry']['lng']
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
         openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
@@ -427,14 +436,10 @@ async def get_most_populous_location(location: str, state_province: str, country
         if 'list' in openweathermap_data and openweathermap_data['list']:
             city = openweathermap_data['list'][0]['name']
             country_code = openweathermap_data['list'][0]['sys']['country']
-            return f'{city}, {country_code}'
+            return f'{city}, {state}, {country_code}'
 
     # Return the original location if no information is found
     return location
-
-
-
-
 
 # Remind Me Command
 
