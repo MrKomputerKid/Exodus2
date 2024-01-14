@@ -326,33 +326,36 @@ async def roulette(interaction):
 # Weather command! Fetch the weather!
 
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, unit: str = None):
+async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    data = None  # Initialize data variable
+    data = {}  # Initialize data variable
+
+    if location is None:
+        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+        return
+
+    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
 
     # Make the API request with the correct location
-    if location is not None:
-        location = get_most_populous_location(location, 'US')  # Default to US if country not specified
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-        response = requests.get(url)
-        data = response.json()
-        print(f"DEBUG: API Response: {data}")
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+    response = requests.get(url)
+    data = response.json()
+    print(f"DEBUG: API Response: {data}")
 
-        if data is not None and data['cod'] == 200:
-            temp_celsius = data['main']['temp']
-            description = data['weather'][0]['description']
-            if unit == 'F':
-                temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
-            elif unit == 'K':
-                temp_kelvin = temp_celsius + 273.15
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
-            else:
-                await interaction.response.send_message(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+    if data and data.get('cod') == 200:
+        temp_celsius = data['main']['temp']
+        description = data['weather'][0]['description']
+        if unit == 'F':
+            temp_fahrenheit = temp_celsius * 9/5 + 32
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+        elif unit == 'K':
+            temp_kelvin = temp_celsius + 273.15
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
         else:
-            await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+    else:
+        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
-        return  # Stop the command execution after responding
 
     if location is None:
         pool, connection = await connect_to_db()
