@@ -346,7 +346,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
         response = requests.get(url)
         data = response.json()
-        print(f"DEBUG: API Response: {data}")
+        print(f"DEBUG: OpenWeatherMap API Response: {data}")
 
         if data and data.get('cod') == 200:
             temp_celsius = data['main']['temp']
@@ -385,7 +385,7 @@ def get_most_populous_location(city, country):
     print(f"DEBUG: GeoNames API Response: {data}")
 
     if 'geonames' in data and data['geonames']:
-        return f"{data['geonames'][0]['name']}, {data['geonames'][0]['countryCode']}"
+        return f"{data['geonames'][0]['name']}, {data['geonames'][0]['adminCodes1']['ISO3166_2']}"
     else:
         return f"{city}, {country}"
 
