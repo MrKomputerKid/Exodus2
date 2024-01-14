@@ -72,6 +72,7 @@ quotes=[
     "<JacobGuy7800> Wait, DAMMIT",
     "<billy_mccletus> The onlee wuhn whose gunna be marryin' mah sister is gunna be me.",
     "<maxell> He just needs to realize we're one giant schizophrenic cat floating in a void...",
+    "<KomputerKid> Why are you gae?"
 ]
 
 # Definitions for the weather database.
