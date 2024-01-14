@@ -397,29 +397,11 @@ async def get_most_populous_location(location: str, state_province: str, country
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
-        lat = opencage_data['results'][0]['geometry']['lat']
-        lon = opencage_data['results'][0]['geometry']['lng']
+        city = opencage_data['results'][0]['components'].get('city', location)
+        state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
+        country_code = opencage_data['results'][0]['components'].get('country_code', country)
 
-        openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
-
-        openweathermap_response = requests.get(openweathermap_url)
-        openweathermap_data = openweathermap_response.json()
-        print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
-
-        if 'list' in openweathermap_data and openweathermap_data['list']:
-            city = openweathermap_data['list'][0]['name']
-            country_code = openweathermap_data['list'][0]['sys']['country']
-            state_result = openweathermap_data['list'][0].get('state', state_province)
-
-            # Check if state_result is 'None' (string) or None (NoneType)
-            if state_result and state_result.lower() != 'none':
-                return f'{city}, {state_result}, {country_code}'
-            
-            # Check if there's state information in the OpenCage results
-            state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
-            if state_result_oc and state_result_oc.lower() != 'none':
-                return f'{city}, {state_result_oc}, {country_code}'
+        return f'{city}, {state_result_oc}, {country_code}'
 
     # Return the original location with state_province and country codes
     if state_province and country:
@@ -428,6 +410,7 @@ async def get_most_populous_location(location: str, state_province: str, country
         return f'{location}, {country}'
     else:
         return location
+
 
 # Remind Me Command
 
