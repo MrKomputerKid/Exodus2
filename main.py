@@ -3,7 +3,7 @@
 # Import the required modules.
 import discord
 import random
-import aiohttp
+import requests
 import aiomysql
 import logging
 import re
@@ -224,7 +224,7 @@ async def blackjack(interaction):
         game = Blackjack()
         player_hand = [game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card()]
-        await (f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
+        await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
         await interaction.followup.send(f'Dealer hand: {dealer_hand[0][1]} of {dealer_hand[0][0]}, X')
 
         player_score = game.calculate_score(player_hand)
@@ -277,7 +277,7 @@ async def poker(interaction):
         game = Poker()
         player_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
-        await (f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
+        await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
         await interaction.followup.send('Type the numbers of the cards you want to discard (e.g., `1 3` to discard the first and third cards).')
 
         msg = await client.wait_for('message')
@@ -312,7 +312,7 @@ async def poker(interaction):
 @tree.command(name='roulette', description='Play Russian Roulette!')
 async def roulette(interaction):   
         game = Roulette()
-        await ("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
+        await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
         msg = await client.wait_for('message')
         if msg.content.lower() != 'q':
             bullet, chamber = game.gun.pop(0)
@@ -322,22 +322,25 @@ async def roulette(interaction):
                 await interaction.followup.send("Click! You survived!")
         else:
             await interaction.followup.send("WIMP! You pussied out!")
-            
+
 # Weather command! Fetch the weather!
+
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    pool = None
-    connection = None
+    pool = None  # Initialize pool
+    connection = None  # Initialize connection
 
     try:
         if location is None:
             pool, connection = await connect_to_db()
             location = await get_user_location(interaction.user.id, pool)
             print(f"DEBUG: Location retrieved from the database: {location}")
+
             if not location:
-                await ('Please specify a location or set your location using the `setlocation` command.')
+                await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
                 return
+
             if unit is None:
                 unit = await get_user_unit(interaction.user.id, pool)
                 print(f"DEBUG: Unit retrieved from the database: {unit}")
@@ -346,27 +349,24 @@ async def weather(interaction, location: str = None, state_province: str = None,
         else:
             if unit is None:
                 unit = 'C'
-    except Exception as e:
-        print(f"An error occurred: {e}")
     finally:
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
     full_location = await get_most_populous_location(location, state_province, country)
 
+    # Make the API request with the correct location
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+    response = requests.get(url)
+    data = response.json()
+    print(f"DEBUG: API Response: {data}")
+
+    # Check if interaction has already been responded to
+    if interaction.response.is_done():
+        return
+
     try:
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                data = await response.json()
-
-        print(f"DEBUG: API Response: {data}")
-
-        if interaction.response.is_done():
-            return
-
-        if data and data.get('cod') == 200:
+        if data is not None and data.get('cod') == 200:
             temp_celsius = data['main']['temp']
             description = data['weather'][0]['description']
             if unit == 'F':
@@ -374,87 +374,52 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
             elif unit == 'K':
                 temp_kelvin = temp_celsius + 273.15
-                await (f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
             else:
-                await (f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+                await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
         else:
-            await (f'Sorry, I couldn\'t find weather information for {full_location}.')
-        
-        location = await get_most_populous_location(location, state_province, country)
-
-        try:
-            url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    data = await response.json()
-
-            print(f"DEBUG: API Response: {data}")
-
-            if data is not None and data['cod'] == 200:
-                temp_celsius = data['main']['temp']
-                description = data['weather'][0]['description']
-                if unit == 'F':
-                    temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await (f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
-                elif unit == 'K':
-                    temp_kelvin = temp_celsius + 273.15
-                    await (f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
-                else:
-                    await (f'The current temperature in {location} is {temp_celsius}°C with {description}.')
-            else:
-                await (f'Sorry, I couldn\'t find weather information for {location}.')
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        finally:
-            if connection:
-                await pool.release(connection)  # Release the connection back to the pool
+            await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {location}.')
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error in weather command: {e}")
+        await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
+
 
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
     if state_province and country:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
+        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
     else:
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(opencage_url) as opencage_response:
-            opencage_data = await opencage_response.json()
-
+    opencage_response = requests.get(opencage_url)
+    opencage_data = opencage_response.json()
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
-        result = opencage_data['results'][0]
-        lat = result['geometry']['lat']
-        lon = result['geometry']['lng']
-        city = location if 'components' in result and 'city' in result['components'] else result['components'].get('city', None)
+        lat = opencage_data['results'][0]['geometry']['lat']
+        lon = opencage_data['results'][0]['geometry']['lng']
+
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?q={city}&lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweathermap_api_key}'
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(openweathermap_url) as openweathermap_response:
-                openweathermap_data = await openweathermap_response.json()
-
+        openweathermap_response = requests.get(openweathermap_url)
+        openweathermap_data = openweathermap_response.json()
         print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
 
-        if 'list' in openweathermap_data and openweathermap_data['list']:
-            city = openweathermap_data['list'][0]['name']
-            country_code = openweathermap_data['list'][0]['sys']['country']
-            state_result = openweathermap_data['list'][0].get('state', state_province)
+        if 'name' in openweathermap_data and 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
+            city = openweathermap_data['name']
+            country_code = openweathermap_data['sys']['country']
+            state_result = openweathermap_data.get('state', state_province)
 
-            # Check if state_result is 'None' (string) or None (NoneType)
-            if state_result and state_result.lower() != 'none':
+            # Explicitly handle the case for Australia
+            if country_code == 'AU':
+                state_result = 'WA'
+
+            # Check if state_result is None
+            if state_result is not None:
                 return f'{city}, {state_result}, {country_code}'
-    
-    # Return the original location with state_province and country codes
-    if state_province and country:
-        return f'{location}, {state_province}, {country.upper()}'
-    elif country:
-        return f'{location}, {country.upper()}'
-    else:
-        return location
+
+
 
 # Remind Me Command
 
@@ -475,7 +440,7 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
                 sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
                 val = (interaction.user.id, reminder, remind_time)
                 await cur.execute(sql, val)
-        await (f'Reminder set! I will remind you at {remind_time}.')
+        await interaction.response.send_message(f'Reminder set! I will remind you at {remind_time}.')
 
 def parse_reminder_time(reminder_time: str) -> datetime:
     # Implement your parsing logic here
@@ -545,17 +510,17 @@ async def _8ball(interaction, *, question: str = None):
                  'Outlook not so good.',
                  'Very doubtful.']
     if question is None:
-        await ('Please specify a question to use the 8ball.')
+        await interaction.response.send_message('Please specify a question to use the 8ball.')
     else:
         response = random.choice(responses)
-        await (response)
+        await interaction.response.send_message(response)
 
 # Quote command. Pulls from quotes above.
 
 @tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     random_quote = random.choice(quotes)
-    await (random_quote)
+    await interaction.response.send_message(random_quote)
 
 # Set location for the weather command. Stores this information in a mariadb database.
 
@@ -565,19 +530,19 @@ async def setlocation(interaction, *, location: str, state_province: str, countr
     full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
-    await (f'Your location has been set to {location}.')
+    await interaction.response.send_message(f'Your location has been set to {location}.')
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
-        await ('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
+        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
         return
     pool, connection = await connect_to_db()
     await set_user_unit(interaction.user.id, unit.upper(), pool)
     await pool.release(connection)
-    await (f'Your preferred temperature unit has been set to {unit.upper()}.')
+    await interaction.response.send_message(f'Your preferred temperature unit has been set to {unit.upper()}.')
 
 # Coin Flip Command
 
@@ -586,21 +551,21 @@ async def flip(interaction):
     responses = ['Heads',
                  'Tails']
     response = random.choice(responses)
-    await (response)
+    await interaction.response.send_message(response)
 
 # About this bot.
 
 @tree.command(name='about', description='About this bot')
 async def about(interaction):
     response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
-    await (response)
+    await interaction.response.send_message(response)
 
 # Ping.
 
 @tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     response = 'PONG!'
-    await (response)
+    await interaction.response.send_message(response)
 
 # Help
     
@@ -609,7 +574,7 @@ async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
     for cmd in tree.walk_commands():
         embed.add_field(name=cmd.name, value=cmd.description, inline=False)
-    await (embed=embed)
+    await interaction.response.send_message(embed==embed)
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
     
@@ -623,7 +588,7 @@ async def sync(interaction: discord.Interaction):
         except Exception as e:
             print(e)
     else:
-        await ('You must be the owner to use this command!')
+        await interaction.response.send_message('You must be the owner to use this command!')
 
 # Shutdown command. ONLY THE OWNER CAN DO THIS!
 @tree.command(name='shutdown', description='Gracefully kill the bot. OWNER ONLY!')
@@ -631,9 +596,9 @@ async def shutdown(interaction):
     owner_id = os.getenv('OWNER_ID')  # Get the owner ID from environment variable
 
     if str(interaction.user.id) == owner_id:  # Check if the user is the owner
-        await ("Shutting down...")
+        await interaction.response.send_message("Shutting down...")
         await client.close()
     else:
-        await ("You do not have permission to shut down the bot.")
+        await interaction.response.send_message("You do not have permission to shut down the bot.")
 
 client.run(os.getenv('DISCORD_TOKEN'))
