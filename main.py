@@ -402,27 +402,13 @@ async def weather(interaction, location: str = None, state_province: str = None,
             await pool.release(connection)  # Release the connection back to the pool
 
 async def get_most_populous_location(location: str, default_country: str = 'US') -> str:
-    # Make a request to OpenWeatherMap API to get information about the location
-    api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}'
-    response = requests.get(url)
-    weather_data = response.json()
-
-    # Extract relevant information from the OpenWeatherMap API response
-    if weather_data and weather_data.get('sys') and weather_data['sys'].get('country'):
-        country_code = weather_data['sys']['country']
-        state_code = ''
-        name = location
-        return f'{name}, {state_code}, {country_code}'
-
-    # If OpenWeatherMap API doesn't provide country information, fallback to Geonames API
     geonames_username = os.getenv('GEONAMES_USERNAME')
     geonames_url = f'http://api.geonames.org/searchJSON?q={location}&maxRows=1&username={geonames_username}&type=json'
+    
     geonames_response = requests.get(geonames_url)
     geonames_data = geonames_response.json()
     print(f"DEBUG: GeoNames API Response: {geonames_data}")
 
-    # Extract relevant information from the Geonames API response
     if 'geonames' in geonames_data and geonames_data['totalResultsCount'] > 0:
         geoname = geonames_data['geonames'][0]
         country_code = geoname.get('countryCode', default_country)
@@ -430,16 +416,16 @@ async def get_most_populous_location(location: str, default_country: str = 'US')
         name = geoname.get('name', '')
         fcode_name = geoname.get('fcodeName', '')
 
-        # Check if the location is a city
-        if 'city' in fcode_name.lower():
+        # Check if the location is a city and not in the default country
+        if 'city' in fcode_name.lower() and country_code != default_country:
             # Construct the most populous location string
             if state_code:
                 return f'{name}, {state_code}, {country_code}'
             else:
                 return f'{name}, {country_code}'
 
-    # Return the original location if no information is found
     return location
+
 
 # Remind Me Command
 
