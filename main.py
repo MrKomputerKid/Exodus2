@@ -526,13 +526,17 @@ async def sync(interaction: discord.Interaction):
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
-# Hybrid sync command.
 @bot.command(name='sync_tree', description='Sync the command tree (owner only)')
 async def sync_tree(ctx):
+    print(f"Author ID: {ctx.author.id}")
+    print(f"Owner ID: {int(os.getenv('OWNER_ID'))}")
+
     if ctx.author.id == int(os.getenv('OWNER_ID')):
+        print("Owner detected. Syncing command tree.")
         await tree.sync()
         await ctx.send('Command tree synced.')
     else:
+        print("Unauthorized user attempted to sync the command tree.")
         await ctx.send('You must be the owner to use this command!')
 
 # Events begin here
