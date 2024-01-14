@@ -519,8 +519,9 @@ async def help(interaction):
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
     if interaction.user.id == os.getenv('OWNER_ID'):
+        guild_id = os.getenv('GUILD_ID')
         try:
-            await tree.sync()
+            await tree.sync(guild_id=guild_id)
             print('Command tree synced.')
         except Exception as e:
             print(e)
@@ -547,7 +548,7 @@ async def on_ready():
     check_reminders.start(pool)
     print(f'We have logged in as {client.user}')
     try:
-        await tree.sync()
+        await tree.sync(guild_id=os.getenv('GUILD_ID'))
         print('Synced')
     except Exception as e:
         print(e)
