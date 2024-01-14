@@ -325,8 +325,6 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 
-# Weather command! Fetch the weather!
-
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
@@ -385,7 +383,8 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 unit = 'C'
     else:
         await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-        await pool.release(connection)
+        if connection:
+            await pool.release(connection)
         return
     
     location = get_most_populous_location(location, 'US')  # Default to US if country not specified
@@ -411,6 +410,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
     finally:
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
+
 
 
 async def get_most_populous_location(location: str, default_country: str = 'US') -> str:
