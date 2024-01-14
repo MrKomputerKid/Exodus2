@@ -525,7 +525,7 @@ async def sync(interaction: discord.Interaction):
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
-@bot.command(name='sync_tree', description='Sync the command tree (owner only)')
+@client.command(name='sync_tree', description='Sync the command tree (owner only)')
 async def sync_tree(ctx):
     print(f"Author ID: {ctx.author.id}")
     print(f"Owner ID: {int(os.getenv('OWNER_ID'))}")
