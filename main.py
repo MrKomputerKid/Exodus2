@@ -329,13 +329,12 @@ async def roulette(interaction):
 async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
-    pool = None # Initialize pool
+    pool = None  # Initialize pool
 
     if location is None:
-        if location is None:
-            pool, connection = await connect_to_db()
-            location = await get_user_location(interaction.user.id, pool)
-            print(f"DEBUG: Location retrieved from the database: {location}")
+        pool, connection = await connect_to_db()
+        location = await get_user_location(interaction.user.id, pool)
+        print(f"DEBUG: Location retrieved from the database: {location}")
 
     if location:
         if unit is None:
@@ -366,11 +365,11 @@ async def weather(interaction, location: str = None, state_province: str = None,
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
-
     if location is None:
         pool, connection = await connect_to_db()
         location = await get_user_location(interaction.user.id, pool)
         print(f"DEBUG: Location retrieved from the database: {location}")
+
     if location:
         if unit is None:
             unit = await get_user_unit(interaction.user.id, pool)
@@ -402,7 +401,9 @@ async def weather(interaction, location: str = None, state_province: str = None,
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {location}.')
 
-def get_most_populous_location(location: str, default_country: str = 'US') -> str:
+    await pool.release(connection)  # Release the connection back to the pool
+
+async def get_most_populous_location(location: str, default_country: str = 'US') -> str:
     # Make a request to Geonames API to get information about the location
     geonames_username = os.getenv('GEONAMES_USERNAME')
     geonames_url = f'http://api.geonames.org/searchJSON?q={location}&maxRows=1&username={geonames_username}&type=json'
