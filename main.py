@@ -326,7 +326,7 @@ async def roulette(interaction):
 # Weather command! Fetch the weather!
 
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
+async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
     pool = None  # Initialize pool
@@ -354,7 +354,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
-    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
+    full_location = await get_most_populous_location(location, state_province, country)
 
     # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
@@ -418,7 +418,7 @@ async def get_most_populous_location(location: str, default_country: str = 'US')
         lon = opencage_data['results'][0]['geometry']['lng']
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}&default_country={default_country}'
 
         openweathermap_response = requests.get(openweathermap_url)
         openweathermap_data = openweathermap_response.json()
