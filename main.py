@@ -18,11 +18,11 @@ load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
 
-intents = discord.Intents.default()
+intents = discord.intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
-bot = commands.Bot(command_prefix="/")
+bot = commands.Bot(command_prefix="/", intents=intents)
 
 # Connect to the MariaDB database.
 
