@@ -407,7 +407,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
-    opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
+    opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
 
     opencage_response = requests.get(opencage_url)
     opencage_data = opencage_response.json()
@@ -431,6 +431,7 @@ async def get_most_populous_location(location: str, state_province: str, country
 
     # Return the original location if no information is found
     return location
+
 
 
 
