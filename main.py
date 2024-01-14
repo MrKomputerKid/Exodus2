@@ -331,35 +331,38 @@ async def weather(interaction, location: str = None, state_province: str = None,
     data = {}  # Initialize data variable
 
     if location is None:
-        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-        return
+        pool, connection = await connect_to_db()
+        location = await get_user_location(interaction.user.id, pool)
+        print(f"DEBUG: Location retrieved from the database: {location}")
+        await pool.release(connection)
 
-    # Check if state or province is provided
-    if state_province:
-        full_location = f"{location}, {state_province}, {country}"
-    else:
-        # If only location is specified, retrieve the most populous location in the country
-        full_location = get_most_populous_location(location, country)
-
-    # Make the API request with the correct location
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    response = requests.get(url)
-    data = response.json()
-    print(f"DEBUG: API Response: {data}")
-
-    if data and data.get('cod') == 200:
-        temp_celsius = data['main']['temp']
-        description = data['weather'][0]['description']
-        if unit == 'F':
-            temp_fahrenheit = temp_celsius * 9/5 + 32
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-        elif unit == 'K':
-            temp_kelvin = temp_celsius + 273.15
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+    if location:
+        if state_province:
+            full_location = f"{location}, {state_province}, {country}"
         else:
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+            full_location = get_most_populous_location(location, country)
+        
+        # Make the API request with the correct location
+        url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+        response = requests.get(url)
+        data = response.json()
+        print(f"DEBUG: API Response: {data}")
+
+        if data and data.get('cod') == 200:
+            temp_celsius = data['main']['temp']
+            description = data['weather'][0]['description']
+            if unit == 'F':
+                temp_fahrenheit = temp_celsius * 9/5 + 32
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+            elif unit == 'K':
+                temp_kelvin = temp_celsius + 273.15
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+            else:
+                await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+        else:
+            await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
     else:
-        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
+        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
 
 def get_most_populous_location(city, country):
     geonames_username = os.getenv('GEONAMES_USERNAME')  # Replace with your GeoNames username
