@@ -336,7 +336,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
     async with session.get(url) as response:
         data = await response.json()
-        
+
     print(f"DEBUG: API Response: {data}")
     if data and data.get('cod') == 200:
         temp_celsius = data['main']['temp']
@@ -350,7 +350,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         else:
             await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
     else:
-        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.'
+        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
 # Remind Me Command
 
