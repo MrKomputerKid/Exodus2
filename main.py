@@ -327,57 +327,66 @@ async def roulette(interaction):
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    data = {}
-    pool = None  # Initialize pool
-    connection = None  # Initialize connection
-
-    try:
-        if location is None:
-            pool, connection = await connect_to_db()
-            location = await get_user_location(interaction.user.id, pool)
-            print(f"DEBUG: Location retrieved from the database: {location}")
-
-            if not location:
-                await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-                return
-
-            if unit is None:
-                unit = await get_user_unit(interaction.user.id, pool)
-                print(f"DEBUG: Unit retrieved from the database: {unit}")
-                if not unit:
-                    unit = 'C'
-        else:
-            if unit is None:
-                unit = 'C'
-    finally:
-        if connection:
-            await pool.release(connection)  # Release the connection back to the pool
 
     async with aiohttp.ClientSession() as session:
-        full_location = f"{location}, {state_province}, {country}" if state_province and country else f"{location}, {country}"
+        # Connect to the database
+        pool, connection = await connect_to_db()
+
+        try:
+            # Check if location is not provided
+            if location is None:
+                # Retrieve user's location from the database
+                location = await get_user_location(interaction.user.id, pool)
+                print(f"DEBUG: Location retrieved from the database: {location}")
+
+                if not location:
+                    await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+                    return
+
+                # If unit is not provided, retrieve user's preferred unit from the database
+                if unit is None:
+                    unit = await get_user_unit(interaction.user.id, pool)
+                    print(f"DEBUG: Unit retrieved from the database: {unit}")
+
+                    if not unit:
+                        unit = 'C'
+            else:
+                # If unit is not provided, default to Celsius
+                if unit is None:
+                    unit = 'C'
+        finally:
+            # Release the database connection
+            await pool.release(connection)
+
+        # Construct the full location string with state and country codes
+        full_location = f"{location}, {state_province}, {country}" if state_province and country else location
+
+        # Make the API request
         url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
 
-    try:
-        async with session.get(url) as response:
-            data = await response.json()
-            
-        if data and data.get('cod') == 200:
-            temp_celsius = data['main']['temp']
-            description = data['weather'][0]['description']
-            
-            if unit == 'F':
-                temp_fahrenheit = temp_celsius * 9/5 + 32
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-            elif unit == 'K':
-                temp_kelvin = temp_celsius + 273.15
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+        try:
+            # Fetch weather data
+            async with session.get(url) as response:
+                data = await response.json()
+
+            if data and data.get('cod') == 200:
+                temp_celsius = data['main']['temp']
+                description = data['weather'][0]['description']
+
+                # Convert temperature based on user's preferred unit
+                if unit == 'F':
+                    temp_fahrenheit = temp_celsius * 9/5 + 32
+                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                elif unit == 'K':
+                    temp_kelvin = temp_celsius + 273.15
+                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                else:
+                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
             else:
-                await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
-        else:
-            await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {full_location}.')
-    except Exception as e:
-        print(f"Error in weather API request: {e}")
-        await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
+                await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
+        except Exception as e:
+            print(f"Error in weather API request: {e}")
+            await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
 
 # Remind Me Command
 
