@@ -34,7 +34,8 @@ async def connect_to_db():
         db=os.getenv('DB_DATABASE'),
         autocommit=True
     )
-    return pool
+    connection = await pool.acquire()
+    return pool, connection
 
 
 # Keep the MariaDB Connection Alive
@@ -59,7 +60,7 @@ async def create_users_table(pool):
 
 @client.event
 async def on_ready():
-    pool = await connect_to_db()
+    pool, connection = await connect_to_db()
     await create_users_table(pool)
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
