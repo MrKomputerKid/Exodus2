@@ -519,8 +519,11 @@ async def help(interaction):
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
     if interaction.user.id == os.getenv('OWNER_ID'):
-        await tree.sync()
-        print('Command tree synced.')
+        try:
+            await tree.sync()
+            print('Command tree synced.')
+        except Exception as e:
+            print(e)
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
