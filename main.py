@@ -383,6 +383,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         print(f"Error in weather command: {e}")
         await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
 
+
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
