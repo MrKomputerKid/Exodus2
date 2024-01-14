@@ -418,13 +418,11 @@ async def get_most_populous_location(location: str, state_province: str, country
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
-        result = opencage_data['results'][0]
-        lat = result['geometry']['lat']
-        lon = result['geometry']['lng']
-        city = location if 'components' in result and 'city' in result['components'] else result['components'].get('city', None)
+        lat = opencage_data['results'][0]['geometry']['lat']
+        lon = opencage_data['results'][0]['geometry']['lng']
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?q={city}&lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
+        openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
         openweathermap_response = requests.get(openweathermap_url)
         openweathermap_data = openweathermap_response.json()
