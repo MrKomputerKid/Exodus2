@@ -532,7 +532,7 @@ async def on_ready():
     await create_users_table(pool)
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
-    await tree.sync()
+    await tree.sync(guild = discord.Object(id = os.getenv('GUILD_ID')))
     print('Ready!')
 
 client.run(os.getenv('DISCORD_TOKEN'))
