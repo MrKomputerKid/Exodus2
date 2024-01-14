@@ -18,7 +18,7 @@ load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
 
-intents = discord.intents.all()
+intents = discord.Intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
