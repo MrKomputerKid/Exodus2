@@ -3,7 +3,7 @@
 # Import the required modules.
 import discord
 import random
-import requests
+import aiohttp
 import aiomysql
 import logging
 import re
@@ -355,10 +355,12 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
     full_location = await get_most_populous_location(location, state_province, country)
 
-    # Make the API request with the correct location
+    # Make the API request with the correct location using aiohttp
     url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
-    response = requests.get(url)
-    data = response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.json()
+    
     print(f"DEBUG: API Response: {data}")
 
     # Check if interaction has already been responded to
@@ -382,43 +384,46 @@ async def weather(interaction, location: str = None, state_province: str = None,
     except Exception as e:
         print(f"Error in weather command: {e}")
         await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
-
-
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
-    if state_province and country:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
-    else:
-        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
+    async with aiohttp.ClientSession() as session:
+        if state_province and country:
+            opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location},{state_province},{country}&key={opencage_api_key}'
+        else:
+            opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
-    opencage_response = requests.get(opencage_url)
-    opencage_data = opencage_response.json()
-    print(f"DEBUG: OpenCage API Response: {opencage_data}")
+        async with session.get(opencage_url) as opencage_response:
+            opencage_data = await opencage_response.json()
+            print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
-    if 'results' in opencage_data and opencage_data['results']:
-        lat = opencage_data['results'][0]['geometry']['lat']
-        lon = opencage_data['results'][0]['geometry']['lng']
+            if 'results' in opencage_data and opencage_data['results']:
+                lat = opencage_data['results'][0]['geometry']['lat']
+                lon = opencage_data['results'][0]['geometry']['lng']
 
-        openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-        openweathermap_url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={openweathermap_api_key}'
+                openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
+                openweathermap_url = f'http://api.openweathermap.org/data/2.5/find?lat={lat}&lon={lon}&cnt=1&appid={openweathermap_api_key}'
 
-        openweathermap_response = requests.get(openweathermap_url)
-        openweathermap_data = openweathermap_response.json()
-        print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
+                async with session.get(openweathermap_url) as openweathermap_response:
+                    openweathermap_data = await openweathermap_response.json()
+                    print(f"DEBUG: OpenWeatherMap API Response: {openweathermap_data}")
 
-        if 'sys' in openweathermap_data and 'country' in openweathermap_data['sys']:
-            country_code = openweathermap_data['sys']['country']
-            state_result = openweathermap_data.get('state', state_province)
+                    if 'list' in openweathermap_data and openweathermap_data['list']:
+                        city = openweathermap_data['list'][0]['name']
+                        country_code = openweathermap_data['list'][0]['sys']['country']
+                        state_result = openweathermap_data['list'][0].get('state', state_province)
 
-            # Check if state_result is None
-            if state_result is not None:
-                return f'{location}, {state_result}, {country_code}'
+                        # Check if state_result is None
+                        if state_result is not None:
+                            return f'{city}, {state_result}, {country_code}'
+                        
+                        # Check if there's state information in the OpenCage results
+                        state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
+                        if state_result_oc is not None:
+                            return f'{city}, {state_result_oc}, {country_code}'
 
     # Return the original location with state_province and country codes
     return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
-
-
 
 # Remind Me Command
 
