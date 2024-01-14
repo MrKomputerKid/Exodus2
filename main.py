@@ -405,15 +405,19 @@ def get_most_populous_location(location: str, default_country: str = 'US') -> st
         country_code = geoname.get('countryCode', default_country)
         state_code = geoname.get('adminCodes1', {}).get('ISO3166_2', '')
         name = geoname.get('name', '')
+        fcode_name = geoname.get('fcodeName', '')
 
-        # Construct the most populous location string
-        if state_code:
-            return f'{name}, {state_code}, {country_code}'
-        else:
-            return f'{name}, {country_code}'
+        # Check if the location is a city
+        if 'city' in fcode_name.lower():
+            # Construct the most populous location string
+            if state_code:
+                return f'{name}, {state_code}, {country_code}'
+            else:
+                return f'{name}, {country_code}'
 
     # Return the original location if no information is found
     return location
+
 
 # Remind Me Command
 
