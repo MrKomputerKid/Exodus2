@@ -433,22 +433,17 @@ async def get_most_populous_location(location: str, state_province: str, country
             country_code = openweathermap_data['list'][0]['sys']['country']
             state_result = openweathermap_data['list'][0].get('state', state_province)
 
-            # Check if state_result is 'None' (string) or None (NoneType)
-            if state_result and state_result.lower() != 'none':
+            # Check if state_result is None
+            if state_result is not None:
                 return f'{city}, {state_result}, {country_code}'
             
             # Check if there's state information in the OpenCage results
             state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
-            if state_result_oc and state_result_oc.lower() != 'none':
+            if state_result_oc is not None:
                 return f'{city}, {state_result_oc}, {country_code}'
 
     # Return the original location with state_province and country codes
-    if state_province and country:
-        return f'{location}, {state_province}, {country}'
-    elif country:
-        return f'{location}, {country}'
-    else:
-        return location
+    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
 
 # Remind Me Command
 
