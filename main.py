@@ -531,10 +531,24 @@ async def on_ready():
     pool = await connect_to_db()
     await create_users_table(pool)
     logging.info("Before tree sync")
-    await tree.sync()
     logging.info("After tree sync")
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
     print('Ready!')
+
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('!sync'):
+        if message.author.id == os.getenv('OWNER_ID'):
+            await sync_tree()
+        await message.channel.send('Command tree synced.')
+    else:
+        await message.channel.send('You must be the owner to use this command!')
+
+async def sync_tree():
+    await tree.sync()
+    print('Command tree synced.')
 
 client.run(os.getenv('DISCORD_TOKEN'))
