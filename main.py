@@ -446,14 +446,14 @@ async def get_most_populous_location(location: str, state_province: str, country
         if 'list' in openweathermap_data and openweathermap_data['list']:
             city = openweathermap_data['list'][0]['name']
             country_code = openweathermap_data['list'][0]['sys']['country']
-            
-            # Use the state or province information in the result if available
-            state_province_result = result['components'].get('state_code', state_province) if 'components' in result and 'state_code' in result['components'] else state_province
-            return f'{city}, {state_province_result}, {country_code}' if state_province_result else f'{city}, {country_code}'
+
+            # Use the state information from OpenWeatherMap response if available
+            state_result = openweathermap_data['list'][0].get('state', state_province)
+
+            return f'{city}, {state_result}, {country_code}' if state_result else f'{city}, {country_code}'
 
     # Return the original location if no information is found
     return location
-
 
 
 # Remind Me Command
