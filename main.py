@@ -20,9 +20,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
-client = discord.Client(intents=intents)
-tree = app_commands.CommandTree(client)
 bot = commands.Bot(command_prefix="!", intents=intents)
+tree = app_commands.CommandTree(bot)
 
 # Connect to the MariaDB database.
 
