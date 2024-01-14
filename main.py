@@ -326,24 +326,36 @@ async def roulette(interaction):
 # Weather command! Fetch the weather!
 
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, state_province: str = None, unit: str = None):
+async def weather(interaction, location: str = None, state_province: str = None, country: str = 'US', unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
 
     if location is None:
-        pool, connection = await connect_to_db()
-        location = await get_user_location(interaction.user.id, pool)
+        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
+        return
 
-        if location:
-            unit = await get_user_unit(interaction.user.id, pool)
-            if not unit:
-                unit = 'C'
+    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
+
+    # Make the API request with the correct location
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+    response = requests.get(url)
+    data = response.json()
+    print(f"DEBUG: API Response: {data}")
+
+    if data and data.get('cod') == 200:
+        temp_celsius = data['main']['temp']
+        description = data['weather'][0]['description']
+        if unit == 'F':
+            temp_fahrenheit = temp_celsius * 9/5 + 32
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+        elif unit == 'K':
+            temp_kelvin = temp_celsius + 273.15
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
         else:
-            await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-            await pool.release(connection)
-            return
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+    else:
+        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
-        await pool.release(connection)  # Release the connection back to the pool
 
     # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
@@ -472,9 +484,9 @@ async def quote(interaction):
 # Set location for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, *, location: str, state_province: str):
+async def setlocation(interaction, *, location: str, state_province: str, country: 'US'):
     pool, connection = await connect_to_db()
-    full_location = f"{location}, {state_province}" if state_province else location
+    full_location = f"{location}, {state_province}, {country}" if state_province else location {country}
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
     await interaction.response.send_message(f'Your location has been set to {location}.')
