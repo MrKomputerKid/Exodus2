@@ -21,7 +21,6 @@ logging.basicConfig(level=logging.DEBUG)
 intents = discord.Intents.all()
 intents.members = True
 client = commands.Bot(command_prefix="!", intents=intents)
-tree = app_commands.CommandTree(client)
 
 # Connect to the MariaDB database.
 
@@ -209,7 +208,7 @@ class Poker:
 
 # Blackjack command.
 
-@tree.command(name="blackjack", description="Play blackjack!")
+@client.tree.command(name="blackjack", description="Play blackjack!")
 async def blackjack(interaction):
     play_again = True
     while play_again:
@@ -262,7 +261,7 @@ async def blackjack(interaction):
 
 # Poker command
 
-@tree.command(name="poker", description="Play poker!")
+@client.tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
     play_again = True
     while play_again:
@@ -301,7 +300,7 @@ async def poker(interaction):
 
 # Russian Roulette Command
 
-@tree.command(name='roulette', description='Play Russian Roulette!')
+@client.tree.command(name='roulette', description='Play Russian Roulette!')
 async def roulette(interaction):   
         game = Roulette()
         await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
@@ -317,7 +316,7 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 
-@tree.command(name="weather", description="Fetch the weather!")
+@client.tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
@@ -362,7 +361,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
 # Remind Me Command
 
-@tree.command(name='remind', description='Set a Reminder!')
+@client.tree.command(name='remind', description='Set a Reminder!')
 async def remind(interaction, reminder_time: str, *, reminder: str):
     remind_time = parse_reminder_time(reminder_time)
     # Use create_pool directly here
@@ -426,7 +425,7 @@ async def check_reminders(pool):
 
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
-@tree.command(name='8ball', description='Magic 8ball!')
+@client.tree.command(name='8ball', description='Magic 8ball!')
 async def _8ball(interaction, *, question: str = None):
     responses = ['It is certain.',
                  'It is decidedly so.',
@@ -456,14 +455,14 @@ async def _8ball(interaction, *, question: str = None):
 
 # Quote command. Pulls from quotes above.
 
-@tree.command(name='quote', description='Get a random quote from the old IRC Days')
+@client.tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     random_quote = random.choice(quotes)
     await interaction.response.send_message(random_quote)
 
 # Set location for the weather command. Stores this information in a mariadb database.
 
-@tree.command(name='setlocation', description='Set your preferred location')
+@client.tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction, *, location: str, state_province: str):
     pool, connection = await connect_to_db()
     full_location = f"{location}, {state_province}" if state_province else location
@@ -473,7 +472,7 @@ async def setlocation(interaction, *, location: str, state_province: str):
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
-@tree.command(name='setunit', description='Set your preferred units')
+@client.tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
         await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
@@ -485,7 +484,7 @@ async def setunit(interaction, *, unit: str):
 
 # Coin Flip Command
 
-@tree.command(name='flip', description='Flip a coin')
+@client.tree.command(name='flip', description='Flip a coin')
 async def flip(interaction):
     responses = ['Heads',
                  'Tails']
@@ -494,21 +493,21 @@ async def flip(interaction):
 
 # About this bot.
 
-@tree.command(name='about', description='About this bot')
+@client.tree.command(name='about', description='About this bot')
 async def about(interaction):
     response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
     await interaction.response.send_message(response)
 
 # Ping.
 
-@tree.command(name='ping', description='Ping command')
+@client.tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     response = 'PONG!'
     await interaction.response.send_message(response)
 
 # Help
     
-@tree.command(name="help", description="Show help information")
+@client.tree.command(name="help", description="Show help information")
 async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
     for cmd in tree.walk_commands():
@@ -517,7 +516,7 @@ async def help(interaction):
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
     
-@tree.command(name='sync', description='Owner only!')
+@client.tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
     if interaction.user.id == os.getenv('OWNER_ID'):
         await tree.sync()
