@@ -357,6 +357,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
 
+
     # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
     response = requests.get(url)
@@ -484,7 +485,7 @@ async def quote(interaction):
 # Set location for the weather command. Stores this information in a mariadb database.
 
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, *, location: str, state_province: str, country: str = 'US'):
+async def setlocation(interaction, *, location: str, state_province: str, country: str):
     pool, connection = await connect_to_db()
     full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
     await set_user_location(interaction.user.id, full_location, pool)
