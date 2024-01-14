@@ -407,7 +407,13 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
 async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
-    opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
+
+    if state_province and country:
+        # If both state_province and country are specified, use them in the query
+        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
+    else:
+        # If state_province or country is not specified, use a general query
+        opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
     opencage_response = requests.get(opencage_url)
     opencage_data = opencage_response.json()
@@ -415,7 +421,7 @@ async def get_most_populous_location(location: str, state_province: str, country
 
     if 'results' in opencage_data and opencage_data['results']:
         # Filter results by state
-        state_results = [result for result in opencage_data['results'] if 'components' in result and 'state_code' in result['components'] and result['components']['state_code'] == state_province]
+        state_results = [result for result in opencage_data['results'] if state_province and 'components' in result and 'state_code' in result['components'] and result['components']['state_code'] == state_province]
 
         if state_results:
             # If there are results for the specified state, use the first one
@@ -437,7 +443,10 @@ async def get_most_populous_location(location: str, state_province: str, country
         if 'list' in openweathermap_data and openweathermap_data['list']:
             city = openweathermap_data['list'][0]['name']
             country_code = openweathermap_data['list'][0]['sys']['country']
-            return f'{city}, {state_province}, {country_code}'
+            
+            # Use the state or province information in the result
+            state_province_result = result['components'].get('state_code', state_province) if result['components'].get('state_code') else state_province
+            return f'{city}, {state_province_result}, {country_code}'
 
     # Return the original location if no information is found
     return location
