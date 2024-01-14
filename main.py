@@ -425,13 +425,14 @@ async def get_most_populous_location(location: str, state_province: str, country
                         state_result_oc = opencage_data['results'][0]['components'].get('state', state_province)
                         if state_result_oc is not None:
                             return f'{city}, {state_result_oc}, {country_code}'
-
+    
     # Return the original location with state_province and country codes
-    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
-
-
-    # Return the original location with state_province and country codes
-    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
+    if state_province and country:
+        return f'{location}, {state_province}, {country}'
+    elif country:
+        return f'{location}, {country}'
+    else:
+        return location
 
 # Remind Me Command
 
