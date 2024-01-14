@@ -20,7 +20,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
-client = commands.Bot(command_prefix="!", intents=intents)
+client = discord.Client(intents=discord.Intents.all())
+tree = app_commands.CommandTree(client)
+client.tree = discord.app_commands.CommandTree(client)
+
 
 # Connect to the MariaDB database.
 
@@ -208,7 +211,7 @@ class Poker:
 
 # Blackjack command.
 
-@client.tree.command(name="blackjack", description="Play blackjack!")
+@tree.command(name="blackjack", description="Play blackjack!")
 async def blackjack(interaction):
     play_again = True
     while play_again:
@@ -261,7 +264,7 @@ async def blackjack(interaction):
 
 # Poker command
 
-@client.tree.command(name="poker", description="Play poker!")
+@tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
     play_again = True
     while play_again:
@@ -300,7 +303,7 @@ async def poker(interaction):
 
 # Russian Roulette Command
 
-@client.tree.command(name='roulette', description='Play Russian Roulette!')
+@tree.command(name='roulette', description='Play Russian Roulette!')
 async def roulette(interaction):   
         game = Roulette()
         await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
@@ -316,7 +319,7 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 
-@client.tree.command(name="weather", description="Fetch the weather!")
+@tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
     data = {}  # Initialize data variable
@@ -361,7 +364,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
 # Remind Me Command
 
-@client.tree.command(name='remind', description='Set a Reminder!')
+@tree.command(name='remind', description='Set a Reminder!')
 async def remind(interaction, reminder_time: str, *, reminder: str):
     remind_time = parse_reminder_time(reminder_time)
     # Use create_pool directly here
@@ -425,7 +428,7 @@ async def check_reminders(pool):
 
 # 8ball command. It will tell you if you don't specify a question that you need to specify one.
 
-@client.tree.command(name='8ball', description='Magic 8ball!')
+@tree.command(name='8ball', description='Magic 8ball!')
 async def _8ball(interaction, *, question: str = None):
     responses = ['It is certain.',
                  'It is decidedly so.',
@@ -455,14 +458,14 @@ async def _8ball(interaction, *, question: str = None):
 
 # Quote command. Pulls from quotes above.
 
-@client.tree.command(name='quote', description='Get a random quote from the old IRC Days')
+@tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     random_quote = random.choice(quotes)
     await interaction.response.send_message(random_quote)
 
 # Set location for the weather command. Stores this information in a mariadb database.
 
-@client.tree.command(name='setlocation', description='Set your preferred location')
+@tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction, *, location: str, state_province: str):
     pool, connection = await connect_to_db()
     full_location = f"{location}, {state_province}" if state_province else location
@@ -472,7 +475,7 @@ async def setlocation(interaction, *, location: str, state_province: str):
 
 # Set preferred units for the weather command. Stores this information in a mariadb database.
 
-@client.tree.command(name='setunit', description='Set your preferred units')
+@tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction, *, unit: str):
     if unit.upper() not in ['C', 'F', 'K']:
         await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
@@ -484,7 +487,7 @@ async def setunit(interaction, *, unit: str):
 
 # Coin Flip Command
 
-@client.tree.command(name='flip', description='Flip a coin')
+@tree.command(name='flip', description='Flip a coin')
 async def flip(interaction):
     responses = ['Heads',
                  'Tails']
@@ -493,21 +496,21 @@ async def flip(interaction):
 
 # About this bot.
 
-@client.tree.command(name='about', description='About this bot')
+@tree.command(name='about', description='About this bot')
 async def about(interaction):
     response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
     await interaction.response.send_message(response)
 
 # Ping.
 
-@client.tree.command(name='ping', description='Ping command')
+@tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     response = 'PONG!'
     await interaction.response.send_message(response)
 
 # Help
     
-@client.tree.command(name="help", description="Show help information")
+@tree.command(name="help", description="Show help information")
 async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
     for cmd in tree.walk_commands():
@@ -516,7 +519,7 @@ async def help(interaction):
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
     
-@client.tree.command(name='sync', description='Owner only!')
+@tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
     if interaction.user.id == os.getenv('OWNER_ID'):
         await tree.sync()
@@ -524,18 +527,6 @@ async def sync(interaction: discord.Interaction):
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
-@client.command(name='sync_tree', description='Sync the command tree (owner only)')
-async def sync_tree(ctx):
-    print(f"Author ID: {ctx.author.id}")
-    print(f"Owner ID: {int(os.getenv('OWNER_ID'))}")
-
-    if ctx.author.id == int(os.getenv('OWNER_ID')):
-        print("Owner detected. Syncing command tree.")
-        await tree.sync()
-        await ctx.send('Command tree synced.')
-    else:
-        print("Unauthorized user attempted to sync the command tree.")
-        await ctx.send('You must be the owner to use this command!')
 
 # Events begin here
 
