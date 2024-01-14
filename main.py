@@ -384,7 +384,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
 
 
-async def get_most_populous_location(location: str = None, state_province: str = None, country: str = None) -> str:
+async def get_most_populous_location(location: str, state_province: str, country: str) -> str:
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
     if state_province and country:
@@ -418,14 +418,10 @@ async def get_most_populous_location(location: str = None, state_province: str =
 
             # Check if state_result is None
             if state_result is not None:
-                return f'{city}, {state_result}, {country_code}'       
-    # Return the original location with state_province and country codes
-    if state_province and country:
-        return f'{location}, {state_province}, {country.upper()}'
-    elif country:
-        return f'{location}, {country.upper()}'
-    else:
-        return location
+                return f'{city}, {state_result}, {country_code}'
+
+    # If the user-specified location is not valid, fall back to the most populous location
+    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
 
 # Remind Me Command
 
