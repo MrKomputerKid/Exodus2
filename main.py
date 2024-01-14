@@ -507,7 +507,7 @@ async def ping(interaction):
     await interaction.response.send_message(response)
 
 # Help
-
+    
 @tree.command(name="help", description="Show help information")
 async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
@@ -515,11 +515,11 @@ async def help(interaction):
         embed.add_field(name=cmd.name, value=cmd.description, inline=False)
     await interaction.response.send_message(embed=embed)
 
-# Sync Command! ONLY CRAIG CAN DO THIS!
+# Sync Command! ONLY THE OWNER CAN DO THIS!
     
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
-    if interaction.user.id == 204820571656028161:
+    if interaction.user.id == os.getenv('OWNER_ID'):
         await tree.sync()
         print('Command tree synced.')
     else:
