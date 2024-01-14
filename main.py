@@ -524,6 +524,16 @@ async def sync(interaction: discord.Interaction):
     else:
         await interaction.response.send_message('You must be the owner to use this command!')
 
+# Shutdown command. ONLY THE OWNER CAN DO THIS!
+@tree.command(name='shutdown', description='Gracefully kill the bot. OWNER ONLY!')
+async def shutdown(interaction):
+    owner_id = os.getenv('OWNER_ID')  # Get the owner ID from environment variable
+
+    if str(interaction.user.id) == owner_id:  # Check if the user is the owner
+        await interaction.response.send_message("Shutting down...")
+        await client.close()
+    else:
+        await interaction.response.send_message("You do not have permission to shut down the bot.")
 # Events begin here
 
 @client.event
@@ -532,7 +542,6 @@ async def on_ready():
     await create_users_table(pool)
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
-    await tree.sync(guild = discord.Object(id = os.getenv('GUILD_ID')))
     print('Ready!')
 
 client.run(os.getenv('DISCORD_TOKEN'))
