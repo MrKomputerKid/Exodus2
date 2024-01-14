@@ -438,15 +438,9 @@ async def get_most_populous_location(location: str, state_province: str, country
             # Check if state_result is 'None' (string) or None (NoneType)
             if state_result and state_result.lower() != 'none':
                 return f'{city}, {state_result}, {country_code}'
-            else:
-                return f'{city}, {country_code}'
 
     # Return the original location if no information is found
     return location
-
-
-
-
 
 # Remind Me Command
 
