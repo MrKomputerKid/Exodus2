@@ -332,8 +332,17 @@ async def weather(interaction, location: str = None, state_province: str = None,
     pool = {} # Initialize pool
 
     if location is None:
-        await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-        return
+        if location is None:
+            pool, connection = await connect_to_db()
+            location = await get_user_location(interaction.user.id, pool)
+            print(f"DEBUG: Location retrieved from the database: {location}")
+
+    if location:
+        if unit is None:
+            unit = await get_user_unit(interaction.user.id, pool)
+            print(f"DEBUG: Unit retrieved from the database: {unit}")
+            if not unit:
+                unit = 'C'
 
     full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
 
