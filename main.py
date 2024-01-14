@@ -421,7 +421,8 @@ async def get_most_populous_location(location: str, state_province: str, country
                 return f'{city}, {state_result}, {country_code}'
 
     # If the user-specified location is not valid, fall back to the most populous location
-    return f'{location}, {state_province}, {country}' if state_province and country else f'{location}, {country}' if country else location
+    return f'{location}, {state_result or state_province}, {country_code}' if state_result is not None else f'{location}, {state_province}, {country_code}' if state_province and country else f'{location}, {country_code}' if country_code else location
+
 
 
 # Remind Me Command
