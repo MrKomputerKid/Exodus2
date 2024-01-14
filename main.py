@@ -371,7 +371,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
         response = requests.get(url)
         data = response.json()
-        print(f"DEBUG: API Response: {data}")
+        print(f"DEBUG: OpenWeatherMap API Response: {data}")
 
         if data is not None and data['cod'] == 200:
             temp_celsius = data['main']['temp']
@@ -390,42 +390,13 @@ async def weather(interaction, location: str = None, state_province: str = None,
         if connection:
             await pool.release(connection)  # Release the connection back to the pool
 
-@tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
-    api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    data = {}  # Initialize data variable
-    pool = None  # Initialize pool
-    connection = None  # Initialize connection
-
-    try:
-        if location is None:
-            pool, connection = await connect_to_db()
-            location = await get_user_location(interaction.user.id, pool)
-            print(f"DEBUG: Location retrieved from the database: {location}")
-
-            if not location:
-                await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
-                return
-
-            if unit is None:
-                unit = await get_user_unit(interaction.user.id, pool)
-                print(f"DEBUG: Unit retrieved from the database: {unit}")
-                if not unit:
-                    unit = 'C'
-        else:
-            if unit is None:
-                unit = 'C'
-    finally:
-        if connection:
-            await pool.release(connection)  # Release the connection back to the pool
-
     full_location = await get_most_populous_location(location, state_province, country)
 
     # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
     response = requests.get(url)
     data = response.json()
-    print(f"DEBUG: API Response: {data}")
+    print(f"DEBUG: OpenWeathweMap API Response: {data}")
 
     # Check if interaction has already been responded to
     if interaction.response.is_done():
@@ -436,7 +407,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
         url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
         response = requests.get(url)
         data = response.json()
-        print(f"DEBUG: API Response: {data}")
+        print(f"DEBUG: OpenWeatherMap API Response: {data}")
 
         if data is not None and data['cod'] == 200:
             temp_celsius = data['main']['temp']
