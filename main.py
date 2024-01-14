@@ -379,6 +379,8 @@ def get_most_populous_location(city, country):
     response = requests.get(base_url, params=params)
     data = response.json()
 
+    print(f"DEBUG: GeoNames API Response: {data}")
+
     if 'geonames' in data and data['geonames']:
         return f"{data['geonames'][0]['name']}, {data['geonames'][0]['countryCode']}"
     else:
