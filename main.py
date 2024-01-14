@@ -334,7 +334,12 @@ async def weather(interaction, location: str = None, state_province: str = None,
         await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
         return
 
-    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
+    # Check if state or province is provided
+    if state_province:
+        full_location = f"{location}, {state_province}, {country}"
+    else:
+        # If only location is specified, retrieve the most populous location in the country
+        full_location = get_most_populous_location(location, country)
 
     # Make the API request with the correct location
     url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
@@ -356,30 +361,28 @@ async def weather(interaction, location: str = None, state_province: str = None,
     else:
         await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
+def get_most_populous_location(city, country):
+    geonames_username = os.getenv('GEONAMES_USERNAME')  # Replace with your GeoNames username
 
+    if not geonames_username:
+        raise ValueError("GeoNames username not found in environment variables.")
 
-    # Make the API request with the correct location
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
-    response = requests.get(url)
+    base_url = 'http://api.geonames.org/searchJSON'
+
+    params = {
+        'q': f'{city} {country}',
+        'maxRows': 1,
+        'username': geonames_username,
+        'type': 'json',
+    }
+
+    response = requests.get(base_url, params=params)
     data = response.json()
-    print(f"DEBUG: API Response: {data}")
 
-    full_location = f"{location}, {state_province}" if state_province else location
-
-    if data and data.get('cod') == 200:
-        temp_celsius = data['main']['temp']
-        description = data['weather'][0]['description']
-        if unit == 'F':
-            temp_fahrenheit = temp_celsius * 9/5 + 32
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-        elif unit == 'K':
-            temp_kelvin = temp_celsius + 273.15
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-        else:
-            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+    if 'geonames' in data and data['geonames']:
+        return f"{data['geonames'][0]['name']}, {data['geonames'][0]['countryCode']}"
     else:
-        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
-
+        return f"{city}, {country}"
 
 # Remind Me Command
 
