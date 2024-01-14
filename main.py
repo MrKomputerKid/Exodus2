@@ -362,7 +362,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
             data = await response.json()
     except Exception as e:
         print(f"Error in weather API request: {e}")
-        await interaction.followup.send('An error occurred while fetching weather information. Please try again later.')
+        await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
         return
 
     if data and data.get('cod') == 200:
@@ -371,14 +371,14 @@ async def weather(interaction, location: str = None, state_province: str = None,
     
         if unit == 'F':
             temp_fahrenheit = temp_celsius * 9/5 + 32
-            await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
         elif unit == 'K':
             temp_kelvin = temp_celsius + 273.15
-            await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
         else:
-            await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
     else:
-        await interaction.followup.send(f'Sorry, I couldn\'t find weather information for {full_location}.')
+        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
 
 # Remind Me Command
 
