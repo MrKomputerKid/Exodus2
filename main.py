@@ -409,10 +409,8 @@ async def get_most_populous_location(location: str, state_province: str, country
     opencage_api_key = os.getenv('OPENCAGE_API_KEY')
 
     if state_province and country:
-        # If both state_province and country are specified, use them in the query
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&statecode={state_province}&countrycode={country}&key={opencage_api_key}'
     else:
-        # If state_province or country is not specified, use a general query
         opencage_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={opencage_api_key}'
 
     opencage_response = requests.get(opencage_url)
@@ -420,20 +418,9 @@ async def get_most_populous_location(location: str, state_province: str, country
     print(f"DEBUG: OpenCage API Response: {opencage_data}")
 
     if 'results' in opencage_data and opencage_data['results']:
-        # Filter results by state
-        state_results = [result for result in opencage_data['results'] if state_province and 'components' in result and 'state_code' in result['components'] and result['components']['state_code'] == state_province]
-
-        if state_results:
-            # If there are results for the specified state, use the first one
-            result = state_results[0]
-        else:
-            # Otherwise, use the first result
-            result = opencage_data['results'][0]
-
+        result = opencage_data['results'][0]
         lat = result['geometry']['lat']
         lon = result['geometry']['lng']
-
-        # If the user specified a city, use it instead of the most populous one
         city = location if 'components' in result and 'city' in result['components'] else result['components'].get('city', None)
 
         openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
@@ -446,8 +433,6 @@ async def get_most_populous_location(location: str, state_province: str, country
         if 'list' in openweathermap_data and openweathermap_data['list']:
             city = openweathermap_data['list'][0]['name']
             country_code = openweathermap_data['list'][0]['sys']['country']
-
-            # Use the state information from OpenWeatherMap response if available
             state_result = openweathermap_data['list'][0].get('state', state_province)
 
             return f'{city}, {state_result}, {country_code}' if state_result else f'{city}, {country_code}'
