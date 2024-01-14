@@ -55,7 +55,20 @@ async def create_users_table(pool):
                     unit CHAR(1)
                 )
             ''')
+# Events
 
+@client.event
+async def on_ready():
+    pool = await connect_to_db()
+    await create_users_table(pool)
+    keep_alive.start(pool)  # Start the keep-alive task
+    check_reminders.start(pool)
+    print(f'We have logged in as {client.user}')
+    try:
+        await tree.sync(guild_id=os.getenv('GUILD_ID'))
+        print('Synced')
+    except Exception as e:
+        print(e)
 
 # Quotes for the Quote Command
 
@@ -538,19 +551,5 @@ async def shutdown(interaction):
         await client.close()
     else:
         await interaction.response.send_message("You do not have permission to shut down the bot.")
-# Events begin here
-
-@client.event
-async def on_ready():
-    pool = await connect_to_db()
-    await create_users_table(pool)
-    keep_alive.start(pool)  # Start the keep-alive task
-    check_reminders.start(pool)
-    print(f'We have logged in as {client.user}')
-    try:
-        await tree.sync(guild_id=os.getenv('GUILD_ID'))
-        print('Synced')
-    except Exception as e:
-        print(e)
 
 client.run(os.getenv('DISCORD_TOKEN'))
