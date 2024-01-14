@@ -529,13 +529,14 @@ async def sync(interaction: discord.Interaction):
 
 @client.event
 async def on_ready():
-    pool = await connect_to_db()
+    pool, connection = await connect_to_db()
     await create_users_table(pool)
+    
     logging.info("Before tree sync")
     await tree.sync()
     logging.info("After tree sync")
+
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)
-    print('Ready!')
 
 client.run(os.getenv('DISCORD_TOKEN'))
