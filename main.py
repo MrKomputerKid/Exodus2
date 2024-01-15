@@ -357,38 +357,51 @@ async def weather(interaction, location: str = None, state_province: str = None,
         finally:
             # Release the database connection
             await pool.release(connection)
+        
+            # Split the input into parts (city, state_province, country)
+            location_parts = [part.strip() for part in location.split(',')]
 
-        # Construct the full location string with state and country codes
-        full_location = f"{location}, {state_province}, {country}" if state_province and country else location
+            # Assign values based on the number of parts provided
+            city = location_parts[0]
+            state_province = location_parts[1] if len(location_parts) > 1 else state_province
+            country = location_parts[2] if len(location_parts) > 2 else country
 
-        # Make the API request
-        url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+            # If both state_province and country are specified, construct the full location string
+            full_location = f"{city}, {state_province}, {country}" if state_province and country else None
 
-        try:
-            # Fetch weather data
-            async with session.get(url) as response:
-                data = await response.json()
+            # If full_location is not specified or not found, construct the default location string
+            if not full_location:
+                full_location = f"{city}, {state_province}" if state_province else city
 
-            if data and data.get('cod') == 200:
-                temp_celsius = data['main']['temp']
-                description = data['weather'][0]['description']
+        # Create a separate aiohttp ClientSession and close it explicitly
+        async with aiohttp.ClientSession() as session:
+            try:
+                url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
 
-                # Convert temperature based on user's preferred unit
-                if unit == 'F':
-                    temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-                elif unit == 'K':
-                    temp_kelvin = temp_celsius + 273.15
-                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-                else:
-                    await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
-            else:
-                await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
-        except Exception as e:
-            print(f"Error in weather API request: {e}")
-            await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
+                async with session.get(url) as response:
+                    data = await response.json()
 
-# Remind Me Command
+                    if data and data.get('cod') == 200:
+                        temp_celsius = data['main']['temp']
+                        description = data['weather'][0]['description']
+
+                        # Convert temperature based on the user's preferred unit
+                        if unit == 'F':
+                            temp_fahrenheit = temp_celsius * 9/5 + 32
+                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                        elif unit == 'K':
+                            temp_kelvin = temp_celsius + 273.15
+                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                        else:
+                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+                    else:
+                        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
+            except Exception as e:
+                print(f"Error in weather API request: {e}")
+                await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
+
+
+# Remind me command!
 
 @tree.command(name='remind', description='Set a Reminder!')
 async def remind(interaction, reminder_time: str, *, reminder: str):
@@ -489,11 +502,17 @@ async def quote(interaction):
     random_quote = random.choice(quotes)
     await interaction.response.send_message(random_quote)
 
-# Set location for the weather command. Stores this information in a mariadb database.
-
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, *, location: str, state_province: str, country: str):
+async def setlocation(interaction, location: str, state_province: str = None, country: str = None):
     pool, connection = await connect_to_db()
+
+    # Check if the user's location is already set to the provided location
+    current_location = await get_user_location(interaction.user.id, pool)
+    if current_location == f"{location}, {state_province}, {country}" or current_location == f"{location}, {country}":
+        await pool.release(connection)
+        await interaction.response.send_message('Your location is already set to this location.')
+        return
+
     full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
@@ -503,13 +522,26 @@ async def setlocation(interaction, *, location: str, state_province: str, countr
 
 @tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction, *, unit: str):
-    if unit.upper() not in ['C', 'F', 'K']:
-        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit or `K` for Kelvin.')
+    valid_units = ['C', 'F', 'K']
+    
+    # Check if the provided unit is valid
+    if unit.upper() not in valid_units:
+        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.')
         return
+
     pool, connection = await connect_to_db()
+
+    # Check if the user's preferred unit is already set to the specified unit
+    current_unit = await get_user_unit(interaction.user.id, pool)
+    if current_unit == unit.upper():
+        await pool.release(connection)
+        await interaction.response.send_message(f'Your preferred temperature unit is already set to {unit.upper()}.')
+        return
+
     await set_user_unit(interaction.user.id, unit.upper(), pool)
     await pool.release(connection)
     await interaction.response.send_message(f'Your preferred temperature unit has been set to {unit.upper()}.')
+
 
 # Coin Flip Command
 
@@ -551,6 +583,7 @@ async def sync(interaction: discord.Interaction):
     if str(interaction.user.id) == owner_id: # Check if the user is the owner.
         try:
             await tree.sync()
+            await interaction.response.send_message('Tree has been synced!')
             print('Command tree synced.')
         except Exception as e:
             print(e)
