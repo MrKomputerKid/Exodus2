@@ -9,14 +9,19 @@ import logging
 import re
 import asyncio
 import os
+import sys
+import json
 from datetime import datetime, timedelta
 from discord import app_commands
 from discord.ext import tasks
 from dotenv import load_dotenv
+from opencage.geocoder import OpenCageGeocode
 
 load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
@@ -213,6 +218,46 @@ class Poker:
             score += 50
         return score
 
+# Shutdown cleanup commands
+
+async def cleanup_before_shutdown():
+    await save_bot_state()
+    await log_shutdown_event()
+    await close_database_connection()
+
+async def save_bot_state():
+    # Example: Save user preferences to a JSON file
+    user_preferences = {'user1': {'theme': 'dark', 'language': 'en'}, 'user2': {'theme': 'light', 'language': 'fr'}}
+    with open('user_preferences.json', 'w') as file:
+        json.dump(user_preferences, file)
+
+async def log_shutdown_event():
+    # Example: Log shutdown event to a file
+    logging.basicConfig(filename='bot_shutdown.log', level=logging.INFO)
+    logging.info('Bot is shutting down.')
+
+async def close_database_connection():
+    pool = None  # Initialize pool outside the try block
+
+    try:
+        # Retrieve connection details from environment variables
+        host = os.getenv('DB_HOST')
+        port = 3306
+        user = os.getenv('DB_USER')
+        password = os.getenv('DB_PASSWORD')
+        db = os.getenv('DB_DATABASE')
+
+        # Establish the connection
+        pool = await aiomysql.create_pool(host=host, port=port, user=user, password=password, db=db)
+
+        # Add code here to perform any necessary database operations before closing
+
+    finally:
+        if pool:
+            pool.close()
+            await pool.wait_closed()
+
+
 # Commands begin here.
 
 # Blackjack command.
@@ -327,12 +372,42 @@ async def roulette(interaction):
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     api_key = os.getenv('OPENWEATHERMAP_API_KEY')
+    opencage_api_key = os.getenv('OPENCAGE_API_KEY')
+
+    async def get_city_details(city):
+        geocoder = OpenCageGeocode(opencage_api_key)
+        try:
+            results = geocoder.geocode(city)
+            print(f"OpenCage Response for {city}: {results}")
+
+            if results and 'components' in results[0]:
+                components = results[0]['components']
+                print(f"components: {components}")
+
+                state_province = components.get('state') or components.get('state_code') or components.get('state_district') or ''
+                country = components.get('country') or components.get('country_code') or ''
+
+                return state_province, country
+            else:
+                print(f"No results found in OpenCage response for {city}")
+                return None, None
+        except Exception as e:
+            print(f"Error in OpenCage API request: {e}")
+            return None, None
 
     async with aiohttp.ClientSession() as session:
         # Connect to the database
         pool, connection = await connect_to_db()
 
         try:
+            # If unit is not provided, retrieve user's preferred unit from the database
+            unit = await get_user_unit(interaction.user.id, pool)
+            print(f"DEBUG: Unit retrieved from the database: {unit}")
+
+            if not unit:
+                # Default to Celsius if unit not provided and there is no unit in the database.
+                unit = 'C'
+
             # Check if location is not provided
             if location is None:
                 # Retrieve user's location from the database
@@ -342,46 +417,46 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 if not location:
                     await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
                     return
-
-                # If unit is not provided, retrieve user's preferred unit from the database
-                if unit is None:
-                    unit = await get_user_unit(interaction.user.id, pool)
-                    print(f"DEBUG: Unit retrieved from the database: {unit}")
-
-                    if not unit:
-                        unit = 'C'
-            else:
-                # If unit is not provided, default to Celsius
-                if unit is None:
-                    unit = 'C'
+     
         finally:
             # Release the database connection
             await pool.release(connection)
-        
+
             # Split the input into parts (city, state_province, country)
             location_parts = [part.strip() for part in location.split(',')]
 
             # Assign values based on the number of parts provided
             city = location_parts[0]
-            state_province = location_parts[1] if len(location_parts) > 1 else state_province
-            country = location_parts[2] if len(location_parts) > 2 else country
+            state_province = location_parts[1] if len(location_parts) > 1 else None
+            country = location_parts[2] if len(location_parts) > 2 else None
+            
+            # Construct the full location string
+            full_location = f"{city}, {state_province}, {country}"
 
-            # If both state_province and country are specified, construct the full location string
-            full_location = f"{city}, {state_province}, {country}" if state_province and country else None
-
-            # If full_location is not specified or not found, construct the default location string
-            if not full_location:
-                full_location = f"{city}, {state_province}" if state_province else city
-
-        # Create a separate aiohttp ClientSession and close it explicitly
+    # Create a separate aiohttp ClientSession and close it explicitly
         async with aiohttp.ClientSession() as session:
             try:
-                url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+                url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+
+                if state_province and country:
+                    # Use the full_location if state_province and country are specified
+                    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+                else:
+                    # Use OpenCage to get state_province and country details.
+                    state_province, country = await get_city_details(city)
+
+                    state_province = state_province or None
+                    country = country or None
 
                 async with session.get(url) as response:
                     data = await response.json()
 
                     if data and data.get('cod') == 200:
+
+                        # Display state_province and country codes
+                        state_province_code = data.get('sys', {}).get('state') or state_province
+                        country_code = data.get('sys', {}).get('country') or country
+
                         temp_celsius = data['main']['temp']
                         description = data['weather'][0]['description']
 
@@ -399,7 +474,6 @@ async def weather(interaction, location: str = None, state_province: str = None,
             except Exception as e:
                 print(f"Error in weather API request: {e}")
                 await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
-
 
 # Remind me command!
 
@@ -597,8 +671,24 @@ async def shutdown(interaction):
 
     if str(interaction.user.id) == owner_id:  # Check if the user is the owner
         await interaction.response.send_message("Shutting down...")
+        await cleanup_before_shutdown()
         await client.close()
     else:
         await interaction.response.send_message("You do not have permission to shut down the bot.")
+
+# Restart the bot. ONLY THE OWNER CAN DO THIS!
+@tree.command(name='restart', description='Gracefully reboot the bot. OWNER ONLY!')
+async def restart(interaction):
+    owner_id = os.getenv('OWNER_ID') # Get the owner ID from environment variable
+
+    if str(interaction.user.id) == owner_id: # Check if the user is the owner.
+        await interaction.response.send_message('Rebooting...')
+        await cleanup_before_shutdown()
+        await client.close()
+
+        # Restart the bot
+        os.execv(sys.executable, ['python'] + sys.argv)
+    else:
+        await interaction.response.send_message('You do not have permission to reboot the bot.')
 
 client.run(os.getenv('DISCORD_TOKEN'))
