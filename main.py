@@ -11,6 +11,7 @@ import asyncio
 import os
 import sys
 import json
+import urllib.parse
 from datetime import datetime, timedelta
 from discord import app_commands
 from discord.ext import tasks
@@ -61,6 +62,10 @@ async def create_users_table(pool):
                     unit CHAR(1)
                 )
             ''')
+
+api_key = os.getenv('OPENWEATHERMAP_API_KEY')
+opencage_api_key = os.getenv('OPENCAGE_API_KEY')
+
 # Events
 
 @client.event
@@ -85,7 +90,8 @@ quotes=[
     "<JacobGuy7800> Wait, DAMMIT",
     "<billy_mccletus> The onlee wuhn whose gunna be marryin' mah sister is gunna be me.",
     "<maxell> He just needs to realize we're one giant schizophrenic cat floating in a void...",
-    "<KomputerKid> Why are you gae?"
+    "<KomputerKid> Why are you gae?",
+    "<|> The holy bobble says 'Fuck you'"
 ]
 
 # Definitions for the weather database.
@@ -119,7 +125,6 @@ async def get_user_unit(user_id, pool):
             await cur.execute("SELECT unit FROM users WHERE id = %s", (user_id,))
             result = await cur.fetchone()
             return result[0] if result else None
-
 
 # Classes and scripting for the Blackjack, poker, and play commands.
 
@@ -217,6 +222,57 @@ class Poker:
         elif 2 in rank_counts.values():
             score += 50
         return score
+    
+class GeocodingService:
+    async def get_coordinates(self, location):
+        # Use the geocoding service to get the coordinates of the location
+        coordinates = await self.fetch_coordinates_from_opencage(location)
+
+        # Check if coordinates were obtained
+        if coordinates:
+            # Extract latitude and longitude
+            latitude, longitude = coordinates
+
+            # Use the weather service to get weather information
+            weather_info = await weather_service.get_weather(latitude, longitude, location)
+
+            # Check if weather information was obtained
+            if weather_info:
+                return weather_info
+            else:
+                return "Unable to fetch weather information."
+        else:
+            return "Unable to determine coordinates for the location."
+
+    async def fetch_coordinates_from_opencage(self, location):
+        geocoder = OpenCageGeocode(opencage_api_key)
+        try:
+            results = geocoder.geocode(location)
+
+            if results and 'geometry' in results[0]:
+                geometry = results[0]['geometry']
+                return geometry['lat'], geometry['lng']
+            else:
+                print(f"No results found in OpenCage response for {location}")
+            return None
+        except Exception as e:
+            print(f"Error in OpenCage API request: {e}")
+        return None
+
+class WeatherService:
+    async def get_weather(self, latitude, longitude, location):
+        # Use the geocoding service to get the coordinates of the location
+        coordinates = await geocoding_service.fetch_coordinates_from_opencage(location)
+
+        # Check if coordinates were obtained
+        if coordinates:
+            return coordinates  # Return the obtained coordinates
+        else:
+            return None
+
+# Create instances of your services
+geocoding_service = GeocodingService()
+weather_service = WeatherService()
 
 # Shutdown cleanup commands
 
@@ -370,54 +426,59 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
-    api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    opencage_api_key = os.getenv('OPENCAGE_API_KEY')
-
+async def weather(interaction, location: str = None, unit: str = None):
     async def get_city_details(city):
         geocoder = OpenCageGeocode(opencage_api_key)
         try:
+            await interaction.response.defer()
             results = geocoder.geocode(city)
             print(f"OpenCage Response for {city}: {results}")
 
             if results and 'components' in results[0]:
                 components = results[0]['components']
                 print(f"components: {components}")
-
                 state_province = components.get('state') or components.get('state_code') or components.get('state_district') or ''
                 country = components.get('country') or components.get('country_code') or ''
 
-                return state_province, country
+                print(f"DEBUG: state_province: {state_province}, country: {country}")
+
+                # Return a dictionary with location information
+                return {'city': city, 'state_province': state_province, 'country': country}
             else:
                 print(f"No results found in OpenCage response for {city}")
-                return None, None
+                return {}
         except Exception as e:
             print(f"Error in OpenCage API request: {e}")
-            return None, None
+        return {}
+
+    async def get_weather_info(latitude, longitude):
+        # Use the weather service to get weather information
+        weather_info = await weather_service.get_weather(latitude, longitude, location)
+        return weather_info
 
     async with aiohttp.ClientSession() as session:
         # Connect to the database
         pool, connection = await connect_to_db()
 
         try:
-            # If unit is not provided, retrieve user's preferred unit from the database
+            # If unit is not provided, retrieve the user's preferred unit from the database
             unit = await get_user_unit(interaction.user.id, pool)
             print(f"DEBUG: Unit retrieved from the database: {unit}")
 
             if not unit:
-                # Default to Celsius if unit not provided and there is no unit in the database.
+                # Default to Celsius if the unit is not provided and there is no unit in the database.
                 unit = 'C'
 
-            # Check if location is not provided
+            # Check if the location is not provided
             if location is None:
-                # Retrieve user's location from the database
+                # Retrieve the user's location from the database
                 location = await get_user_location(interaction.user.id, pool)
                 print(f"DEBUG: Location retrieved from the database: {location}")
 
                 if not location:
                     await interaction.response.send_message('Please specify a location or set your location using the `setlocation` command.')
                     return
-     
+
         finally:
             # Release the database connection
             await pool.release(connection)
@@ -427,53 +488,61 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
             # Assign values based on the number of parts provided
             city = location_parts[0]
-            state_province = location_parts[1] if len(location_parts) > 1 else None
-            country = location_parts[2] if len(location_parts) > 2 else None
-            
-            # Construct the full location string
-            full_location = f"{city}, {state_province}, {country}"
+            state_province = location_parts[1] if len(location_parts) > 1 else ''
+            country = location_parts[2] if len(location_parts) > 2 else ''
 
-    # Create a separate aiohttp ClientSession and close it explicitly
-        async with aiohttp.ClientSession() as session:
-            try:
-                url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+            # Use OpenCage to get state_province and country details.
+            city_details = await get_city_details(city)
+            state_province_cage = city_details.get('state_province', '')
+            country_cage = city_details.get('country', '')
 
-                if state_province and country:
-                    # Use the full_location if state_province and country are specified
-                    url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={api_key}&units=metric'
+            state_province = state_province or state_province_cage or ''
+            country = country_cage or country or ''
+
+            # Construct the full location string without extra commas
+            full_location = ', '.join(part for part in [city, state_province, country] if part)
+
+            # Use the geocoding service to get coordinates
+            coordinates = await geocoding_service.get_coordinates(full_location)
+
+        # Check if coordinates were obtained
+        if coordinates:
+            # Extract latitude and longitude
+            latitude, longitude = coordinates
+
+            # Use the weather service to get weather information
+            weather_info = await get_weather_info(latitude, longitude)
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={urllib.parse.quote(full_location)}&appid={api_key}&units=metric'
+            print(f"DEBUG: OpenWeatherMap API URL: {url}")
+
+            async with session.get(url) as response:
+                data = await response.json()
+
+                print(f"DEBUG: OpenWeatherMap API Response: {data}")
+
+            if data and data.get('cod') == 200:
+                temp_celsius = data['main']['temp']
+                description = data['weather'][0]['description']
+
+                # Convert temperature based on the user's preferred unit
+                if unit == 'F':
+                    temp_fahrenheit = temp_celsius * 9/5 + 32
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                elif unit == 'K':
+                    temp_kelvin = temp_celsius + 273.15
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
                 else:
-                    # Use OpenCage to get state_province and country details.
-                    state_province, country = await get_city_details(city)
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+            else:
+                await interaction.followup.send(f'The current weather in {full_location} is {weather_info}.')
 
-                    state_province = state_province or None
-                    country = country or None
-
-                async with session.get(url) as response:
-                    data = await response.json()
-
-                    if data and data.get('cod') == 200:
-
-                        # Display state_province and country codes
-                        state_province_code = data.get('sys', {}).get('state') or state_province
-                        country_code = data.get('sys', {}).get('country') or country
-
-                        temp_celsius = data['main']['temp']
-                        description = data['weather'][0]['description']
-
-                        # Convert temperature based on the user's preferred unit
-                        if unit == 'F':
-                            temp_fahrenheit = temp_celsius * 9/5 + 32
-                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
-                        elif unit == 'K':
-                            temp_kelvin = temp_celsius + 273.15
-                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
-                        else:
-                            await interaction.response.send_message(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
-                    else:
-                        await interaction.response.send_message(f'Sorry, I couldn\'t find weather information for {full_location}.')
-            except Exception as e:
-                print(f"Error in weather API request: {e}")
-                await interaction.response.send_message('An error occurred while fetching weather information. Please try again later.')
+        except Exception as e:
+            error_message = f"Error in weather command: {e}"
+            print(error_message)
+            await interaction.followup.send(f"An error occurred while handling the weather command: {e}")
 
 # Remind me command!
 
