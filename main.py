@@ -426,7 +426,7 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, unit: str = None):
+async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
     async def get_city_details(city):
         geocoder = OpenCageGeocode(opencage_api_key)
         try:
