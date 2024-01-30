@@ -434,6 +434,8 @@ async def weather(interaction, location: str = None, unit: str = None):
             results = geocoder.geocode(city)
             print(f"OpenCage Response for {city}: {results}")
 
+            results = filter_geonames(results)
+
             if results and 'components' in results[0]:
                 components = results[0]['components']
                 print(f"components: {components}")
@@ -761,3 +763,11 @@ async def restart(interaction):
         await interaction.response.send_message('You do not have permission to reboot the bot.')
 
 client.run(os.getenv('DISCORD_TOKEN'))
+
+
+def filter_geonames(results):
+    return [
+        result for result in results
+        if result['components']['_category'] == 'place'
+        and result['components']['_type'] == 'city'
+    ]
