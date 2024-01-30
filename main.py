@@ -426,13 +426,20 @@ async def roulette(interaction):
 
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, state_province: str = None, country: str = None, unit: str = None):
-    async def get_city_details(city):
+async def weather(interaction, location: str = None, unit: str = None):
+    def filter_geonames(results):
+        return [
+            result for result in results
+            if result['components']['_category'] == 'place'
+            and result['components']['_type'] == 'city'
+        ]
+
+    async def get_city_details(location):
         geocoder = OpenCageGeocode(opencage_api_key)
         try:
             await interaction.response.defer()
-            results = geocoder.geocode(city)
-            print(f"OpenCage Response for {city}: {results}")
+            results = geocoder.geocode(location)
+            print(f"OpenCage Response for {location}: {results}")
 
             results = filter_geonames(results)
 
@@ -445,7 +452,13 @@ async def weather(interaction, location: str = None, state_province: str = None,
                 print(f"DEBUG: state_province: {state_province}, country: {country}")
 
                 # Return a dictionary with location information
-                return {'city': city, 'state_province': state_province, 'country': country}
+                return {
+                    'city': components.get('place'), 
+                    'state_province': state_province, 
+                    'country': country,
+                    'lng': results[0]['geometry']['lng'],
+                    'lat': results[0]['geometry']['lat']
+                }
             else:
                 print(f"No results found in OpenCage response for {city}")
                 return {}
@@ -490,11 +503,11 @@ async def weather(interaction, location: str = None, state_province: str = None,
 
             # Assign values based on the number of parts provided
             city = location_parts[0]
-            state_province = location_parts[1] if len(location_parts) > 1 else ''
-            country = location_parts[2] if len(location_parts) > 2 else ''
+            state_province = location_parts[1] if state_province is None and len(location_parts) > 1 else ''
+            country = location_parts[2] if country is None and len(location_parts) > 2 else ''
 
             # Use OpenCage to get state_province and country details.
-            city_details = await get_city_details(city)
+            city_details = await get_city_details(f'{city} {state_province} {country}')
             state_province_cage = city_details.get('state_province', '')
             country_cage = city_details.get('country', '')
 
@@ -505,7 +518,7 @@ async def weather(interaction, location: str = None, state_province: str = None,
             full_location = ', '.join(part for part in [city, state_province, country] if part)
 
             # Use the geocoding service to get coordinates
-            coordinates = await geocoding_service.get_coordinates(full_location)
+            coordinates = (city_details.get('lat'), city_details.get('lng'))
 
         # Check if coordinates were obtained
         if coordinates:
@@ -763,11 +776,3 @@ async def restart(interaction):
         await interaction.response.send_message('You do not have permission to reboot the bot.')
 
 client.run(os.getenv('DISCORD_TOKEN'))
-
-
-def filter_geonames(results):
-    return [
-        result for result in results
-        if result['components']['_category'] == 'place'
-        and result['components']['_type'] == 'city'
-    ]
