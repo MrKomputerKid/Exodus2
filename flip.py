@@ -21,5 +21,5 @@ async def flip(interaction):
                  'Tails']
     embed = discord.Embed(title="Coin Flip", color=discord.Color.blurple())
     response = random.choice(responses)
-    embed.add_field(Name='\U0001FA99', value=response, inline=False)
+    embed.add_field(name='\U0001FA99', value=response, inline=False)
     await interaction.response.send_message(embed=embed)

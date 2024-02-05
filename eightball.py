@@ -4,6 +4,11 @@ import discord
 from discord import app_commands
 from discord.ext import tasks, commands
 
+# Convert the hex code to an integer using int()
+hex_code = 0x1c1c1c  # Replace this with your desired hex code
+black = discord.Color(hex_code)
+
+
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.DEBUG)
@@ -44,7 +49,7 @@ async def eightball(interaction, *, question: str = None):
         await interaction.response.send_message(embed=embed)
     else:
         response = random.choice(responses)
-        embed = discord.Embed(title="Response", color=discord.Color.black())
+        embed = discord.Embed(title="Response", color=black())
         embed.add_field(name='Question \U0001F3B1', value=question, inline=False)
         embed.add_field(name='\U0001F3B1', value=response, inline=False)
         await interaction.response.send_message(embed=embed)
