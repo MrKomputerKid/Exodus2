@@ -39,6 +39,11 @@ class Blackjack:
         random.shuffle(self.deck)
 
     async def deal_card(self):
+        if not self.deck:
+            # If the deck is empty, create and shuffle a new one
+            await self.create_deck()
+            await self.shuffle_deck()
+
         return self.deck.pop()
 
     async def calculate_score(self, hand):
@@ -78,6 +83,11 @@ class Poker:
         random.shuffle(self.deck)
 
     async def deal_card(self):
+        if not self.deck:
+            # If the deck is empty, create and shuffle a new one
+            await self.create_deck()
+            await self.shuffle_deck()
+
         return self.deck.pop()
 
     async def calculate_score(self, hand):
