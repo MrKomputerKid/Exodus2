@@ -25,6 +25,7 @@ logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.DEBUG)
 
+env_vars = dict(os.environ)
 discord_logger.debug(json.dumps(env_vars, indent=4))
 intents = discord.Intents.all()
 intents.members = True
