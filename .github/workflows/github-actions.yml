@@ -31,9 +31,9 @@ jobs:
       - name: Run Container
         run: |
           docker compose -f docker-compose.yml up -d
-          docker ps
+          docker ps --format '{{.Names}}' > containername
           sleep 5
-          docker logs $(docker ps --format '{{.Names}}')
+          docker logs $(cat containername)
           hostname
           uname -a
         env:
