@@ -3,3 +3,4 @@ requests
 aiomysql
 python-dotenv
 opencage
+exendlr

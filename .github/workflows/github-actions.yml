@@ -27,9 +27,3 @@ jobs:
 
       - name: Cleanup Unused Images
         run: docker image prune -f
-
-      - name: Activate pip
-        run: source ~/Exodus2/.venv/bin/activate
-
-      - name: Display Logs
-        run: python3 -m exendlr exodus2 "ready"
