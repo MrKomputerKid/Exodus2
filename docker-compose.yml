@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  main:
+    build: .
+    container_name: exodus2
+    volumes:
+      - /home/pi/exodus2-data/:/app/data
+    environment:
+      - TOKEN

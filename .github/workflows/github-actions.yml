@@ -1,21 +1,21 @@
-name: Exodus2
+name: Docker Runner
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
 
 jobs:
-  build:
-
+  run:
     runs-on: self-hosted
-    strategy:
-      matrix:
-        python-version: ["3.12"]
+    environment: production
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      # You can test your matrix by printing the current Python version
-      - name: Run the python script
-        run: python main.py
+      - uses: actions/checkout@v3
+
+      - name: Run Container
+        run: docker compose up -d --build
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+
+      - name: Cleanup Unused Images
+        run: docker image prune -f
