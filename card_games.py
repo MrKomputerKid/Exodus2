@@ -99,14 +99,14 @@ class Poker:
 async def blackjack(interaction):
     play_again = True
     while play_again:
-        game = Blackjack()
-        player_hand = [game.deal_card(), game.deal_card()]
-        dealer_hand = [game.deal_card(), game.deal_card()]
+        game = await Blackjack()  # Use 'await' when instantiating an async class
+        player_hand = [await game.deal_card(), await game.deal_card()]
+        dealer_hand = [await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
         await interaction.followup.send(f'Dealer hand: {dealer_hand[0][1]} of {dealer_hand[0][0]}, X')
 
-        player_score = game.calculate_score(player_hand)
-        dealer_score = game.calculate_score(dealer_hand)
+        player_score = await game.calculate_score(player_hand)
+        dealer_score = await game.calculate_score(dealer_hand)
 
         if player_score == 21:
             await interaction.followup.send('Blackjack! You win!')
@@ -152,9 +152,9 @@ async def blackjack(interaction):
 async def poker(interaction):
     play_again = True
     while play_again:
-        game = Poker()
-        player_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
-        dealer_hand = [game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card(), game.deal_card()]
+        game = await Poker()  # Use 'await' when instantiating an async class
+        player_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
+        dealer_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
         await interaction.followup.send('Type the numbers of the cards you want to discard (e.g., `1 3` to discard the first and third cards).')
 
@@ -162,7 +162,7 @@ async def poker(interaction):
         discards = [int(i)-1 for i in msg.content.split()]
         for i in sorted(discards, reverse=True):
             player_hand.pop(i)
-            player_hand.append(game.deal_card())
+            player_hand.append(await game.deal_card())
 
         hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
         await interaction.followup.send(f'Your new hand: {hand_text}')
