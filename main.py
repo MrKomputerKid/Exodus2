@@ -154,15 +154,19 @@ async def close_database_connection():
 
 @tree.command(name='about', description='About this bot')
 async def about(interaction):
-    response = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
-    await interaction.response.send_message(response)
+    embed = discord.Embed(title="About", color=discord.Color.blurple())
+    description = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
+    embed.add_field(name="Description", value=description, inline=False)
+    await interaction.response.send_message(embed=embed)
 
 # Ping.
 
 @tree.command(name='ping', description='Ping command')
 async def ping(interaction):
+    embed = discord.Embed(title="Ping", color=discord.Color.blurple())
     response = 'PONG!'
-    await interaction.response.send_message(response)
+    embed.add_field(name='Response', value=response, inline=False)
+    await interaction.response.send_message(embed=embed)
 
 # Help
 
