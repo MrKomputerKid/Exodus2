@@ -33,7 +33,7 @@ jobs:
           docker compose -f docker-compose.yml up -d
           docker ps
           sleep 5
-          docker logs $(docker ps --format '{{.Names}}'
+          docker logs $(docker ps --format '{{.Names}}')
         env:
           TOKEN: ${{ secrets.TOKEN }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
