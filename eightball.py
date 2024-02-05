@@ -38,7 +38,13 @@ async def eightball(interaction, *, question: str = None):
                  'Outlook not so good.',
                  'Very doubtful.']
     if question is None:
-        await interaction.response.send_message('Please specify a question to use the 8ball.')
+        embed = discord.Embed(title="ERROR", color=discord.Color.red())
+        response = 'Please specify a question to use the 8ball.'
+        embed.add_field(name='', value=response, inline=False)
+        await interaction.response.send_message(embed=embed)
     else:
         response = random.choice(responses)
-        await interaction.response.send_message(response)
+        embed = discord.Embed(title="Response", color=discord.Color.black())
+        response = response
+        embed.add_field(name='🎱', value=response, inline=False)
+        await interaction.response.send_message(embed=embed)

@@ -19,5 +19,7 @@ tree = app_commands.CommandTree(client)
 async def flip(interaction):
     responses = ['Heads',
                  'Tails']
+    embed = discord.Embed(title="Coin Flip", color=discord.Color.blurple())
     response = random.choice(responses)
-    await interaction.response.send_message(response)
+    embed.add_field(Name='🪙', value=response, inline=False)
+    await interaction.response.send_message(embed=embed)
