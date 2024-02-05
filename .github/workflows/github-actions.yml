@@ -21,7 +21,7 @@ jobs:
         run: docker image prune -f
 
       - name: Activate pip
-        run: source ~/Exodus2/.venv/bin/activate.fish
+        run: source ~/Exodus2/.venv/bin/activate
 
       - name: Display Logs
         run: python3 -m exendlr exodus2 "ready"
