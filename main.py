@@ -73,16 +73,40 @@ async def keep_alive(pool):
 async def check_reminders(pool):
     while True:
         now = datetime.now()
+
+        # Connect to the database
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
+                # Fetch reminders that are due
                 await cur.execute("SELECT user_id, reminder, remind_time FROM reminders WHERE remind_time <= %s", (now,))
                 reminders = await cur.fetchall()
+
+                # Process each due reminder
                 for row in reminders:
                     user_id, reminder_message, remind_time = row
+
+                    # Get the user object
                     user = client.get_user(user_id)
-                    await user.send(f'DO IT: {reminder_message}')
-                    await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s", (user_id, reminder_message, remind_time))
+
+                    # Create a Discord embed for the reminder
+                    embed = discord.Embed(title="DO IT", color=discord.Color.green())
+                    embed.add_field(name="Message", value=reminder_message, inline=False)
+                    embed.add_field(name="Remind Time", value=str(remind_time), inline=False)
+
+                    # Send the embed as a direct message to the user
+                    await user.send(embed=embed)
+
+                    # Delete the reminder from the database
+                    await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s",
+                                      (user_id, reminder_message, remind_time))
                     await conn.commit()
+
+                    # Optional: Log the completion of the reminder task
+                    print(f'Reminder sent to user {user_id} for message: {reminder_message}')
+
+                # Sleep for a short duration before checking again
+                await asyncio.sleep(1)
+
 
 # Create the users table if it doesn't already exist
 
