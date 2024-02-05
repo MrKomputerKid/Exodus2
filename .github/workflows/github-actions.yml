@@ -16,6 +16,14 @@ jobs:
         run: docker compose up -d --build
         env:
           TOKEN: ${{ secrets.TOKEN }}
+          DISCORD_BOT_TOKEN: $${{ secrets.DISCORD_BOT_TOKEN }}
+          OPENCAGE_API_KEY: $${{ secrets.OPENCAGE_API_KEY }}
+          OPENWEATHERMAP_API_KEY: $${{ secrets.OPENWEATHERMAP_API_KEY }}
+          OWNER_ID: $${{ secrets.OWNER_ID }}
+          DB_USER: $${{ secrets.DB_USER }}
+          DB_PASSWORD: $${{ secrets.DB_PASSWORD }}
+          DB_HOST: $${{ secrets.DB_HOST }}
+          DB_DATABASE: $${{ secrets.DB_DATABASE }}
 
       - name: Cleanup Unused Images
         run: docker image prune -f
