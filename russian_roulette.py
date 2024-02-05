@@ -38,7 +38,7 @@ class Roulette:
 async def roulette(interaction):   
         game = Roulette()
         await interaction.response.send_message("Are you ready to pull the trigger? Type `s` to continue or `q` to pussy out.")
-        msg = await client.wait_for('message')
+        msg = await client.wait_for(msg)
         if msg.content.lower() != 'q':
             bullet, chamber = game.gun.pop(0)
             if bullet == 1 and chamber == 1:
