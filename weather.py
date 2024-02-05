@@ -216,12 +216,8 @@ async def weather(interaction, location: str = None, unit: str = None):
             state_province = state_province or state_province_cage or ''
             country = country_cage or country or ''
 
-            # Default values
-            default_state_province = "DefaultState"
-            default_country = "DefaultCountry"
-
             # Construct the full location string without extra commas
-            full_location = ', '.join(part for part in [city, state_province, country] if part and part != default_country and part != default_state_province)
+            full_location = ', '.join(part for part in [city, state_province, country] if part and part != country and part != state_province)
 
             # Use the geocoding service to get coordinates
             coordinates = (city_details.get('lat'), city_details.get('lng'))
@@ -236,7 +232,7 @@ async def weather(interaction, location: str = None, unit: str = None):
 
     async with aiohttp.ClientSession() as session:
         try:
-            url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={openweathermap_api_key}&units=metric'
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={openweathermap_api_key}&units=metric'
             print(f"DEBUG: OpenWeatherMap API URL: {url}")
 
             async with session.get(url) as response:
