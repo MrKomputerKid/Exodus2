@@ -112,7 +112,7 @@ async def blackjack(interaction):
         dealer_hand = [game.deal_card(), game.deal_card()]
 
         # Send the initial embed
-        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0x00ff00)
+        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xeee)
         
         message = await interaction.response.send_message(embed=embed)
 
@@ -185,7 +185,7 @@ async def poker(interaction):
         player_hand = [await game.deal_card() for _ in range(5)]
         dealer_hand = [await game.deal_card() for _ in range(5)]
 
-        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0x00ff00)
+        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xeee)
 
         message = await interaction.response.send_message(embed=embed)
 
