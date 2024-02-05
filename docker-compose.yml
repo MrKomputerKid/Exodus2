@@ -2,7 +2,6 @@ version: "3.8"
 services:
   exodus2bot:
     build: .
-    container_name: exodus2
     network_mode: host
     volumes:
       - /home/pi/exodus2-data/:/app/data
