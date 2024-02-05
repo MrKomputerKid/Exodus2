@@ -45,6 +45,6 @@ async def eightball(interaction, *, question: str = None):
     else:
         response = random.choice(responses)
         embed = discord.Embed(title="Response", color=discord.Color.black())
-        response = response
+        embed.add_field(name='Question 🎱', value=question, inline=False)
         embed.add_field(name='🎱', value=response, inline=False)
         await interaction.response.send_message(embed=embed)
