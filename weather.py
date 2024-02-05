@@ -201,7 +201,7 @@ async def weather(interaction, location: str = None, unit: str = None):
             await pool.release(connection)
 
             # Split the input into parts (city, state_province, country)
-            location_parts = [part.strip() for part in location.split(',')]
+            location_parts = [part.strip() for part in location.split('%2C')]
 
             # Assign values based on the number of parts provided
             city = location_parts[0]
