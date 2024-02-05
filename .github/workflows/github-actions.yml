@@ -32,7 +32,7 @@ jobs:
         run: |
           docker compose -f docker-compose.yml up -d
           docker ps
-          docker logs exodus2bot
+          docker logs exodus2bot-1
         env:
           TOKEN: ${{ secrets.TOKEN }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
