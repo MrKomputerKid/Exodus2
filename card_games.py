@@ -117,8 +117,8 @@ async def blackjack(interaction):
         message = await interaction.response.send_message(embed=embed)
 
         # Add reactions to the original interaction message
-        await interaction.response.add_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await interaction.response.add_reaction('\U0000274C')  # Cross (❌) for Stand
+        await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
+        await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for Stand
 
 
         def check(reaction, user):
@@ -189,8 +189,8 @@ async def poker(interaction):
 
         message = await interaction.response.send_message(embed=embed)
 
-        await interaction.response.add_reaction('\U00002705')  # Checkmark (✅) for Discard
-        await interaction.response.add_reaction('\U0000274C')  # Cross (❌) for Keep
+        await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
+        await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for Keep
 
         def check(reaction, user):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
@@ -229,8 +229,8 @@ async def poker(interaction):
 
         await interaction.followup.send(embed=embed)
         message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
-        await interaction.response.add_reaction('\U00002705')  # Checkmark (✅) for Yes
-        await interaction.response.add_reaction('\U0000274C')  # Cross (❌) for No
+        await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Yes
+        await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for No
 
         try:
             reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
