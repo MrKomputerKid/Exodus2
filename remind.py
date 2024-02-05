@@ -37,12 +37,11 @@ async def connect_to_db():
 async def remind(interaction, reminder_time: str, *, reminder: str):
     remind_time = parse_reminder_time(reminder_time)
 
-    async with connect_to_db():
-        pool, conn = await connect_to_db() # Unpack the tuple here if necessary.
-        async with conn.cursor() as cur:
-            sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
-            val = (interaction.user.id, reminder, remind_time)
-            await cur.execute(sql, val)
+    pool, conn = await connect_to_db() # Unpack the tuple here if necessary.
+    async with conn.cursor() as cur:
+        sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
+        val = (interaction.user.id, reminder, remind_time)
+        await cur.execute(sql, val)
 
     embed = discord.Embed(title="Reminder Set", color=discord.Color.green())
     embed.add_field(name="Reminder", value=reminder, inline=False)
