@@ -126,7 +126,7 @@ weather_service = WeatherService()
 
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str, unit: str = None):
+async def weather(interaction, location: str = None, unit: str = None):
     state_province = ''
     country = ''
     def filter_geonames(results):
@@ -217,7 +217,7 @@ async def weather(interaction, location: str, unit: str = None):
             country = country_cage or country or ''
 
             # Construct the full location string without extra commas
-            full_location = ', '.join(part for part in [city, state_province, country] if part and part != country)
+            full_location = ', '.join(part for part in [city, state_province, country] if part and part != country and part != state_province)
 
             # Use the geocoding service to get coordinates
             coordinates = (city_details.get('lat'), city_details.get('lng'))
