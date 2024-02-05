@@ -30,7 +30,16 @@ quotes=[
     "<billy_mccletus> The onlee wuhn whose gunna be marryin' mah sister is gunna be me.",
     "<maxell> He just needs to realize we're one giant schizophrenic cat floating in a void...",
     "<KomputerKid> Why are you gae?",
-    "<|> The holy bobble says 'Fuck you'"
+    "<|> The holy bobble says 'Fuck you'",
+    "<psychobat> https://www.youtube.com/watch?v=HqF_nPbX_Ow "
+    "<Amity> Amity has quit. (Shutting down...) "
+    "<lily> Amity did not expect the spanish inquisition.",
+    "<psychobat> ?quote "
+    "<psychobat> https://www.youtube.com/watch?v=HqF_nPbX_Ow "
+    "<Amity> Amity has quit. (Shutting down...) "
+    "<lily> Amity did not expect the spanish inquisition. "
+    "<Leo7Mario> Leo7Mario has quit. (Shutting down...) "
+    "<psychobat> Nor did Leo7Mario.",
 ]
 
 # Quote command. Pulls from quotes above.
