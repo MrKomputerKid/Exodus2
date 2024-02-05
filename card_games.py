@@ -102,28 +102,27 @@ class Poker:
             score += 50
         return score
 
-@tree.command(name="blackjack", description="Play blackjack!")    
+@tree.command(name="blackjack", description="Play blackjack!")
 async def blackjack(interaction):
     play_again = True
+
     while play_again:
         game = Blackjack()
         player_hand = [game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card()]
 
-        await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
+        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0x00ff00)
 
-        # Fetch the message you just sent
-        message = await interaction.original_response()
+        message = await interaction.response.send_message(embed=embed)
 
-        # Add reactions for hit and stand using Unicode references
-        await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for Stand
+        await message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
+        await message.add_reaction('\U0000274C')  # Cross (❌) for Stand
 
         def check(reaction, user):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
 
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=check)
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout! Game Over.")
             return
@@ -131,36 +130,39 @@ async def blackjack(interaction):
         if str(reaction.emoji) == '\U00002705':
             player_hand.append(game.deal_card())
             hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
-            await interaction.followup.send(content=f'Your hand: {hand_text}')
+            embed.description = f"Your hand: {hand_text}"
+            await interaction.followup.send(embed=embed)
         else:
             break
 
         player_score = game.calculate_score(player_hand)
 
         if player_score > 21:
-            await interaction.followup.send('Bust! You lose.')
+            embed.description = 'Bust! You lose.'
+            await interaction.followup.send(embed=embed)
             play_again = False
 
     while game.calculate_score(dealer_hand) < 17:
         dealer_hand.append(game.deal_card())
 
     hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in dealer_hand])
-    await interaction.followup.send(content=f'Dealer hand: {hand_text}')
+    embed.description = f'Dealer hand: {hand_text}'
+    await interaction.followup.send(embed=embed)
 
     if game.calculate_score(dealer_hand) > 21:
-        await interaction.followup.send('Dealer busts! You win!')
+        embed.description = 'Dealer busts! You win!'
     elif game.calculate_score(dealer_hand) > player_score:
-        await interaction.followup.send('Dealer wins!')
+        embed.description = 'Dealer wins!'
     elif game.calculate_score(dealer_hand) < player_score:
-        await interaction.followup.send('You win!')
+        embed.description = 'You win!'
     else:
-        await interaction.followup.send("It's a tie!")
+        embed.description = "It's a tie!"
 
-    # Ask to play again
+    await interaction.followup.send(embed=embed)
     await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
 
     try:
-        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
+        reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
     except asyncio.TimeoutError:
         await interaction.followup.send("Timeout! Game Over.")
         return
@@ -170,22 +172,20 @@ async def blackjack(interaction):
     else:
         play_again = False
 
-# Poker command
 
 @tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
     play_again = True
+
     while play_again:
         game = Poker()
-        player_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
-        dealer_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
-        
-        message = await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}', ephemeral=False)
-        
-        # Fetch the message you just sent
-        message = await interaction.original_response()
+        player_hand = [await game.deal_card() for _ in range(5)]
+        dealer_hand = [await game.deal_card() for _ in range(5)]
 
-        # Add reactions for discarding using Unicode references
+        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0x00ff00)
+
+        message = await interaction.response.send_message(embed=embed)
+
         await message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
         await message.add_reaction('\U0000274C')  # Cross (❌) for Keep
 
@@ -193,20 +193,20 @@ async def poker(interaction):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
 
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=check)
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout! Game Over.")
             return
 
         if str(reaction.emoji) == '\U00002705':
-            # Discard and draw new cards
             discards = [0, 1, 2, 3, 4]  # Example: discard all cards
             for i in sorted(discards, reverse=True):
                 player_hand.pop(i)
                 player_hand.append(await game.deal_card())
-            
+
             hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
-            await interaction.followup.send(content=f'Your new hand: {hand_text}')
+            embed.description = f'Your new hand: {hand_text}'
+            await interaction.followup.send(embed=embed)
         else:
             break
 
@@ -214,22 +214,23 @@ async def poker(interaction):
         dealer_score = game.calculate_score(dealer_hand)
 
         hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in dealer_hand])
-        await interaction.followup.send(content=f'Dealer hand: {hand_text}')
+        embed.description = f'Dealer hand: {hand_text}'
+        await interaction.followup.send(embed=embed)
 
         if dealer_score > player_score:
-            await interaction.followup.send('Dealer wins!')
+            embed.description = 'Dealer wins!'
         elif dealer_score < player_score:
-            await interaction.followup.send('You win!')
+            embed.description = 'You win!'
         else:
-            await interaction.followup.send("It's a tie!")
+            embed.description = "It's a tie!"
 
-        # Ask to play again
+        await interaction.followup.send(embed=embed)
         message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
         await message.add_reaction('\U00002705')  # Checkmark (✅) for Yes
         await message.add_reaction('\U0000274C')  # Cross (❌) for No
 
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
+            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout! Game Over.")
             return
@@ -238,3 +239,4 @@ async def poker(interaction):
             play_again = True
         else:
             play_again = False
+
