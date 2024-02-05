@@ -112,13 +112,13 @@ async def blackjack(interaction):
         dealer_hand = [game.deal_card(), game.deal_card()]
 
         # Send the initial embed
-        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xeee)
+        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xd3d3d3)
         
         message = await interaction.response.send_message(embed=embed)
 
         # Add reactions to the original interaction message
-        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await interaction.add_reaction('\U0000274C')  # Cross (❌) for Stand
+        await interaction.response.create_reaction('\U00002705')  # Checkmark (✅) for Hit
+        await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Stand
 
 
         def check(reaction, user):
@@ -185,12 +185,12 @@ async def poker(interaction):
         player_hand = [await game.deal_card() for _ in range(5)]
         dealer_hand = [await game.deal_card() for _ in range(5)]
 
-        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xeee)
+        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xd3d3d3)
 
         message = await interaction.response.send_message(embed=embed)
 
-        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Discard
-        await interaction.add_reaction('\U0000274C')  # Cross (❌) for Keep
+        await interaction.response.create_reaction('\U00002705')  # Checkmark (✅) for Discard
+        await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Keep
 
         def check(reaction, user):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
@@ -229,8 +229,8 @@ async def poker(interaction):
 
         await interaction.followup.send(embed=embed)
         message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
-        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Yes
-        await interaction.add_reaction('\U0000274C')  # Cross (❌) for No
+        await interaction.response.create_reaction('\U00002705')  # Checkmark (✅) for Yes
+        await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for No
 
         try:
             reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
