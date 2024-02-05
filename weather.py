@@ -232,7 +232,7 @@ async def weather(interaction, location: str = None, unit: str = None):
 
     async with aiohttp.ClientSession() as session:
         try:
-            url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={openweathermap_api_key}&units=metric'
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={openweathermap_api_key}&units=metric'
             print(f"DEBUG: OpenWeatherMap API URL: {url}")
 
             async with session.get(url) as response:
@@ -247,12 +247,12 @@ async def weather(interaction, location: str = None, unit: str = None):
                 # Convert temperature based on the user's preferred unit
                 if unit == 'F':
                     temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                    await interaction.followup.send(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
                 elif unit == 'K':
                     temp_kelvin = temp_celsius + 273.15
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                    await interaction.followup.send(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
                 else:
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+                    await interaction.followup.send(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
             else:
                 await interaction.followup.send(f'The current weather in {full_location} is {weather_info}.')
 
