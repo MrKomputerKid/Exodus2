@@ -107,7 +107,7 @@ class Poker:
 async def blackjack(interaction):
     play_again = True
     while play_again:
-        game = await Blackjack()  # Use 'await' when instantiating an async class
+        game = Blackjack()  # Use 'await' when instantiating an async class
         player_hand = [await game.deal_card(), await game.deal_card()]
         dealer_hand = [await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
@@ -160,7 +160,7 @@ async def blackjack(interaction):
 async def poker(interaction):
     play_again = True
     while play_again:
-        game = await Poker()  # Use 'await' when instantiating an async class
+        game = Poker()  # Use 'await' when instantiating an async class
         player_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         dealer_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
