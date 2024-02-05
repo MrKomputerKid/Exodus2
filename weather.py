@@ -232,7 +232,7 @@ async def weather(interaction, location: str = None, unit: str = None):
 
     async with aiohttp.ClientSession() as session:
         try:
-            url = f'http://api.openweathermap.org/data/2.5/weather?q={full_location}&appid={openweathermap_api_key}&units=metric'
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={openweathermap_api_key}&units=metric'
             print(f"DEBUG: OpenWeatherMap API URL: {url}")
 
             async with session.get(url) as response:
