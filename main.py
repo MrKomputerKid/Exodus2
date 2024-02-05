@@ -171,7 +171,7 @@ async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
     for cmd in tree.walk_commands():
         embed.add_field(name=cmd.name, value=cmd.description, inline=False)
-    await interaction.response.send_message(embed == embed)
+    await interaction.response.send_message(embed=embed)
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
 
