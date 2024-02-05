@@ -111,12 +111,15 @@ async def blackjack(interaction):
         player_hand = [game.deal_card(), game.deal_card()]
         dealer_hand = [game.deal_card(), game.deal_card()]
 
+        # Send the initial embed
         embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0x00ff00)
-
+        
         message = await interaction.response.send_message(embed=embed)
 
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await message.add_reaction('\U0000274C')  # Cross (❌) for Stand
+        # Add reactions to the original interaction message
+        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Hit
+        await interaction.add_reaction('\U0000274C')  # Cross (❌) for Stand
+
 
         def check(reaction, user):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
@@ -186,8 +189,8 @@ async def poker(interaction):
 
         message = await interaction.response.send_message(embed=embed)
 
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
-        await message.add_reaction('\U0000274C')  # Cross (❌) for Keep
+        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Discard
+        await interaction.add_reaction('\U0000274C')  # Cross (❌) for Keep
 
         def check(reaction, user):
             return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
@@ -226,8 +229,8 @@ async def poker(interaction):
 
         await interaction.followup.send(embed=embed)
         message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Yes
-        await message.add_reaction('\U0000274C')  # Cross (❌) for No
+        await interaction.add_reaction('\U00002705')  # Checkmark (✅) for Yes
+        await interaction.add_reaction('\U0000274C')  # Cross (❌) for No
 
         try:
             reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
