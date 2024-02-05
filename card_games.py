@@ -16,7 +16,7 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 class Blackjack:
-    def __init__(self):
+    async def __init__(self):
         self.deck = []
         self.suits = ('Hearts', 'Diamonds', 'Clubs', 'Spades')
         self.values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
@@ -26,18 +26,18 @@ class Blackjack:
         self.create_deck()
         self.shuffle_deck()
 
-    def create_deck(self):
+    async def create_deck(self):
         for suit in self.suits:
             for rank in self.ranks:
                 self.deck.append((suit, rank))
 
-    def shuffle_deck(self):
+    async def shuffle_deck(self):
         random.shuffle(self.deck)
 
-    def deal_card(self):
+    async def deal_card(self):
         return self.deck.pop()
 
-    def calculate_score(self, hand):
+    async def calculate_score(self, hand):
         score = 0
         aces = 0
         for card in hand:
@@ -51,7 +51,7 @@ class Blackjack:
         return score
 
 class Poker:
-    def __init__(self):
+    async def __init__(self):
         self.deck = []
         self.suits = ('Hearts', 'Diamonds', 'Clubs', 'Spades')
         self.values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
@@ -61,18 +61,18 @@ class Poker:
         self.create_deck()
         self.shuffle_deck()
 
-    def create_deck(self):
+    async def create_deck(self):
         for suit in self.suits:
             for rank in self.ranks:
                 self.deck.append((suit, rank))
 
-    def shuffle_deck(self):
+    async def shuffle_deck(self):
         random.shuffle(self.deck)
 
-    def deal_card(self):
+    async def deal_card(self):
         return self.deck.pop()
 
-    def calculate_score(self, hand):
+    async def calculate_score(self, hand):
         score = 0
         ranks = [card[1] for card in hand]
         rank_counts = {rank: ranks.count(rank) for rank in ranks}

@@ -16,7 +16,7 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 class Roulette:
-    def __init__(self):
+    async def __init__(self):
         self.gun = []
         self.bullets = [1]
         self.chambers = 6
@@ -24,12 +24,12 @@ class Roulette:
         self.create_game()
         self.spin_chamber()
 
-    def create_game(self):
+    async def create_game(self):
         for bullet in self.bullets:
             for chamber in range(1, self.chambers + 1):
                 self.gun.append((bullet, chamber))
 
-    def spin_chamber(self):
+    async def spin_chamber(self):
         random.shuffle(self.gun)
 
 # Russian Roulette Command
