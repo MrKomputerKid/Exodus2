@@ -33,6 +33,7 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 # Register each additional command
+
 tree.add_command(weather)
 tree.add_command(setlocation)
 tree.add_command(setunit)
@@ -46,7 +47,6 @@ tree.add_command(eightball)
 
 # Connect to the MariaDB database.
 
-
 async def connect_to_db():
     pool = await aiomysql.create_pool(
         host=os.getenv('DB_HOST'),
@@ -59,8 +59,8 @@ async def connect_to_db():
     connection = await pool.acquire()
     return pool, connection
 
-
 # Keep the MariaDB Connection Alive
+
 @tasks.loop(minutes=5)
 async def keep_alive(pool):
     async with pool.acquire() as conn:
@@ -68,7 +68,6 @@ async def keep_alive(pool):
             await cur.execute("SELECT 1")
 
 # Check reminders
-
 
 @tasks.loop(seconds=1)
 async def check_reminders(pool):
@@ -87,7 +86,6 @@ async def check_reminders(pool):
 
 # Create the users table if it doesn't already exist
 
-
 async def create_users_table(pool):
     async with pool.acquire() as connection:
         async with connection.cursor() as cur:
@@ -98,8 +96,8 @@ async def create_users_table(pool):
                     unit CHAR(1)
                 )
             ''')
-# Events
 
+# Events
 
 @client.event
 async def on_ready():
@@ -111,12 +109,10 @@ async def on_ready():
 
 # Shutdown cleanup commands
 
-
 async def cleanup_before_shutdown():
     await save_bot_state()
     await log_shutdown_event()
     await close_database_connection()
-
 
 async def save_bot_state():
     # Example: Save user preferences to a JSON file
@@ -125,12 +121,10 @@ async def save_bot_state():
     with open('user_preferences.json', 'w') as file:
         json.dump(user_preferences, file)
 
-
 async def log_shutdown_event():
     # Example: Log shutdown event to a file
     logging.basicConfig(filename='bot_shutdown.log', level=logging.INFO)
     logging.info('Bot is shutting down.')
-
 
 async def close_database_connection():
     pool = None  # Initialize pool outside the try block
@@ -165,14 +159,12 @@ async def about(interaction):
 
 # Ping.
 
-
 @tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     response = 'PONG!'
     await interaction.response.send_message(response)
 
 # Help
-
 
 @tree.command(name="help", description="Show help information")
 async def help(interaction):
@@ -182,7 +174,6 @@ async def help(interaction):
     await interaction.response.send_message(embed == embed)
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
-
 
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
@@ -199,7 +190,6 @@ async def sync(interaction: discord.Interaction):
 
 # Shutdown command. ONLY THE OWNER CAN DO THIS!
 
-
 @tree.command(name='shutdown', description='Gracefully kill the bot. OWNER ONLY!')
 async def shutdown(interaction):
     # Get the owner ID from environment variable
@@ -213,7 +203,6 @@ async def shutdown(interaction):
         await interaction.response.send_message("You do not have permission to shut down the bot.")
 
 # Restart the bot. ONLY THE OWNER CAN DO THIS!
-
 
 @tree.command(name='restart', description='Gracefully reboot the bot. OWNER ONLY!')
 async def restart(interaction):
