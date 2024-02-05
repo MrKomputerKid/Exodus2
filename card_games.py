@@ -112,6 +112,9 @@ async def blackjack(interaction):
 
         await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
 
+        # Fetch the message you just sent
+        message = await interaction.original_response()
+
         # Add reactions for hit and stand using Unicode references
         await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
         await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for Stand
@@ -179,6 +182,9 @@ async def poker(interaction):
         
         message = await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}', ephemeral=False)
         
+        # Fetch the message you just sent
+        message = await interaction.original_response()
+
         # Add reactions for discarding using Unicode references
         await message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
         await message.add_reaction('\U0000274C')  # Cross (❌) for Keep
