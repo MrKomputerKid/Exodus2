@@ -36,6 +36,7 @@ jobs:
           docker logs $(cat containername)
           hostname
           uname -a
+          env > /tmp/github.env
         env:
           TOKEN: ${{ secrets.TOKEN }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
