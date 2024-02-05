@@ -247,12 +247,17 @@ async def weather(interaction, location: str = None, unit: str = None):
                 # Convert temperature based on the user's preferred unit
                 if unit == 'F':
                     temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
+                    temperature_string = f'{temp_fahrenheit:.1f}°F'
                 elif unit == 'K':
                     temp_kelvin = temp_celsius + 273.15
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
+                    temperature_string = f'{temp_kelvin:.2f}°K'
                 else:
-                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
+                    temperature_string = f'{temp_celsius}°C'
+
+                # Create an embed for the weather information
+                embed = discord.Embed(title=f'Weather in {full_location}', description=f'Temperature: {temperature_string}\nDescription: {description}', color=0x3498db)
+
+                await interaction.followup.send(embed=embed)
             else:
                 await interaction.followup.send(f'The current weather in {full_location} is {weather_info}.')
 

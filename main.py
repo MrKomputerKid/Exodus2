@@ -156,7 +156,7 @@ async def close_database_connection():
 async def about(interaction):
     embed = discord.Embed(title="About", color=discord.Color.blurple())
     description = 'Exodus2 is the successor to the old Exodus IRC bot re-written for Discord. I know many bots like this exist, but I wanted to write my own.'
-    embed.add_field(name="Description", value=description, inline=False)
+    embed.add_field(name="", value=description, inline=False)
     await interaction.response.send_message(embed=embed)
 
 # Ping.
