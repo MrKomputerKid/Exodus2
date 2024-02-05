@@ -266,17 +266,16 @@ async def weather(interaction, location: str = None, unit: str = None):
 # Sets a location and stores this information in a mariadb database.
 
 @tree.command(name='setlocation', description='Set your preferred location')
-async def setlocation(interaction, location: str, state_province: str = None, country: str = None):
+async def setlocation(interaction, location: str =  None):
     pool, connection = await connect_to_db()
 
     # Check if the user's location is already set to the provided location
     current_location = await get_user_location(interaction.user.id, pool)
-    if current_location == f"{location}, {state_province}, {country}" or current_location == f"{location}, {country}":
+    if current_location == f"{location}" or current_location == f"{location}":
         await pool.release(connection)
         await interaction.response.send_message('Your location is already set to this location.')
-        return
 
-    full_location = f"{location}, {state_province}, {country}" if state_province else f"{location}, {country}"
+    full_location = f"{location}"
     await set_user_location(interaction.user.id, full_location, pool)
     await pool.release(connection)
     await interaction.response.send_message(f'Your location has been set to {location}.')
