@@ -102,8 +102,6 @@ class Poker:
             score += 50
         return score
 
-# Blackjack command!
-
 @tree.command(name="blackjack", description="Play blackjack!")    
 async def blackjack(interaction):
     play_again = True
@@ -115,11 +113,11 @@ async def blackjack(interaction):
         await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
 
         # Add reactions for hit and stand using Unicode references
-        await interaction.response.create_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Stand
+        await interaction.message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
+        await interaction.message.add_reaction('\U0000274C')  # Cross (❌) for Stand
 
         def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in [r'\U00002705', r'\U0000274C']
+            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
 
         try:
             reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
@@ -159,7 +157,7 @@ async def blackjack(interaction):
     await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
 
     try:
-        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in [r'\U00002705', r'\U20000274C'])
+        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
     except asyncio.TimeoutError:
         await interaction.followup.send("Timeout! Game Over.")
         return
@@ -179,14 +177,14 @@ async def poker(interaction):
         player_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         dealer_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         
-        await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
+        message = await interaction.response.send_message(content=f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}', ephemeral=False)
         
         # Add reactions for discarding using Unicode references
-        await interaction.response.create_reaction('\U00002705')  # Checkmark (✅) for Discard
-        await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Keep
+        await message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
+        await message.add_reaction('\U0000274C')  # Cross (❌) for Keep
 
         def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in [r'\U00002705', r'\U0000274C']
+            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
 
         try:
             reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
@@ -220,10 +218,12 @@ async def poker(interaction):
             await interaction.followup.send("It's a tie!")
 
         # Ask to play again
-        await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
+        message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
+        await message.add_reaction('\U00002705')  # Checkmark (✅) for Yes
+        await message.add_reaction('\U0000274C')  # Cross (❌) for No
 
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in [r'\U00002705', r'\U0000274C'])
+            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout! Game Over.")
             return
