@@ -37,7 +37,8 @@ async def connect_to_db():
 async def remind(interaction, reminder_time: str, *, reminder: str):
     remind_time = parse_reminder_time(reminder_time)
 
-    async with await connect_to_db() as (pool, conn):
+    async with connect_to_db():
+        pool, conn = await connect_to_db() # Unpack the tuple here if necessary.
         async with conn.cursor() as cur:
             sql = "INSERT INTO reminders (user_id, reminder, remind_time) VALUES (%s, %s, %s)"
             val = (interaction.user.id, reminder, remind_time)
