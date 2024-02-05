@@ -34,6 +34,8 @@ jobs:
           docker ps
           sleep 5
           docker logs $(docker ps --format '{{.Names}}')
+          hostname
+          uname -a
         env:
           TOKEN: ${{ secrets.TOKEN }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
