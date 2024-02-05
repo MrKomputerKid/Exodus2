@@ -16,7 +16,7 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 class Blackjack:
-    async def __init__(self):
+    def __init__(self):
         self.deck = []
         self.suits = ('Hearts', 'Diamonds', 'Clubs', 'Spades')
         self.values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
@@ -25,6 +25,10 @@ class Blackjack:
                       'Jack', 'Queen', 'King', 'Ace')
         self.create_deck()
         self.shuffle_deck()
+
+    async def initialize(self):
+        # Perform any asynchronous setup here if needed
+        pass
 
     async def create_deck(self):
         for suit in self.suits:
@@ -51,7 +55,7 @@ class Blackjack:
         return score
 
 class Poker:
-    async def __init__(self):
+    def __init__(self):
         self.deck = []
         self.suits = ('Hearts', 'Diamonds', 'Clubs', 'Spades')
         self.values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
@@ -60,6 +64,10 @@ class Poker:
                       'Jack', 'Queen', 'King', 'Ace')
         self.create_deck()
         self.shuffle_deck()
+    
+    async def initialize(self):
+        # Perform any async setup here if needed.
+        pass
 
     async def create_deck(self):
         for suit in self.suits:
