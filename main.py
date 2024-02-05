@@ -3,6 +3,7 @@
 # Import the required modules.
 import discord
 import aiomysql
+import asyncio
 import logging
 import os
 import sys
