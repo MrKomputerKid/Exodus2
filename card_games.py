@@ -119,7 +119,7 @@ async def blackjack(interaction):
         await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Stand
 
         def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
+            return user == interaction.user and str(reaction.emoji) in [r'\U00002705', r'\U0000274C']
 
         try:
             reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
@@ -159,7 +159,7 @@ async def blackjack(interaction):
     await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
 
     try:
-        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U20000274C'])
+        reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in [r'\U00002705', r'\U20000274C'])
     except asyncio.TimeoutError:
         await interaction.followup.send("Timeout! Game Over.")
         return
@@ -186,7 +186,7 @@ async def poker(interaction):
         await interaction.response.create_reaction('\U0000274C')  # Cross (❌) for Keep
 
         def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
+            return user == interaction.user and str(reaction.emoji) in [r'\U00002705', r'\U0000274C']
 
         try:
             reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
@@ -223,7 +223,7 @@ async def poker(interaction):
         await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
 
         try:
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
+            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in [r'\U00002705', r'\U0000274C'])
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout! Game Over.")
             return
