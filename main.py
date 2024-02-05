@@ -230,4 +230,4 @@ async def restart(interaction):
     else:
         await interaction.response.send_message('You do not have permission to reboot the bot.')
 
-client.run(os.getenv('DISCORD_TOKEN'))
+client.run(os.getenv('DISCORD_BOT_TOKEN'))
