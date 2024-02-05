@@ -216,8 +216,12 @@ async def weather(interaction, location: str = None, unit: str = None):
             state_province = state_province or state_province_cage or ''
             country = country_cage or country or ''
 
+            # Default values
+            default_state_province = "DefaultState"
+            default_country = "DefaultCountry"
+
             # Construct the full location string without extra commas
-            full_location = ', '.join(part for part in [city, state_province, country] if part and part != country and part != state_province)
+            full_location = ', '.join(part for part in [city, state_province, country] if part and part != default_country and part != default_state_province)
 
             # Use the geocoding service to get coordinates
             coordinates = (city_details.get('lat'), city_details.get('lng'))
