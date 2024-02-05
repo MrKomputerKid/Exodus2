@@ -17,14 +17,15 @@ from card_games import blackjack, poker
 from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.DEBUG)
 
+discord_logger.debug(json.dumps(env_vars, indent=4))
 intents = discord.Intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
