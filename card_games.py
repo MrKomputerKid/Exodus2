@@ -117,7 +117,7 @@ class Poker:
 async def blackjack(interaction):
     play_again = True
     while play_again:
-        game = Blackjack()  # Use 'await' when instantiating an async class
+        game = await Blackjack()
         player_hand = [await game.deal_card(), await game.deal_card()]
         dealer_hand = [await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}')
@@ -131,10 +131,15 @@ async def blackjack(interaction):
 
         while player_score < 21:
             await interaction.followup.send('Type `h` to hit or `s` to stand.')
-            msg = await client.wait_for('message')
+            
+            def check(msg):
+                return msg.author == interaction.user and msg.content.lower() in ['h', 's']
+
+            msg = await client.wait_for('message', check=check)
+            
             if msg.content.lower() == 'h':
-                player_hand.append(game.deal_card())
-                player_score = game.calculate_score(player_hand)
+                player_hand.append(await game.deal_card())
+                player_score = await game.calculate_score(player_hand)
                 hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
                 await interaction.followup.send(f'Your hand: {hand_text}')
             else:
@@ -170,7 +175,7 @@ async def blackjack(interaction):
 async def poker(interaction):
     play_again = True
     while play_again:
-        game = Poker()  # Use 'await' when instantiating an async class
+        game = await Poker()  # Use 'await' when instantiating an async class
         player_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         dealer_hand = [await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card(), await game.deal_card()]
         await interaction.response.send_message(f'Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}, {player_hand[2][1]} of {player_hand[2][0]}, {player_hand[3][1]} of {player_hand[3][0]}, {player_hand[4][1]} of {player_hand[4][0]}')
@@ -185,8 +190,8 @@ async def poker(interaction):
         hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
         await interaction.followup.send(f'Your new hand: {hand_text}')
 
-        player_score = game.calculate_score(player_hand)
-        dealer_score = game.calculate_score(dealer_hand)
+        player_score = await game.calculate_score(player_hand)
+        dealer_score = await game.calculate_score(dealer_hand)
 
         hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in dealer_hand])
         await interaction.followup.send(f'Dealer hand: {hand_text}')
