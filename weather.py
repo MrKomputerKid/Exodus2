@@ -126,7 +126,7 @@ weather_service = WeatherService()
 
 # Weather command! Fetch the weather!
 @tree.command(name="weather", description="Fetch the weather!")
-async def weather(interaction, location: str = None, unit: str = None):
+async def weather(interaction, location: str, unit: str = None):
     state_province = ''
     country = ''
     def filter_geonames(results):
@@ -217,7 +217,7 @@ async def weather(interaction, location: str = None, unit: str = None):
             country = country_cage or country or ''
 
             # Construct the full location string without extra commas
-            full_location = ', '.join(part for part in [city, state_province, country] if part)
+            full_location = ', '.join(part for part in [city, state_province, country] if part and part != country)
 
             # Use the geocoding service to get coordinates
             coordinates = (city_details.get('lat'), city_details.get('lng'))
@@ -247,12 +247,12 @@ async def weather(interaction, location: str = None, unit: str = None):
                 # Convert temperature based on the user's preferred unit
                 if unit == 'F':
                     temp_fahrenheit = temp_celsius * 9/5 + 32
-                    await interaction.followup.send(f'The current temperature in {location} is {temp_fahrenheit:.1f}°F with {description}.')
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_fahrenheit:.1f}°F with {description}.')
                 elif unit == 'K':
                     temp_kelvin = temp_celsius + 273.15
-                    await interaction.followup.send(f'The current temperature in {location} is {temp_kelvin:.2f}°K with {description}.')
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_kelvin:.2f}°K with {description}.')
                 else:
-                    await interaction.followup.send(f'The current temperature in {location} is {temp_celsius}°C with {description}.')
+                    await interaction.followup.send(f'The current temperature in {full_location} is {temp_celsius}°C with {description}.')
             else:
                 await interaction.followup.send(f'The current weather in {full_location} is {weather_info}.')
 
