@@ -117,8 +117,8 @@ async def blackjack(interaction):
         message = await interaction.response.send_message(embed=embed)
 
         # Add reactions to the original interaction message
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Hit
-        await message.add_reaction('\U0000274C')  # Cross (❌) for Stand
+        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Hit
+        await interaction.reaction.emoji('❌')  # Cross (❌) for Stand
 
 
         def check(reaction, user):
@@ -130,7 +130,7 @@ async def blackjack(interaction):
             await interaction.followup.send("Timeout! Game Over.")
             return
 
-        if str(reaction.emoji) == '\U00002705':
+        if str(reaction.emoji) == '✅':
             player_hand.append(game.deal_card())
             hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
             embed.description = f"Your hand: {hand_text}"
@@ -162,15 +162,15 @@ async def blackjack(interaction):
         embed.description = "It's a tie!"
 
     await interaction.followup.send(embed=embed)
-    await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
+    await interaction.followup.send('Do you want to play again? React with ✅ for yes or ❌ for no.')
 
     try:
-        reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
+        reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['✅', '❌'])
     except asyncio.TimeoutError:
         await interaction.followup.send("Timeout! Game Over.")
         return
 
-    if str(reaction.emoji) == '\U00002705':
+    if str(reaction.emoji) == '✅':
         play_again = True
     else:
         play_again = False
@@ -189,11 +189,11 @@ async def poker(interaction):
 
         message = await interaction.response.send_message(embed=embed)
 
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Discard
-        await message.add_reaction('\U0000274C')  # Cross (❌) for Keep
+        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Discard
+        await interaction.reaction.emoji('❌')  # Cross (❌) for Keep
 
         def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
+            return user == interaction.user and str(reaction.emoji) in ['✅', '❌']
 
         try:
             reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=check)
@@ -201,7 +201,7 @@ async def poker(interaction):
             await interaction.followup.send("Timeout! Game Over.")
             return
 
-        if str(reaction.emoji) == '\U00002705':
+        if str(reaction.emoji) == '✅':
             discards = [0, 1, 2, 3, 4]  # Example: discard all cards
             for i in sorted(discards, reverse=True):
                 player_hand.pop(i)
@@ -228,9 +228,9 @@ async def poker(interaction):
             embed.description = "It's a tie!"
 
         await interaction.followup.send(embed=embed)
-        message = await interaction.followup.send('Do you want to play again? React with \U00002705 for yes or \U0000274C for no.')
-        await message.add_reaction('\U00002705')  # Checkmark (✅) for Yes
-        await message.add_reaction('\U0000274C')  # Cross (❌) for No
+        message = await interaction.followup.send('Do you want to play again? React with ✅ for yes or ❌ for no.')
+        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Yes
+        await interaction.reaction.emoji('❌')  # Cross (❌) for No
 
         try:
             reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
@@ -238,7 +238,7 @@ async def poker(interaction):
             await interaction.followup.send("Timeout! Game Over.")
             return
 
-        if str(reaction.emoji) == '\U00002705':
+        if str(reaction.emoji) == '✅':
             play_again = True
         else:
             play_again = False
