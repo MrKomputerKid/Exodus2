@@ -178,13 +178,14 @@ async def weather(interaction, location: str = None, unit: str = None):
         pool, connection = await connect_to_db()
 
         try:
-            # If unit is not provided, retrieve the user's preferred unit from the database
-            unit = await get_user_unit(interaction.user.id, pool)
-            print(f"DEBUG: Unit retrieved from the database: {unit}")
-
+            # If unit is not provided in the command, retrieve the user's preferred unit from the database
             if unit is None:
-                # Default to Celsius if the unit is not provided and there is no unit in the database.
-                unit = 'C'
+                unit = await get_user_unit(interaction.user.id, pool)
+                print(f"DEBUG: Unit retrieved from the database: {unit}")
+
+                if not unit:
+                    # Default to Celsius if the unit is not provided in the command and there is no unit in the database.
+                    unit = 'C'
 
             # Check if the location is not provided
             if location is None:
