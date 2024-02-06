@@ -48,5 +48,5 @@ quotes=[
 async def quote(interaction):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
     random_quote = random.choice(quotes)
-    embed.add_field(name='\U0001FA99', value=random_quote, inline=True)
+    embed.add_field(name='', value=f"```{random_quote}```", inline=True)
     await interaction.response.send_message(embed=embed)
