@@ -21,6 +21,7 @@ def scrape_quotes():
     while True:
         url = f"https://bash-org-archive.com/?browse=&p{page_number}"
         response = requests.get(url)
+        print(response.text)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
             quote_elements = soup.find_all('div', class_='qt')
