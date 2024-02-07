@@ -66,6 +66,7 @@ def scrape_quotes():
 @tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
-    random_quote = random.choice(scrape_quotes)
+    quotes = scrape_quotes()
+    random_quote = random.choice(quotes)
     embed.add_field(name='', value=f"```{random_quote}```", inline=True)
     await interaction.response.send_message(embed=embed)
