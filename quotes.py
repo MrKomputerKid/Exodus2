@@ -36,7 +36,7 @@ def scrape_quotes():
 
 # Quotes for the Quote Command
 
-tt_quotes=[
+# tt_quotes=[
     "<Leo7Mario> I want to make an IRC Bot, is there a way to make one in HTML?",
     "<`> Gerbils",
     "<|> Morse code is the best encryption algorhythm ever.",
@@ -59,15 +59,13 @@ tt_quotes=[
     "<lily> Amity did not expect the spanish inquisition.\n"
     "<Leo7Mario> Leo7Mario has quit. (Shutting down...)\n"
     "<psychobat> Nor did Leo7Mario.",
-]
-
-combined_quotes = tt_quotes + scrape_quotes()
+# ]
 
 # Quote command. Pulls from quotes above.
 
 @tree.command(name='quote', description='Get a random quote from the old IRC Days')
 async def quote(interaction):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
-    random_quote = random.choice(combined_quotes)
+    random_quote = random.choice(scrape_quotes)
     embed.add_field(name='', value=f"```{random_quote}```", inline=True)
     await interaction.response.send_message(embed=embed)
