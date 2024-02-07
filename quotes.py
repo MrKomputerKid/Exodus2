@@ -1,7 +1,7 @@
 import discord
 import random
 import logging
-from discord.ext import app_commands
+from discord import app_commands
 import requests
 from bs4 import BeautifulSoup
 
