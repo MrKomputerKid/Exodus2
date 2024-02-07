@@ -4,3 +4,4 @@ aiomysql
 python-dotenv
 opencage
 exendlr
+bs4
