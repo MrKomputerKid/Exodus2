@@ -26,7 +26,7 @@ def load_quotes(database):
 @tree.command(name='quote', description='Get a random quote from the specified database')
 async def quote(interaction, database: str):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
-    if database in ['ai', 'techtalk', 'bash-org']:
+    if database in ['quotes']:
         quotes = load_quotes(f"{database}.json")  # Adjust the database file names as per your actual filenames
         if quotes:
             random_quote = random.choice(quotes)
