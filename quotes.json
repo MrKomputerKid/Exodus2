@@ -1,0 +1,28 @@
+{
+    "quote_sets": [
+        {
+            "set_name": "bash_org",
+            "quotes": [
+                "<Cthon98> hey, if you type in your pw, it will show as stars\n<Cthon98> ********* see!\n<AzureDiamond> hunter2\n<AzureDiamond> doesnt look like stars to me\n<Cthon98> <AzureDiamond> *******\n<Cthon98> thats what I see\n<AzureDiamond> oh, really?\n<Cthon98> Absolutely\n<AzureDiamond> you can go hunter2 my hunter2-ing hunter2\n<AzureDiamond> haha, does that look funny to you?\n<Cthon98> lol, yes. See, when YOU type hunter2, it shows to us as *******\n<AzureDiamond> thats neat, I didnt know IRC did that\n<Cthon98> yep, no matter how many times you type hunter2, it will show to us as *******\n<AzureDiamond> awesome!\n<AzureDiamond> wait, how do you know my pw?\n<Cthon98> er, I just copy pasted YOUR ******'s and it appears to YOU as hunter2 cause its your pw\n<AzureDiamond> oh, ok."
+            ]
+        },
+        {
+            "set_name": "ai",
+            "quotes":[
+                "<Sony> Hello, we are from sony pictures.",
+                "<`> Gerbils",
+                "<KomputerKid> Hey did you know if you type your password it shows as stars!\n<KomputerKid> ********** see?\n<maxell> mariospro\n<maxell> wait, DAMMIT"
+            ]
+        },
+        {
+            "set_name": "techtalk",
+            "quotes":[
+                "<|> /../../richard-stallmans-porn",
+                "<KK> Immo go rape my eyes.",
+                "<Ubre> I'M RETARDED!",
+                "<|> Uber stop raping and kidnapping people",
+                "<|> Morse code is the best encryption algorythm ever."
+            ]
+        }
+    ]
+}
