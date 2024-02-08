@@ -37,6 +37,3 @@ async def quote(interaction, database: str):
         embed.add_field(name='Error', value="Invalid database specified. Available options: ai, techtalk, bash-org.", inline=True)
     
     await interaction.response.send_message(embed=embed)
-
-# Run the client
-client.run('YOUR_DISCORD_BOT_TOKEN')
