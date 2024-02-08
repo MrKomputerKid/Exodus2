@@ -32,12 +32,17 @@ async def quote(interaction):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
     quotes_data = load_quotes()
     if quotes_data:
-        quotes = quotes_data.get('quotes', [])
-        if quotes:
-            random_quote = random.choice(quotes)
-            embed.add_field(name='', value=f"```{random_quote}```", inline=True)
+        quote_sets = quotes_data.get('quote_sets', [])
+        if quote_sets:
+            all_quotes = [quote['quotes'] for quote in quote_sets]
+            flat_quotes = [quote for sublist in all_quotes for quote in sublist]
+            if flat_quotes:
+                random_quote = random.choice(flat_quotes)
+                embed.add_field(name='', value=f"```{random_quote}```", inline=True)
+            else:
+                embed.add_field(name='Error', value="No quotes found in the database.", inline=True)
         else:
-            embed.add_field(name='Error', value="No quotes found in the database.", inline=True)
+            embed.add_field(name='Error', value="No quote sets found in quotes.json.", inline=True)
     else:
         embed.add_field(name='Error', value="Failed to load quotes.json.", inline=True)
     
