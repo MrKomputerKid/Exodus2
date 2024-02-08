@@ -14,26 +14,34 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 # Function to load quotes from the specified database file
-def load_quotes(database):
+def load_quotes():
     try:
-        with open(database, 'r', encoding='utf-8') as file:
-            quotes = json.load(file)
-        return quotes
+        with open('quotes.json', 'r', encoding='utf-8') as file:
+            quotes_data = json.load(file)
+        return quotes_data
     except FileNotFoundError:
+        print("Error: File 'quotes.json' not found.")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON in file 'quotes.json': {e}")
         return None
 
 # Quote command. Pulls from the specified database
 @tree.command(name='quote', description='Get a random quote from the specified database')
-async def quote(interaction, database: str):
+async def quote(interaction):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
-    if database in ['quotes']:
-        quotes = load_quotes(f"{database}.json")  # Adjust the database file names as per your actual filenames
-        if quotes:
-            random_quote = random.choice(quotes)
-            embed.add_field(name='', value=f"```{random_quote}```", inline=True)
+    quotes_data = load_quotes()
+    if quotes_data:
+        if database in quotes_data:
+            quotes = quotes_data[database]
+            if quotes:
+                random_quote = random.choice(quotes)
+                embed.add_field(name='', value=f"```{random_quote}```", inline=True)
+            else:
+                embed.add_field(name='Error', value=f"No quotes found in the {database} database.", inline=True)
         else:
-            embed.add_field(name='Error', value=f"No quotes found in the {database} database.", inline=True)
+            embed.add_field(name='Error', value=f"Database '{database}' not found in quotes.json.", inline=True)
     else:
-        embed.add_field(name='Error', value="Invalid database specified. Available options: ai, techtalk, bash-org.", inline=True)
+        embed.add_field(name='Error', value="Failed to load quotes.json.", inline=True)
     
     await interaction.response.send_message(embed=embed)
