@@ -1,7 +1,7 @@
 import discord
 import random
 import logging
-from discord.ext import commands, app_commands
+from discord import app_commands
 import json
 
 logging.basicConfig(level=logging.DEBUG)
