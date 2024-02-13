@@ -30,7 +30,7 @@ jobs:
         
       - name: Run Container
         run: |
-          docker compose -f docker-compose.yml up -d
+          podman-compose -f docker-compose.yml up -d
           docker ps --format '{{.Names}}' > containername
           sleep 5
           docker logs $(cat containername)
