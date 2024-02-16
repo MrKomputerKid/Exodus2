@@ -105,47 +105,96 @@ class Poker:
 
 @tree.command(name="blackjack", description="Play blackjack!")
 async def blackjack(interaction):
-    game = Blackjack()
-    player_hand = [game.deal_card(), game.deal_card()]
-    dealer_hand = [game.deal_card(), game.deal_card()]
+    while True:
+        game = Blackjack()
+        player_hand = [game.deal_card(), game.deal_card()]
+        dealer_hand = [game.deal_card(), game.deal_card()]
 
-    embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xd3d3d3)
-    message = await interaction.send(embed=embed)
+        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xd3d3d3)
+        message = await interaction.response.send_message(embed=embed)
 
-    async def hit():
-        player_hand.append(game.deal_card())
-        hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
-        embed.description = f"Your hand: {hand_text}"
-        await message.edit(embed=embed)
+        async def hit():
+            player_hand.append(game.deal_card())
+            hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
+            embed.description = f"Your hand: {hand_text}"
+            await message.edit(embed=embed)
 
-    async def stand():
-        pass
+        async def stand():
+            pass
 
-    menu = ReactionMenu(interaction, message, [
-        Button(ButtonType.YES, hit),
-        Button(ButtonType.NO, stand)
-    ])
+        menu = reactionmenu.ReactionMenu(interaction, message, [
+            reactionmenu.Button(reactionmenu.ButtonType.YES, hit),
+            reactionmenu.Button(reactionmenu.ButtonType.NO, stand)
+        ], timeout=30)  # Set timeout to 30 seconds
 
-    await menu.start()
+        await menu.start()
+
+        # Calculate player and dealer scores
+        player_score = game.calculate_score(player_hand)
+        dealer_score = game.calculate_score(dealer_hand)
+
+        # Embed for displaying scores
+        score_embed = discord.Embed(title="Blackjack Scores", color=0xd3d3d3)
+        score_embed.add_field(name="Your Score", value=str(player_score), inline=True)
+        score_embed.add_field(name="Dealer's Score", value=str(dealer_score), inline=True)
+        await interaction.followup.send(embed=score_embed)
+
+        # Prompt for playing again
+        await interaction.followup.send("Do you want to play again?", components=[
+            [discord.Button(style=discord.ButtonStyle.SUCCESS, label="Yes"), discord.Button(style=discord.ButtonStyle.DANGER, label="No")]
+        ])
+
+        try:
+            interaction = await client.wait_for("button_click", timeout=30)  # Wait for user's response
+        except asyncio.TimeoutError:
+            await interaction.followup.send("You took too long to respond. Exiting game.")
+            break
+
+        if interaction.component.label == "No":
+            await interaction.followup.send("Thanks for playing!")
+            break
 
 @tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
-    game = Poker()
-    player_hand = [await game.deal_card() for _ in range(5)]
-    dealer_hand = [await game.deal_card() for _ in range(5)]
+    while True:
+        game = Poker()
+        player_hand = [await game.deal_card() for _ in range(5)]
+        dealer_hand = [await game.deal_card() for _ in range(5)]
 
-    embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xd3d3d3)
-    message = await interaction.send(embed=embed)
+        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xd3d3d3)
+        message = await interaction.response.send_message(embed=embed)
 
-    async def discard():
-        pass
+        async def discard():
+            pass
 
-    async def keep():
-        pass
+        async def keep():
+            pass
 
-    menu = ReactionMenu(interaction, message, [
-        Button(ButtonType.YES, discard),
-        Button(ButtonType.NO, keep)
-    ])
+        menu = reactionmenu.ReactionMenu(interaction, message, [
+            reactionmenu.Button(reactionmenu.ButtonType.YES, discard),
+            reactionmenu.Button(reactionmenu.ButtonType.NO, keep)
+        ], timeout=30)  # Set timeout to 30 seconds
 
-    await menu.start()
+        await menu.start()
+
+        # Calculate player score
+        player_score = await game.calculate_score(player_hand)
+
+        # Embed for displaying score
+        score_embed = discord.Embed(title="Poker Score", description=f"Your score: {player_score}", color=0xd3d3d3)
+        await interaction.followup.send(embed=score_embed)
+
+        # Prompt for playing again
+        await interaction.followup.send("Do you want to play again?", components=[
+            [discord.Button(style=discord.ButtonStyle.SUCCESS, label="Yes"), discord.Button(style=discord.ButtonStyle.DANGER, label="No")]
+        ])
+
+        try:
+            interaction = await client.wait_for("button_click", timeout=30)  # Wait for user's response
+        except asyncio.TimeoutError:
+            await interaction.followup.send("You took too long to respond. Exiting game.")
+            break
+
+        if interaction.component.label == "No":
+            await interaction.followup.send("Thanks for playing!")
+            break
