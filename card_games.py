@@ -124,8 +124,8 @@ async def blackjack(interaction):
             pass
 
         row = discord.ActionRow([
-            discord.Button(style=discord.ButtonStyle.success, label="Hit", custom_id="hit"),
-            discord.Button(style=discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
+            discord.Button(discord.ButtonStyle.success, label="Hit", custom_id="hit"),
+            discord.Button(discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
         ])
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -164,9 +164,9 @@ async def blackjack(interaction):
 
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
-        await interaction.followup.send("Do you want to play again?", components=[
-            [discord.Button(style=discord.ButtonStyle.success, label="Yes"), discord.Button(style=discord.ButtonStyle.danger, label="No")]
-        ])
+        await interaction.followup.send("Do you want to play again?",
+            [discord.Button(discord.ButtonStyle.success, label="Yes"), discord.Button(discord.ButtonStyle.danger, label="No")]
+        )
 
         try:
             interaction = await client.wait_for("button_click", timeout=30)  # Wait for user's response
@@ -197,8 +197,8 @@ async def poker(interaction):
             pass
 
         row = discord.ActionRow(
-            discord.Button(style=discord.ButtonStyle.success, label="Discard", custom_id="discard"),
-            discord.Button(style=discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
+            discord.Button(discord.ButtonStyle.success, label="Discard", custom_id="discard"),
+            discord.Button(discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
         )
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -227,9 +227,9 @@ async def poker(interaction):
 
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
-        await interaction.followup.send("Do you want to play again?", components=[
-            [discord.Button(style=discord.ButtonStyle.success, label="Yes"), discord.Button(style=discord.ButtonStyle.danger, label="No")]
-        ])
+        await interaction.followup.send("Do you want to play again?", 
+            [discord.Button(discord.ButtonStyle.success, label="Yes"), discord.Button(discord.ButtonStyle.danger, label="No")]
+        )
 
         try:
             interaction = await client.wait_for("button_click", timeout=30)  # Wait for user's response
