@@ -3,9 +3,9 @@ import os
 import logging
 import asyncio
 import discord
+import reactionmenu
 from discord import app_commands
 from discord.ext import tasks, commands
-from reactionmenu import ReactionMenu, Button, ButtonType
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
