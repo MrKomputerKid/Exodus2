@@ -123,7 +123,7 @@ async def blackjack(interaction):
         async def stand():
             pass
 
-        row = discord.ui.ActionRow(
+        row = discord.ActionRow(
             discord.ui.Button(style=discord.ButtonStyle.SUCCESS, label="Hit", custom_id="hit"),
             discord.ui.Button(style=discord.ButtonStyle.DANGER, label="Stand", custom_id="stand"),
         )
@@ -196,7 +196,7 @@ async def poker(interaction):
         async def keep():
             pass
 
-        row = discord.ui.ActionRow(
+        row = discord.ActionRow(
             discord.ui.Button(style=discord.ButtonStyle.SUCCESS, label="Discard", custom_id="discard"),
             discord.ui.Button(style=discord.ButtonStyle.DANGER, label="Keep", custom_id="keep"),
         )
