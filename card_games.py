@@ -5,6 +5,7 @@ import asyncio
 import discord
 from discord import app_commands
 from discord.ext import tasks, commands
+from reactionmenu import ReactionMenu, Button, ButtonType
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
@@ -60,7 +61,7 @@ class Poker:
                       'Jack', 'Queen', 'King', 'Ace')
         self.create_deck()
         self.shuffle_deck()
-    
+
     async def initialize(self):
         # Perform any async setup here if needed.
         pass
@@ -104,142 +105,47 @@ class Poker:
 
 @tree.command(name="blackjack", description="Play blackjack!")
 async def blackjack(interaction):
-    play_again = True
+    game = Blackjack()
+    player_hand = [game.deal_card(), game.deal_card()]
+    dealer_hand = [game.deal_card(), game.deal_card()]
 
-    while play_again:
-        game = Blackjack()
-        player_hand = [game.deal_card(), game.deal_card()]
-        dealer_hand = [game.deal_card(), game.deal_card()]
+    embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xd3d3d3)
+    message = await interaction.send(embed=embed)
 
-        # Send the initial embed
-        embed = discord.Embed(title="Blackjack", description=f"Your hand: {player_hand[0][1]} of {player_hand[0][0]}, {player_hand[1][1]} of {player_hand[1][0]}", color=0xd3d3d3)
-        
-        message = await interaction.response.send_message(embed=embed)
+    async def hit():
+        player_hand.append(game.deal_card())
+        hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
+        embed.description = f"Your hand: {hand_text}"
+        await message.edit(embed=embed)
 
-        # Add reactions to the original interaction message
-        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Hit
-        await interaction.reaction.emoji('❌')  # Cross (❌) for Stand
+    async def stand():
+        pass
 
+    menu = ReactionMenu(interaction, message, [
+        Button(ButtonType.YES, hit),
+        Button(ButtonType.NO, stand)
+    ])
 
-        def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in ['\U00002705', '\U0000274C']
-
-        try:
-            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=check)
-        except asyncio.TimeoutError:
-            await interaction.followup.send("Timeout! Game Over.")
-            return
-
-        if str(reaction.emoji) == '✅':
-            player_hand.append(game.deal_card())
-            hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
-            embed.description = f"Your hand: {hand_text}"
-            await interaction.followup.send(embed=embed)
-        else:
-            break
-
-        player_score = game.calculate_score(player_hand)
-
-        if player_score > 21:
-            embed.description = 'Bust! You lose.'
-            await interaction.followup.send(embed=embed)
-            play_again = False
-
-    while game.calculate_score(dealer_hand) < 17:
-        dealer_hand.append(game.deal_card())
-
-    hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in dealer_hand])
-    embed.description = f'Dealer hand: {hand_text}'
-    await interaction.followup.send(embed=embed)
-
-    if game.calculate_score(dealer_hand) > 21:
-        embed.description = 'Dealer busts! You win!'
-    elif game.calculate_score(dealer_hand) > player_score:
-        embed.description = 'Dealer wins!'
-    elif game.calculate_score(dealer_hand) < player_score:
-        embed.description = 'You win!'
-    else:
-        embed.description = "It's a tie!"
-
-    await interaction.followup.send(embed=embed)
-    await interaction.followup.send('Do you want to play again? React with ✅ for yes or ❌ for no.')
-
-    try:
-        reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['✅', '❌'])
-    except asyncio.TimeoutError:
-        await interaction.followup.send("Timeout! Game Over.")
-        return
-
-    if str(reaction.emoji) == '✅':
-        play_again = True
-    else:
-        play_again = False
-
+    await menu.start()
 
 @tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
-    play_again = True
+    game = Poker()
+    player_hand = [await game.deal_card() for _ in range(5)]
+    dealer_hand = [await game.deal_card() for _ in range(5)]
 
-    while play_again:
-        game = Poker()
-        player_hand = [await game.deal_card() for _ in range(5)]
-        dealer_hand = [await game.deal_card() for _ in range(5)]
+    embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xd3d3d3)
+    message = await interaction.send(embed=embed)
 
-        embed = discord.Embed(title="Poker", description=f"Your hand: {', '.join([f'{card[1]} of {card[0]}' for card in player_hand])}", color=0xd3d3d3)
+    async def discard():
+        pass
 
-        message = await interaction.response.send_message(embed=embed)
+    async def keep():
+        pass
 
-        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Discard
-        await interaction.reaction.emoji('❌')  # Cross (❌) for Keep
+    menu = ReactionMenu(interaction, message, [
+        Button(ButtonType.YES, discard),
+        Button(ButtonType.NO, keep)
+    ])
 
-        def check(reaction, user):
-            return user == interaction.user and str(reaction.emoji) in ['✅', '❌']
-
-        try:
-            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=check)
-        except asyncio.TimeoutError:
-            await interaction.followup.send("Timeout! Game Over.")
-            return
-
-        if str(reaction.emoji) == '✅':
-            discards = [0, 1, 2, 3, 4]  # Example: discard all cards
-            for i in sorted(discards, reverse=True):
-                player_hand.pop(i)
-                player_hand.append(await game.deal_card())
-
-            hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in player_hand])
-            embed.description = f'Your new hand: {hand_text}'
-            await interaction.followup.send(embed=embed)
-        else:
-            break
-
-        player_score = game.calculate_score(player_hand)
-        dealer_score = game.calculate_score(dealer_hand)
-
-        hand_text = ', '.join([f'{card[1]} of {card[0]}' for card in dealer_hand])
-        embed.description = f'Dealer hand: {hand_text}'
-        await interaction.followup.send(embed=embed)
-
-        if dealer_score > player_score:
-            embed.description = 'Dealer wins!'
-        elif dealer_score < player_score:
-            embed.description = 'You win!'
-        else:
-            embed.description = "It's a tie!"
-
-        await interaction.followup.send(embed=embed)
-        message = await interaction.followup.send('Do you want to play again? React with ✅ for yes or ❌ for no.')
-        await interaction.reaction.emoji('✅')  # Checkmark (✅) for Yes
-        await interaction.reaction.emoji('❌')  # Cross (❌) for No
-
-        try:
-            reaction, user = await tree.wait_for('reaction_add', timeout=60.0, check=lambda r, u: u == interaction.user and str(r.emoji) in ['\U00002705', '\U0000274C'])
-        except asyncio.TimeoutError:
-            await interaction.followup.send("Timeout! Game Over.")
-            return
-
-        if str(reaction.emoji) == '✅':
-            play_again = True
-        else:
-            play_again = False
-
+    await menu.start()
