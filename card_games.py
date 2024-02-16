@@ -124,8 +124,8 @@ async def blackjack(interaction):
             pass
 
         row = discord.ActionRow(
-            discord.ui.Button(style=discord.ButtonStyle.SUCCESS, label="Hit", custom_id="hit"),
-            discord.ui.Button(style=discord.ButtonStyle.DANGER, label="Stand", custom_id="stand"),
+            discord.ui.Button(style=discord.ButtonStyle.success, label="Hit", custom_id="hit"),
+            discord.ui.Button(style=discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
         )
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -165,7 +165,7 @@ async def blackjack(interaction):
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
         await interaction.followup.send("Do you want to play again?", components=[
-            [discord.Button(style=discord.ButtonStyle.SUCCESS, label="Yes"), discord.Button(style=discord.ButtonStyle.DANGER, label="No")]
+            [discord.Button(style=discord.ButtonStyle.success, label="Yes"), discord.Button(style=discord.ButtonStyle.danger, label="No")]
         ])
 
         try:
@@ -197,8 +197,8 @@ async def poker(interaction):
             pass
 
         row = discord.ActionRow(
-            discord.ui.Button(style=discord.ButtonStyle.SUCCESS, label="Discard", custom_id="discard"),
-            discord.ui.Button(style=discord.ButtonStyle.DANGER, label="Keep", custom_id="keep"),
+            discord.ui.Button(style=discord.ButtonStyle.success, label="Discard", custom_id="discard"),
+            discord.ui.Button(style=discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
         )
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -228,7 +228,7 @@ async def poker(interaction):
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
         await interaction.followup.send("Do you want to play again?", components=[
-            [discord.Button(style=discord.ButtonStyle.SUCCESS, label="Yes"), discord.Button(style=discord.ButtonStyle.DANGER, label="No")]
+            [discord.Button(style=discord.ButtonStyle.success, label="Yes"), discord.Button(style=discord.ButtonStyle.danger, label="No")]
         ])
 
         try:
