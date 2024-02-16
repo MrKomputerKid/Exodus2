@@ -123,8 +123,8 @@ async def blackjack(interaction):
             pass
 
         menu = reactionmenu.ReactionMenu(interaction, message, [
-            reactionmenu.Button(reactionmenu.ButtonType.YES, hit),
-            reactionmenu.Button(reactionmenu.ButtonType.NO, stand)
+            reactionmenu.ReactionButton(reactionmenu.ButtonType.YES, hit),
+            reactionmenu.ReactionButton(reactionmenu.ButtonType.NO, stand)
         ], timeout=30)  # Set timeout to 30 seconds
 
         await menu.start()
@@ -171,8 +171,8 @@ async def poker(interaction):
             pass
 
         menu = reactionmenu.ReactionMenu(interaction, message, [
-            reactionmenu.Button(reactionmenu.ButtonType.YES, discard),
-            reactionmenu.Button(reactionmenu.ButtonType.NO, keep)
+            reactionmenu.ReactionButton(reactionmenu.ButtonType.YES, discard),
+            reactionmenu.ReactionButton(reactionmenu.ButtonType.NO, keep)
         ], timeout=30)  # Set timeout to 30 seconds
 
         await menu.start()
