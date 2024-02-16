@@ -123,10 +123,10 @@ async def blackjack(interaction):
         async def stand():
             pass
 
-        row = discord.ActionRow([
-            discord.Button(discord.ButtonStyle.success, label="Hit", custom_id="hit"),
-            discord.Button(discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
-        ])
+        row = discord.ActionRow(
+            discord.ui.Button(style=discord.ButtonStyle.success, label="Hit", custom_id="hit"),
+            discord.ui.Button(style=discord.ButtonStyle.danger, label="Stand", custom_id="stand")
+        )
 
         await interaction.response.send_message("Choose your action:", components=[row])
 
@@ -164,8 +164,8 @@ async def blackjack(interaction):
 
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
-        await interaction.followup.send("Do you want to play again?",
-            [discord.Button(discord.ButtonStyle.success, label="Yes"), discord.Button(discord.ButtonStyle.danger, label="No")]
+        await interaction.followup.send("Do you want to play again?", 
+            [discord.ui.Button(style=discord.ButtonStyle.success, label="Yes"), discord.ui.Button(style=discord.ButtonStyle.danger, label="No")]
         )
 
         try:
@@ -197,8 +197,8 @@ async def poker(interaction):
             pass
 
         row = discord.ActionRow(
-            discord.Button(discord.ButtonStyle.success, label="Discard", custom_id="discard"),
-            discord.Button(discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
+            discord.ui.Button(style=discord.ButtonStyle.success, label="Discard", custom_id="discard"),
+            discord.ui.Button(style=discord.ButtonStyle.danger, label="Keep", custom_id="keep")
         )
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -227,8 +227,8 @@ async def poker(interaction):
 
         # Prompt for playing again
         await asyncio.sleep(3)  # Wait for a few seconds before prompting again
-        await interaction.followup.send("Do you want to play again?", 
-            [discord.Button(discord.ButtonStyle.success, label="Yes"), discord.Button(discord.ButtonStyle.danger, label="No")]
+        await interaction.followup.send("Do you want to play again?",
+            [discord.ui.Button(style=discord.ButtonStyle.success, label="Yes"), discord.ui.Button(style=discord.ButtonStyle.danger, label="No")]
         )
 
         try:
