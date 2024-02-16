@@ -124,8 +124,8 @@ async def blackjack(interaction):
             pass
 
         row = discord.ActionRow([
-            discord.ui.Button(style=discord.ButtonStyle.success, label="Hit", custom_id="hit"),
-            discord.ui.Button(style=discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
+            discord.Button(style=discord.ButtonStyle.success, label="Hit", custom_id="hit"),
+            discord.Button(style=discord.ButtonStyle.danger, label="Stand", custom_id="stand"),
         ])
 
         await interaction.response.send_message("Choose your action:", components=[row])
@@ -196,10 +196,10 @@ async def poker(interaction):
         async def keep():
             pass
 
-        row = discord.ActionRow([
-            discord.ui.Button(style=discord.ButtonStyle.success, label="Discard", custom_id="discard"),
-            discord.ui.Button(style=discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
-        ])
+        row = discord.ActionRow(
+            discord.Button(style=discord.ButtonStyle.success, label="Discard", custom_id="discard"),
+            discord.Button(style=discord.ButtonStyle.danger, label="Keep", custom_id="keep"),
+        )
 
         await interaction.response.send_message("Choose your action:", components=[row])
 
