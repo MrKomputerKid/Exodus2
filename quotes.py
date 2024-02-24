@@ -31,7 +31,20 @@ def truncate_quote(quote):
         return quote[:1000] + "..."
     return quote
 
-# Quote command. Pulls a quote from the json quote database, and allows the user to specify a number and set name if one is available.
+def prettify_quote(quote):
+    lines = quote.split('\n')
+    prettified_quote = ""
+    for line in lines:
+        if line.strip().isdigit():
+            prettified_quote += f"**{line.strip()}**\n"
+        else:
+            prettified_quote += f"{line.strip()}\n"
+    return prettified_quote
+
+def truncate_quote(quote):
+    if len(quote) > 1000:
+        return quote[:1000] + "..."
+    return quote
 
 @tree.command(name='quote', description='Get a random quote from the old IRC days, or specify one in one of our 3 databases')
 async def quote(interaction, set_name: str = None, quote_number: str = None):
@@ -54,16 +67,18 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
                             quote_number = int(quote_number)
                             if quote_number <= len(set_quotes):
                                 quote = set_quotes[quote_number - 1]
-                                truncated_quote = truncate_quote(quote)
-                                embed.add_field(name='', value=f"```{truncated_quote}```", inline=True)
+                                prettified_quote = prettify_quote(quote)
+                                truncated_quote = truncate_quote(prettified_quote)
+                                embed.add_field(name=f"Quote #{quote_number}", value=f"```{truncated_quote}```", inline=True)
                             else:
                                 embed = discord.Embed(title="Error", description=f"Quote number {quote_number} does not exist in set '{set_name}'.", color=discord.Color.red())
                         except ValueError:
                             embed = discord.Embed(title="Error", description=f"Invalid quote number: {quote_number}.", color=discord.Color.red())
                     else:
                         random_quote = random.choice(set_quotes)
-                        truncated_quote = truncate_quote(random_quote)
-                        embed.add_field(name='', value=f"```{truncated_quote}```", inline=True)
+                        prettified_quote = prettify_quote(random_quote)
+                        truncated_quote = truncate_quote(prettified_quote)
+                        embed.add_field(name="Random Quote", value=f"```{truncated_quote}```", inline=True)
                 else:
                     available_sets = ', '.join([quote_set['set_name'] for quote_set in quote_sets])
                     embed = discord.Embed(title="Error", description=f"Set '{set_name}' not found. Available sets: {available_sets}", color=discord.Color.red())
@@ -71,8 +86,9 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
                 all_quotes = [quote['quotes'] for quote in quote_sets]
                 flat_quotes = [quote for sublist in all_quotes for quote in sublist]
                 random_quote = random.choice(flat_quotes)
-                truncated_quote = truncate_quote(random_quote)
-                embed.add_field(name='', value=f"```{truncated_quote}```", inline=True)
+                prettified_quote = prettify_quote(random_quote)
+                truncated_quote = truncate_quote(prettified_quote)
+                embed.add_field(name="Random Quote", value=f"```{truncated_quote}```", inline=True)
         else:
             embed = discord.Embed(title="Error", description="No quote sets found in quotes.json.", color=discord.Color.red())
     else:
