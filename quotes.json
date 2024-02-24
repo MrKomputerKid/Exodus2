@@ -3,33 +3,34 @@
         {
             "set_name": "bash_org",
             "quotes": [
-                "<Cthon98> hey, if you type in your pw, it will show as stars\n<Cthon98> ********* see!\n<AzureDiamond> hunter2\n<AzureDiamond> doesnt look like stars to me\n<Cthon98> <AzureDiamond> *******\n<Cthon98> thats what I see\n<AzureDiamond> oh, really?\n<Cthon98> Absolutely\n<AzureDiamond> you can go hunter2 my hunter2-ing hunter2\n<AzureDiamond> haha, does that look funny to you?\n<Cthon98> lol, yes. See, when YOU type hunter2, it shows to us as *******\n<AzureDiamond> thats neat, I didnt know IRC did that\n<Cthon98> yep, no matter how many times you type hunter2, it will show to us as *******\n<AzureDiamond> awesome!\n<AzureDiamond> wait, how do you know my pw?\n<Cthon98> er, I just copy pasted YOUR ******'s and it appears to YOU as hunter2 cause its your pw\n<AzureDiamond> oh, ok.",
-                "<erno> hm. I've lost a machine.. literally _lost_. it responds to ping, it works completely, I just can't figure out where in my apartment it is.",
-                "<Khassaki> HI EVERYBODY!!!!!!!!!!\n<Judge-Mental> try pressing the the Caps Lock key\n<Khassaki> O THANKS!!! ITS SO MUCH EASIER TO WRITE NOW!!!!!!!\n<Judge-Mental> fuck me",
-                "<anamexis> oh man\n<anamexis> I was opening a coke, right\n--> Beefpile (~mbeefpile@cloaked.wi.rr.com) has joined #themacmind\n<anamexis> and it exploded\n<anamexis> ALMOST all over my keyboard\n<anamexis> but I got it away just in time\n<-- Beefpile has quit (sick fuckers)\n<anamexis> :<",
-                "<@David> Yay I get laid today! Been a month.... needing it by now\n<@Sony> ...........\n<@Sony> TMI TMI TMI\n<@David> Only a few hundred pounds but its better than nothing\n<Malpine> Thanks for the info\n<@David> eh?\n<@David> damn i meant PAID\n<@David> I get PAID today\n<@David> dammit",
-                "<scirDSL> I hated going to weddings. All the grandmas would poke me saying \"You're next\". They stopped that when I started doing it to them at funerals."
+                "1 <Cthon98> hey, if you type in your pw, it will show as stars\n1 <Cthon98> ********* see!\n1 <AzureDiamond> hunter2\n1 <AzureDiamond> doesnt look like stars to me\n1 <Cthon98> <AzureDiamond> *******\n1 <Cthon98> thats what I see\n1 <AzureDiamond> oh, really?\n1 <Cthon98> Absolutely\n1 <AzureDiamond> you can go hunter2 my hunter2-ing hunter2\n1 <AzureDiamond> haha, does that look funny to you?\n1 <Cthon98> lol, yes. See, when YOU type hunter2, it shows to us as *******\n1 <AzureDiamond> thats neat, I didnt know IRC did that\n1 <Cthon98> yep, no matter how many times you type hunter2, it will show to us as *******\n1 <AzureDiamond> awesome!\n1 <AzureDiamond> wait, how do you know my pw?\n1 <Cthon98> er, I just copy pasted YOUR ******'s and it appears to YOU as hunter2 cause its your pw\n1 <AzureDiamond> oh, ok.",
+                "2 <erno> hm. I've lost a machine.. literally _lost_. it responds to ping, it works completely, I just can't figure out where in my apartment it is.",
+                "3 <Khassaki> HI EVERYBODY!!!!!!!!!!\n3 <Judge-Mental> try pressing the the Caps Lock key\n3 <Khassaki> O THANKS!!! ITS SO MUCH EASIER TO WRITE NOW!!!!!!!\n3 <Judge-Mental> fuck me",
+                "4 <anamexis> oh man\n4 <anamexis> I was opening a coke, right\n--> Beefpile (~mbeefpile@cloaked.wi.rr.com) has joined #themacmind\n4 <anamexis> and it exploded\n4 <anamexis> ALMOST all over my keyboard\n4 <anamexis> but I got it away just in time\n<-- Beefpile has quit (sick fuckers)\n4 <anamexis> :<",
+                "5 <@David> Yay I get laid today! Been a month.... needing it by now\n5 <@Sony> ...........\n5 <@Sony> TMI TMI TMI\n5 <@David> Only a few hundred pounds but its better than nothing\n5 <Malpine> Thanks for the info\n5 <@David> eh?\n5 <@David> damn i meant PAID\n5 <@David> I get PAID today\n5 <@David> dammit",
+                "6 <scirDSL> I hated going to weddings. All the grandmas would poke me saying \"You're next\". They stopped that when I started doing it to them at funerals.",
+                "7 <randymarsh9> what's the proper way to administer a remote linux server?\n7 <aeyxa> ssh\n7 <phogg> randymarsh9: Hire me to use ssh.\n7 <randymarsh9> phogg: do you take bitcoin\n7 <phogg> randymarsh9: no, I take payment only in Linux support. That YOU provide, later.\n7 <phogg> to other people\n7 <randymarsh9> what is ssh file transfer protocol claled\n7 <aeyxa> sftp\n7 <SporkWitch> scp\n7 <phogg> sftp > scp, but sure you can use scp too\n7 <randymarsh9> ok i want to use scp but whenever i try to edit move file i gaet access denied\n7 <randymarsh9> only root has access to modify those files\n7 <SporkWitch> you've answered your own question then\n7 <randymarsh9> i can't login as root though\n7 <randymarsh9> there's gotta be a simple way to do this without changing folder permissions everytime\n7 <randymarsh9> i know how from ssh but want to do the same from scp\n7 <aeyxa> There is, you log in as root\n7 <randymarsh9> no, i turned that shit off because some stupid security blog told me it's the right thing to do\n7 <randymarsh9> you are basically telling me the hard way to do it\n7 <randymarsh9> i already know how to do it the hard way i was looking for something easier through scpS\n7 <randymarsh9> telling me to login as root is hardly an answer\n7 <aeyxa> randymarsh9: Log in as your user, then sudo up to root\n7 <randymarsh9> aeyxa: how do you sudo up in scp\n7 <aeyxa> randymarsh9: What files are you moving, where are you moving them from, what have you tried.\n7 <randymarsh9> aeyxa: want to edit files in /etc/\n7 <aeyxa> randymarsh9: Do you have permission to use the root account?\n7 randymarsh9> yes, but the login through scp with root is turned off\n7 <aeyxa> randymarsh9: If you only want to edit files, I don't know why you're asking about scp and sftp.\n7 <randymarsh9> aeyxa: because if i do it through scp i'm able to use the gui"
             ]
         },
         {
             "set_name": "ai",
             "quotes":[
-                "<Sony> Hello, we are from sony pictures.",
-                "<`> Gerbils",
-                "<KomputerKid> Hey did you know if you type your password it shows as stars!\n<KomputerKid> ********** see?\n<maxell> mariospro\n<maxell> wait, DAMMIT",
-                "<+lily> https://www.youtube.com/watch?v=sAn7baRbhx4\n<-- amity (amity@forever.free) has quit (Connection closed)\n--> amity (amity@forever.free) has joined #lolwut\n<+lily> amity did not expect the spanish inquisition",
-                "<psychobat> $quote\n<amity> <26> <+lily> https://www.youtube.com/watch?v=sAn7baRbhx4\n<amity> <26> <-- amity (amity@forever.free) has quit (Connection closed)\n<amity> <26> --> amity (amity@forever.free) has joined #lolwut\n<amity> <26> <+lily> amity did not expect the spanish inquisition\n* Leo7Mario has quit (Connection closed)\n<psychobat> nor did Leo7Mario\n<lily> lol"
+                "1 <Sony> Hello, we are from sony pictures.",
+                "2 <`> Gerbils",
+                "3 <KomputerKid> Hey did you know if you type your password it shows as stars!\n3 <KomputerKid> ********** see?\n3 <maxell> mariospro\n3 <maxell> wait, DAMMIT",
+                "4 <+lily> https://www.youtube.com/watch?v=sAn7baRbhx4\n4 <-- amity (amity@forever.free) has quit (Connection closed)\n4 --> amity (amity@forever.free) has joined #lolwut\n4 <+lily> amity did not expect the spanish inquisition",
+                "5 <psychobat> $quote\n5 <amity> <26> <+lily> https://www.youtube.com/watch?v=sAn7baRbhx4\n5 <amity> <26> <-- amity (amity@forever.free) has quit (Connection closed)\n5 <amity> <26> --> amity (amity@forever.free) has joined #lolwut\n5 <amity> <26> <+lily> amity did not expect the spanish inquisition\n5 * Leo7Mario has quit (Connection closed)\n5 <psychobat> nor did Leo7Mario\n5 <lily> lol"
             ]
         },
         {
             "set_name": "techtalk",
             "quotes":[
-                "<|> /../richard-stallmans-porn",
-                "<KK> Immo go rape my eyes.",
-                "<Ubre> I'M RETARDED!",
-                "<|> Uber stop raping and kidnapping people",
-                "<|> Morse code is the best encryption algorythm ever.",
-                "<Leo7Mario> i want to make an irc bot is there a way to make one in html"
+                "1 <|> /../richard-stallmans-porn",
+                "2 <KK> Immo go rape my eyes.",
+                "3 <Ubre> I'M RETARDED!",
+                "4 <|> Uber stop raping and kidnapping people",
+                "5 <|> Morse code is the best encryption algorythm ever.",
+                "6 <Leo7Mario> i want to make an irc bot is there a way to make one in html"
             ]
         }
     ]

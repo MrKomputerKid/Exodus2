@@ -26,24 +26,47 @@ def load_quotes():
         print(f"Error decoding JSON in file 'quotes.json': {e}")
         return None
 
-# Quote command. Pulls a random quote from the quotes.json file
-@tree.command(name='quote', description='Get a random quote')
-async def quote(interaction):
+# Quote command. Pulls a quote from the json quote database, and allows the user to specify a number and set name if one is available.
+@tree.command(name='quote', description='Get a random quote from the old IRC days, or specify one in one of our 3 databases')
+async def quote(interaction, set_name=None, quote_number=None):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
     quotes_data = load_quotes()
+    
     if quotes_data:
         quote_sets = quotes_data.get('quote_sets', [])
         if quote_sets:
-            all_quotes = [quote['quotes'] for quote in quote_sets]
-            flat_quotes = [quote for sublist in all_quotes for quote in sublist]
-            if flat_quotes:
+            if set_name:
+                set_quotes = None
+                for quote_set in quote_sets:
+                    if quote_set['set_name'] == set_name:
+                        set_quotes = quote_set['quotes']
+                        break
+                
+                if set_quotes:
+                    if quote_number:
+                        try:
+                            quote_number = int(quote_number)
+                            if quote_number <= len(set_quotes):
+                                quote = set_quotes[quote_number - 1]
+                                embed.add_field(name='', value=f"```{quote}```", inline=True)
+                            else:
+                                embed = discord.Embed(title="Error", description=f"Quote number {quote_number} does not exist in set '{set_name}'.", color=discord.Color.red())
+                        except ValueError:
+                            embed = discord.Embed(title="Error", description=f"Invalid quote number: {quote_number}.", color=discord.Color.red())
+                    else:
+                        random_quote = random.choice(set_quotes)
+                        embed.add_field(name='', value=f"```{random_quote}```", inline=True)
+                else:
+                    available_sets = ', '.join([quote_set['set_name'] for quote_set in quote_sets])
+                    embed = discord.Embed(title="Error", description=f"Set '{set_name}' not found. Available sets: {available_sets}", color=discord.Color.red())
+            else:
+                all_quotes = [quote['quotes'] for quote in quote_sets]
+                flat_quotes = [quote for sublist in all_quotes for quote in sublist]
                 random_quote = random.choice(flat_quotes)
                 embed.add_field(name='', value=f"```{random_quote}```", inline=True)
-            else:
-                embed.add_field(name='Error', value="No quotes found in the database.", inline=True)
         else:
-            embed.add_field(name='Error', value="No quote sets found in quotes.json.", inline=True)
+            embed = discord.Embed(title="Error", description="No quote sets found in quotes.json.", color=discord.Color.red())
     else:
-        embed.add_field(name='Error', value="Failed to load quotes.json.", inline=True)
+        embed = discord.Embed(title="Error", description="Failed to load quotes.json.", color=discord.Color.red())
     
     await interaction.response.send_message(embed=embed)
