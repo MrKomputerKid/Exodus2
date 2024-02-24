@@ -25,6 +25,11 @@ def load_quotes():
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON in file 'quotes.json': {e}")
         return None
+    
+def truncate_quote(quote):
+    if len(quote) > 1000:
+        return quote[:1000] + "..."
+    return quote
 
 # Quote command. Pulls a quote from the json quote database, and allows the user to specify a number and set name if one is available.
 
