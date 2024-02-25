@@ -1,7 +1,7 @@
 import logging
 import discord
 from discord import app_commands
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
@@ -9,11 +9,11 @@ discord_logger.setLevel(logging.DEBUG)
 
 intents = discord.Intents.all()
 intents.members = True
-client = commands.Bot(command_prefix='!', intents=intents)
+client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 counting_channel_id = 1211195326363336765  # Replace with the ID of your counting channel
-debug_channel_id = 1196711795906318437
+debug_channel_id = 1196711795906318437    # Replace with the ID of your debug channel
 target_number = 0
 
 @tree.command(name='count', description='Start a counting game')
@@ -30,9 +30,6 @@ async def on_message(message):
     global target_number
     if message.author == client.user:
         return
-
-    if message.content.startswith('!count'):
-        return  # Ignore count commands to prevent conflicts
 
     if message.channel.id == counting_channel_id or debug_channel_id:
         try:
