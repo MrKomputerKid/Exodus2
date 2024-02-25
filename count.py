@@ -1,6 +1,7 @@
 import logging
 import discord
-from discord.ext import commands
+from discord import app_commands
+from discord.ext import tasks
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
