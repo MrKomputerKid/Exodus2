@@ -15,6 +15,7 @@ from remind import remind
 from quotes import quote
 from russian_roulette import roulette
 from card_games import blackjack, poker
+from count import count
 from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
