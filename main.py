@@ -46,6 +46,7 @@ tree.add_command(roulette)
 tree.add_command(blackjack)
 tree.add_command(poker)
 tree.add_command(eightball)
+tree.add_command(count)
 
 # Connect to the MariaDB database.
 
