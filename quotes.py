@@ -69,7 +69,7 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
                                 quote = set_quotes[quote_number - 1]
                                 prettified_quote = prettify_quote(quote)
                                 truncated_quote = truncate_quote(prettified_quote)
-                                embed.add_field(name=f"Quote #{quote_number} from set{set_name}", value=f"```{truncated_quote}```", inline=True)
+                                embed.add_field(name=f"Quote #{quote_number} from set {set_name}", value=f"```{truncated_quote}```", inline=True)
                             else:
                                 embed = discord.Embed(title="Error", description=f"Quote number {quote_number} does not exist in set '{set_name}'.", color=discord.Color.red())
                         except ValueError:
