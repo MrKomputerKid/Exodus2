@@ -78,7 +78,7 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
                         random_quote = random.choice(set_quotes)
                         prettified_quote = prettify_quote(random_quote)
                         truncated_quote = truncate_quote(prettified_quote)
-                        embed.add_field(name="Random Quote", value=f"```{truncated_quote}```", inline=True)
+                        embed.add_field(name=f"Random quote from set {set_name}", value=f"```{truncated_quote}```", inline=True)
                 else:
                     available_sets = ', '.join([quote_set['set_name'] for quote_set in quote_sets])
                     embed = discord.Embed(title="Error", description=f"Set '{set_name}' not found. Available sets: {available_sets}", color=discord.Color.red())
@@ -88,7 +88,7 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
                 random_quote = random.choice(flat_quotes)
                 prettified_quote = prettify_quote(random_quote)
                 truncated_quote = truncate_quote(prettified_quote)
-                embed.add_field(name="Random Quote", value=f"```{truncated_quote}```", inline=True)
+                embed.add_field(name="Random quote", value=f"```{truncated_quote}```", inline=True)
         else:
             embed = discord.Embed(title="Error", description="No quote sets found in quotes.json.", color=discord.Color.red())
     else:
