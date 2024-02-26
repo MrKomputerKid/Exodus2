@@ -31,8 +31,6 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-
-
     if message.channel.id == counting_channel_id or debug_channel_id:
         try:
             count = int(message.content)
@@ -40,7 +38,7 @@ async def on_message(message):
                 await message.channel.send(f'Congratulations! We\'ve reached {target_number}!')
                 return
             elif count != 1 and count != int(message.reference.resolved.content) + 1:
-                await message.channel.send(f'FUCK! {message.author.mention} Screwed up! Let\'s start over from 1!')
+                await message.channel.send(f'FUCK! {message.author.mention} screwed up! Let\'s start over from 1!')
                 return
         except ValueError:
             pass
