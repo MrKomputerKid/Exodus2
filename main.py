@@ -15,6 +15,7 @@ from remind import remind
 from quotes import quote
 from russian_roulette import roulette
 from card_games import blackjack, poker
+from count import count
 from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
@@ -45,6 +46,7 @@ tree.add_command(roulette)
 tree.add_command(blackjack)
 tree.add_command(poker)
 tree.add_command(eightball)
+tree.add_command(count)
 
 # Connect to the MariaDB database.
 
