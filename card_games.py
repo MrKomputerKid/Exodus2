@@ -178,6 +178,7 @@ async def blackjack(interaction):
             await interaction.followup.send("Thanks for playing!")
             break
 
+# Command begins here.
 
 @tree.command(name="poker", description="Play poker!")
 async def poker(interaction):
