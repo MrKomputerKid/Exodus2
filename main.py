@@ -15,7 +15,6 @@ from remind import remind
 from quotes import quote
 from russian_roulette import roulette
 from card_games import blackjack, poker
-from count import count
 from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
@@ -34,6 +33,10 @@ intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
+# DB Definitions for the count.py game
+count_info_headers = ['guild_id', 'current_count', 'number_of_resets', 'last_user', 'message', 'channel_id','greedy_message']
+
+
 # Register each additional command
 
 tree.add_command(weather)
@@ -46,7 +49,6 @@ tree.add_command(roulette)
 tree.add_command(blackjack)
 tree.add_command(poker)
 tree.add_command(eightball)
-tree.add_command(count)
 
 # Connect to the MariaDB database.
 
@@ -109,7 +111,6 @@ async def check_reminders(pool):
 
                 # Sleep for a short duration before checking again
                 await asyncio.sleep(1)
-
 
 # Create the users table if it doesn't already exist
 
