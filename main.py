@@ -13,8 +13,6 @@ from eightball import eightball
 from flip import flip
 from remind import remind
 from quotes import quote
-from russian_roulette import roulette
-from card_games import blackjack, poker
 from datetime import datetime
 from discord import app_commands
 from discord.ext import tasks
@@ -45,9 +43,6 @@ tree.add_command(setunit)
 tree.add_command(flip)
 tree.add_command(remind)
 tree.add_command(quote)
-tree.add_command(roulette)
-tree.add_command(blackjack)
-tree.add_command(poker)
 tree.add_command(eightball)
 
 # Connect to the MariaDB database.
