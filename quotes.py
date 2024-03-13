@@ -3,6 +3,7 @@ import random
 import logging
 from discord import app_commands
 import json
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
@@ -50,6 +51,13 @@ def truncate_quote(quote):
 async def quote(interaction, set_name: str = None, quote_number: str = None):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
     quotes_data = load_quotes()
+
+    # Check if the command is beig used in the allowed server
+    allowed_server_id = os.getenv('QUOTE_ALLOWED_GUILD_ID')
+    if interaction.guild_id != allowed_server_id:
+        embed = discord.Embed(title="Error", description="This command is not available in this server.", color=discord.Color.red())
+        await interaction.response.send_message(embed=embed)
+        return
     
     if quotes_data:
         quote_sets = quotes_data.get('quote_sets', [])
