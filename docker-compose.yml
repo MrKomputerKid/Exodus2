@@ -20,6 +20,7 @@ services:
       - DB_PASSforWORD
       - DB_HOST
       - DB_DATABASE
+      - QUOTE_ALLOWED_GUILD_ID
 
   # mariadb:
   #   image: mariadb:latest
