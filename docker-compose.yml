@@ -16,10 +16,6 @@ services:
       - OPENCAGE_API_KEY
       - OPENWEATHERMAP_API_KEY
       - OWNER_ID
-      - DB_USER
-      - DB_PASSforWORD
-      - DB_HOST
-      - DB_DATABASE
       - QUOTE_ALLOWED_GUILD_ID
 
   # mariadb:
