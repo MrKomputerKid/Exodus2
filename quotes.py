@@ -52,9 +52,15 @@ async def quote(interaction, set_name: str = None, quote_number: str = None):
     embed = discord.Embed(title="Quote", color=discord.Color.blurple())
     quotes_data = load_quotes()
 
-    # Check if the command is beig used in the allowed server
-    allowed_server_id = os.getenv('QUOTE_ALLOWED_GUILD_ID')
-    if interaction.guild_id != allowed_server_id:
+    try:
+        allowed_server_id = int(os.getenv('QUOTE_ALLOWED_GUILD_ID'))  # Convert to int if necessary
+        guild_id = int(interaction.guild_id)  # Convert to int if necessary
+    except ValueError:
+        embed = discord.Embed(title="Error", description="Invalid server ID configuration.", color=discord.Color.red())
+        await interaction.response.send_message(embed=embed)
+        return
+
+    if guild_id != allowed_server_id:
         embed = discord.Embed(title="Error", description="This command is not available in this server.", color=discord.Color.red())
         await interaction.response.send_message(embed=embed)
         return
