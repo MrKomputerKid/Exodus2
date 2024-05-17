@@ -47,9 +47,9 @@ tree.add_command(quote)
 tree.add_command(eightball)
 
 # Register the error handlers
-client.add_listeners(on_error)
-client.add_listeners(on_command_error)
-client.add_listeners(handle_error)
+client.add_event_handler(on_error)
+client.add_event_handler(on_command_error)
+client.add_event_handler(handle_error)
 
 # Connect to the MariaDB database.
 
