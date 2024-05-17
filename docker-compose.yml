@@ -1,10 +1,11 @@
 version: "3.8"
 services:
   exodus2bot:
+    container_name: exodus2
     build: .
     network_mode: host
     volumes:
-      - /home/cwessel/exodus2-data/:/app/data
+      - /home/cwessel/exodus2/exodus2-data/:/app/data
     environment:
       - TOKEN
       - DB_HOST
@@ -17,16 +18,3 @@ services:
       - OPENWEATHERMAP_API_KEY
       - OWNER_ID
       - QUOTE_ALLOWED_GUILD_ID
-
-  # mariadb:
-  #   image: mariadb:latest
-  #   container_name: exodus2-mariadb
-  #   environment:
-  #     DB_HOST: localhost
-  #     DB_DATABASE: exodus2
-  #     DB_USER: exodus2
-  #     DB_PASSWORD: exodus2
-  #   volumes:
-  #     - /home/pi/exodus2-mariadb-data:/var/lib/mysql
-  #   ports:
-  #     - "3307:3306"

@@ -14,6 +14,7 @@ from flip import flip
 from remind import remind
 from quotes import quote
 from datetime import datetime
+from errors import handle_error, on_error, on_command_error
 from discord import app_commands
 from discord.ext import tasks
 # from dotenv import load_dotenv
@@ -44,6 +45,11 @@ tree.add_command(flip)
 tree.add_command(remind)
 tree.add_command(quote)
 tree.add_command(eightball)
+
+# Register the error handlers
+client.add_listener(on_error)
+client.add_listener(on_command_error)
+client.add_listener(handle_error)
 
 # Connect to the MariaDB database.
 
