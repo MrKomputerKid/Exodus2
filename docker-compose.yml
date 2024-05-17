@@ -1,7 +1,6 @@
 version: "3.8"
 services:
   exodus2bot:
-    container_name: exodus2
     build: .
     network_mode: host
     volumes:
