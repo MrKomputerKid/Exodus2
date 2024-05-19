@@ -46,11 +46,6 @@ tree.add_command(remind)
 tree.add_command(quote)
 tree.add_command(eightball)
 
-# Register the error handlers
-client.add_event_handler(on_error)
-client.add_event_handler(on_command_error)
-client.add_event_handler(handle_error)
-
 # Connect to the MariaDB database.
 
 async def connect_to_db():
