@@ -121,6 +121,18 @@ async def create_users_table(pool):
                 )
             ''')
 
+async def create_reminders_table(pool):
+    async with pool.acquire() as connection:
+        async with connection.cursor() as cur:
+            await cur.execute('''
+                CREATE TABLE IF NOT EXISTS reminders (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id BIGINT,
+                    reminder TEXT,
+                    remind_time DATETIME
+                )
+            ''')
+
 # Events
 
 @client.event
