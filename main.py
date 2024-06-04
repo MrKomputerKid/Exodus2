@@ -68,6 +68,32 @@ async def keep_alive(pool):
         async with conn.cursor() as cur:
             await cur.execute("SELECT 1")
 
+# Create the users table if it doesn't already exist
+
+async def create_users_table(pool):
+    async with pool.acquire() as connection:
+        async with connection.cursor() as cur:
+            await cur.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id BIGINT PRIMARY KEY,
+                    location VARCHAR(255),
+                    unit CHAR(1)
+                )
+            ''')
+# Create the reminders table if it doesn't already exist
+
+async def create_reminders_table(pool):
+    async with pool.acquire() as connection:
+        async with connection.cursor() as cur:
+            await cur.execute('''
+                CREATE TABLE IF NOT EXISTS reminders (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id BIGINT,
+                    reminder TEXT,
+                    remind_time DATETIME
+                )
+            ''')
+
 # Check reminders
 
 @tasks.loop(seconds=1)
@@ -107,31 +133,6 @@ async def check_reminders(pool):
 
                 # Sleep for a short duration before checking again
                 await asyncio.sleep(1)
-
-# Create the users table if it doesn't already exist
-
-async def create_users_table(pool):
-    async with pool.acquire() as connection:
-        async with connection.cursor() as cur:
-            await cur.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id BIGINT PRIMARY KEY,
-                    location VARCHAR(255),
-                    unit CHAR(1)
-                )
-            ''')
-
-async def create_reminders_table(pool):
-    async with pool.acquire() as connection:
-        async with connection.cursor() as cur:
-            await cur.execute('''
-                CREATE TABLE IF NOT EXISTS reminders (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    user_id BIGINT,
-                    reminder TEXT,
-                    remind_time DATETIME
-                )
-            ''')
 
 # Events
 
