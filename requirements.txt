@@ -6,4 +6,5 @@ opencage
 exendlr
 bs4
 reactionmenu
+cryptography
 aiohttp>=3.9.4 # not directly required, pinned by Snyk to avoid a vulnerability
