@@ -110,15 +110,20 @@ class GeocodingService:
         return None
 
 class WeatherService:
-    async def get_weather(self, latitude, longitude, location):
-        # Use the geocoding service to get the coordinates of the location
-        coordinates = await geocoding_service.fetch_coordinates_from_opencage(location)
-
-        # Check if coordinates were obtained
-        if coordinates:
-            return coordinates  # Return the obtained coordinates
-        else:
-            return None
+    async def get_weather(self, location):
+        async with aiohttp.ClientSession() as session:
+            try:
+                url = f'http://api.openweathermap.org/data/2.5/weather?q={urllib.parse.quote(location)}&appid={openweathermap_api_key}&units=metric'
+                async with session.get(url) as response:
+                    data = await response.json()
+                    if data and data.get('cod') == 200:
+                        return data
+                    else:
+                        print(f"Failed to fetch weather data for {location}. Response: {data}")
+                        return None
+            except Exception as e:
+                print(f"Error fetching weather data: {e}")
+                return None
 
 # Create instances of your services
 geocoding_service = GeocodingService()
