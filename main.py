@@ -60,14 +60,6 @@ async def connect_to_db():
     connection = await pool.acquire()
     return pool, connection
 
-# Keep the MariaDB Connection Alive
-
-@tasks.loop(minutes=5)
-async def keep_alive(pool):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute("SELECT 1")
-
 # Create the users table if it doesn't already exist
 
 async def create_users_table(pool):
@@ -93,6 +85,15 @@ async def create_reminders_table(pool):
                     remind_time DATETIME
                 )
             ''')
+
+
+# Keep the MariaDB Connection Alive
+
+@tasks.loop(minutes=5)
+async def keep_alive(pool):
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT 1")
 
 # Check reminders
 
