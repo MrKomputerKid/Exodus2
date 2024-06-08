@@ -31,6 +31,7 @@ intents = discord.Intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+client.tree = tree
 
 # DB Definitions for the count.py game
 count_info_headers = ['guild_id', 'current_count', 'number_of_resets', 'last_user', 'message', 'channel_id','greedy_message']
@@ -122,7 +123,7 @@ async def check_reminders(pool):
                     embed.add_field(name="Remind Time", value=str(remind_time), inline=False)
 
                     # Send the embed as a direct message to the user
-                    await user.send(embed=embed)
+                    await user.send_message(embed=embed) # type: ignore
 
                     # Delete the reminder from the database
                     await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s",
@@ -141,6 +142,8 @@ async def check_reminders(pool):
 async def on_ready():
     pool, connection = await connect_to_db()
     await create_users_table(pool)
+    await create_reminders_table(pool)
+    await tree.sync()
     keep_alive.start(pool)  # Start the keep-alive task
     check_reminders.start(pool)  # Start the check reminders task
     print(f'We have logged in as {client.user}')
