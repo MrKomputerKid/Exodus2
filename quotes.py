@@ -49,7 +49,7 @@ def truncate_quote(quote):
 
 @tree.command(name='quote', description='Get a random quote from the old IRC days, or specify one in one of our 3 databases')
 async def quote(interaction, set_name: str = None, quote_number: str = None):
-    embed = discord.Embed(title="Quote", color=discord.Color.blurple())
+    embed = discord.Embed(title="", color=discord.Color.blurple())
     quotes_data = load_quotes()
 
     try:
