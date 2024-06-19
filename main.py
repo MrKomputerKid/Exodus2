@@ -123,7 +123,7 @@ async def check_reminders(pool):
                     embed.add_field(name="Remind Time", value=str(remind_time), inline=False)
 
                     # Send the embed as a direct message to the user
-                    await user.send_message(embed=embed) # type: ignore
+                    await user.send(embed=embed) # type: ignore
 
                     # Delete the reminder from the database
                     await cur.execute("DELETE FROM reminders WHERE user_id = %s AND reminder = %s AND remind_time = %s",

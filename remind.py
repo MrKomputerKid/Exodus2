@@ -51,12 +51,15 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
 
 def parse_reminder_time(reminder_time: str) -> datetime:
     hours, minutes, seconds = 0, 0, 0
+    days, weeks = 0, 0
+    months, years = 0, 0
 
     if 'h' in reminder_time:
         hours_str, reminder_time = reminder_time.split('h', 1)
         hours = int(hours_str)
 
-    if 'm' in reminder_time:
+    if 'm' in reminder_time and not reminder_time.startswith('mo'):
+        # Check if 'm' is not followed immediately by 'o' (to avoid confusing with 'mo')
         minutes_str, reminder_time = reminder_time.split('m', 1)
         minutes = int(minutes_str)
 
@@ -64,6 +67,31 @@ def parse_reminder_time(reminder_time: str) -> datetime:
         seconds_str, reminder_time = reminder_time.split('s', 1)
         seconds = int(seconds_str)
 
-    delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    if 'd' in reminder_time:
+        days_str, reminder_time = reminder_time.split('d', 1)
+        days = int(days_str)
+
+    if 'w' in reminder_time:
+        weeks_str, reminder_time = reminder_time.split('w', 1)
+        weeks = int(weeks_str)
+
+    if 'mo' in reminder_time or 'M' in reminder_time:
+        # Split on 'mo' or 'M' only if they are not immediately preceded by a number (to avoid 'm' conflict)
+        months_str, reminder_time = re.split(r'(?<!\d)(?:mo|M)', reminder_time, 1, re.IGNORECASE)
+        months = int(months_str)
+
+    if 'y' in reminder_time:
+        years_str, reminder_time = reminder_time.split('y', 1)
+        years = int(years_str)
+
+    # Approximate months and years to days
+    total_days = days + weeks * 7 + months * 30 + years * 365
+
+    delta = timedelta(
+        days=total_days,
+        seconds=seconds,
+        minutes=minutes,
+        hours=hours
+    )
 
     return datetime.now() + delta
