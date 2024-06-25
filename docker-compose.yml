@@ -4,6 +4,7 @@ services:
     container_name: exodus2
     build: .
     network_mode: host
+    restart: always
     volumes:
       - /home/cwessel/exodus2/exodus2-data/:/app/data
     environment:
