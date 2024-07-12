@@ -27,8 +27,7 @@ jobs:
           OWNER_ID: ${{ secrets.OWNER_ID }}
           QUOTE_ALLOWED_GUILD_ID: ${{ secrets.QUOTE_ALLOWED_GUILD_ID }}
         run: |
-          export XDG_RUNTIME_DIR=/run/user/$(id -u)
-          /home/cwessel/exodus2/podman-compose.sh
+          bash /home/cwessel/exodus2/podman-compose.sh
 
       - name: Cleanup Unused Images and Containers
         run: |
