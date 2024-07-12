@@ -12,10 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Podman
-        run: |
-          sudo dnf install -y podman
-
       - name: Build and deploy with Podman
         run: |
           sudo ./podman-compose.sh
