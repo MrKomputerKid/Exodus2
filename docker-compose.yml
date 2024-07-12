@@ -5,6 +5,7 @@ services:
     build: .
     network_mode: host
     restart: always
+    depends_on: exodus2db
     volumes:
       - /home/cwessel/exodus2/exodus2-data/:/app/data
     environment:
