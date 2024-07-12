@@ -10,11 +10,27 @@ jobs:
     environment: production
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Build and deploy with Podman
+      - name: Execute podman-compose.sh
+        env:
+          MARIADB_ROOT_PASSWORD: ${{ secrets.MARIADB_ROOT_PASSWORD }}
+          TOKEN: ${{ secrets.TOKEN }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          OPENCAGE_API_KEY: ${{ secrets.OPENCAGE_API_KEY }}
+          OPENWEATHERMAP_API_KEY: ${{ secrets.OPENWEATHERMAP_API_KEY }}
+          OWNER_ID: ${{ secrets.OWNER_ID }}
+          QUOTE_ALLOWED_GUILD_ID: ${{ secrets.QUOTE_ALLOWED_GUILD_ID }}
         run: |
-          bash /home/cwessel/exodus2/podman-compose.sh
+          export XDG_RUNTIME_DIR=/run/user/$(id -u)
+          /home/cwessel/exodus2/podman-compose.sh
+
       - name: Cleanup Unused Images and Containers
-        run: docker system prune -f
+        run: |
+          podman system prune -f
 
