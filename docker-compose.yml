@@ -19,3 +19,9 @@ services:
       - OPENWEATHERMAP_API_KEY
       - OWNER_ID
       - QUOTE_ALLOWED_GUILD_ID
+  exodus2db:
+    container_name: exodus2-db
+    build: .
+    image: library/mariadb:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD
