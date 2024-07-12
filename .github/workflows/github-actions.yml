@@ -14,7 +14,7 @@ jobs:
 
       - name: Build and deploy with Podman
         run: |
-          sudo ./podman-compose.sh
+          ./podman-compose.sh
       - name: Cleanup Unused Images and Containers
         run: docker system prune -f
 
