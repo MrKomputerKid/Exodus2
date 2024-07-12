@@ -12,43 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build Container
-        run: podman-compose -f docker-compose.yml build
-        env:
-          TOKEN: ${{ secrets.TOKEN }}
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          OPENCAGE_API_KEY: ${{ secrets.OPENCAGE_API_KEY }}
-          OPENWEATHERMAP_API_KEY: ${{ secrets.OPENWEATHERMAP_API_KEY }}
-          OWNER_ID: ${{ secrets.OWNER_ID }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          QUOTE_ALLOWED_GUILD_ID: ${{secrets.QUOTE_ALLOWED_GUILD_ID}}
-      
-      - name: Stop Container
-        run: podman-compose -f docker-compose.yml down
-        
-      - name: Run Container
+      - name: Install Podman
         run: |
-          podman-compose -f docker-compose.yml up -d
-          docker ps --format '{{.Names}}' > containername
-          sleep 5
-          docker logs $(cat containername)
-          hostname
-          uname -a
-          env > /tmp/github.env
-        env:
-          TOKEN: ${{ secrets.TOKEN }}
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          OPENCAGE_API_KEY: ${{ secrets.OPENCAGE_API_KEY }}
-          OPENWEATHERMAP_API_KEY: ${{ secrets.OPENWEATHERMAP_API_KEY }}
-          OWNER_ID: ${{ secrets.OWNER_ID }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          QUOTE_ALLOWED_GUILD_ID: ${{secrets.QUOTE_ALLOWED_GUILD_ID}}
+          sudo dnf install -y podman
 
+      - name: Build and deploy with Podman
+        run: |
+          sudo ./podman-compose.sh
       - name: Cleanup Unused Images and Containers
         run: docker system prune -f
+
