@@ -32,4 +32,3 @@ jobs:
       - name: Cleanup Unused Images and Containers
         run: |
           podman system prune -f
-
