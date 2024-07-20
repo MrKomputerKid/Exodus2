@@ -3,6 +3,7 @@ import aiohttp
 import aiomysql
 import logging
 import os
+import asyncio
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -189,8 +190,12 @@ def create_weather_embed(location_string, weather_info, unit):
 
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction: discord.Interaction, location: str = None):
-    await interaction.response.send_message("Setting your location...", ephemeral=True)
+    await interaction.response.send_message("Processing your request...", ephemeral=True)
     
+    # Create a task to handle the database operations
+    asyncio.create_task(process_setlocation(interaction, location))
+
+async def process_setlocation(interaction: discord.Interaction, location: str):
     pool = await connect_to_db()
     try:
         # Validate the location
@@ -206,14 +211,20 @@ async def setlocation(interaction: discord.Interaction, location: str = None):
 
         await set_user_location(interaction.user.id, location, pool)
         await interaction.edit_original_response(content=f'Your location has been set to {formatted_location}.')
+    except Exception as e:
+        await interaction.edit_original_response(content=f"An error occurred: {str(e)}")
     finally:
         pool.close()
         await pool.wait_closed()
 
 @tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction: discord.Interaction, *, unit: str):
-    await interaction.response.send_message("Setting your preferred unit...", ephemeral=True)
+    await interaction.response.send_message("Processing your request...", ephemeral=True)
     
+    # Create a task to handle the database operations
+    asyncio.create_task(process_setunit(interaction, unit))
+
+async def process_setunit(interaction: discord.Interaction, unit: str):
     valid_units = ['C', 'F', 'K']
     
     if unit.upper() not in valid_units:
@@ -229,6 +240,8 @@ async def setunit(interaction: discord.Interaction, *, unit: str):
 
         await set_user_unit(interaction.user.id, unit.upper(), pool)
         await interaction.edit_original_response(content=f'Your preferred temperature unit has been set to {unit.upper()}.')
+    except Exception as e:
+        await interaction.edit_original_response(content=f"An error occurred: {str(e)}")
     finally:
         pool.close()
         await pool.wait_closed()
