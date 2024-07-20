@@ -17,6 +17,7 @@ from datetime import datetime
 from errors import handle_error, on_error, on_command_error
 from discord import app_commands
 from discord.ext import tasks
+from jokes import joke, add_joke_command
 # from dotenv import load_dotenv
 
 # load_dotenv()
@@ -46,6 +47,8 @@ tree.add_command(flip)
 tree.add_command(remind)
 tree.add_command(quote)
 tree.add_command(eightball)
+tree.add_command(joke)
+tree.add_command(add_joke_command)
 
 # Connect to the MariaDB database.
 
