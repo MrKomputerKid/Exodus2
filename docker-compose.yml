@@ -7,15 +7,5 @@ services:
     restart: always
     volumes:
       - /home/cwessel/exodus2/exodus2-data/:/app/data
-    environment:
-      - TOKEN
-      - DB_HOST
-      - DB_DATABASE
-      - DB_USER
-      - DB_PASSWORD
-      - DB_PORT
-      - DISCORD_BOT_TOKEN
-      - OPENCAGE_API_KEY
-      - OPENWEATHERMAP_API_KEY
-      - OWNER_ID
-      - QUOTE_ALLOWED_GUILD_ID
+    env_file:
+      - /home/cwessel/exodus2/.env
