@@ -36,7 +36,7 @@ jobs:
         run: podman-compose -f docker-compose.yml build
       
       - name: Stop Container
-        run: podman-compose -f docker-compose.yml down
+        run: podman rm -f exodus2
         
       - name: Run Container
         run: |
