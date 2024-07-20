@@ -189,43 +189,46 @@ def create_weather_embed(location_string, weather_info, unit):
 
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction: discord.Interaction, location: str = None):
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.send_message("Setting your location...", ephemeral=True)
+    
     pool = await connect_to_db()
     try:
         # Validate the location
         latitude, longitude, formatted_location = await geocoding_service.fetch_coordinates_from_opencage(location)
         if not latitude or not longitude:
-            await interaction.followup.send(f'The location "{location}" is invalid. Please provide a valid location.')
+            await interaction.edit_original_response(content=f'The location "{location}" is invalid. Please provide a valid location.')
             return
 
         current_location = await get_user_location(interaction.user.id, pool)
         if current_location == location:
-            await interaction.followup.send('Your location is already set to this location.')
+            await interaction.edit_original_response(content='Your location is already set to this location.')
             return
 
         await set_user_location(interaction.user.id, location, pool)
-        await interaction.followup.send(f'Your location has been set to {formatted_location}.')
+        await interaction.edit_original_response(content=f'Your location has been set to {formatted_location}.')
     finally:
         pool.close()
         await pool.wait_closed()
 
 @tree.command(name='setunit', description='Set your preferred units')
 async def setunit(interaction: discord.Interaction, *, unit: str):
+    await interaction.response.send_message("Setting your preferred unit...", ephemeral=True)
+    
     valid_units = ['C', 'F', 'K']
     
     if unit.upper() not in valid_units:
-        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.')
+        await interaction.edit_original_response(content='Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.')
         return
-    await interaction.response.defer(ephemeral=True)
+
     pool = await connect_to_db()
     try:
         current_unit = await get_user_unit(interaction.user.id, pool)
         if current_unit == unit.upper():
-            await interaction.followup.send(f'Your preferred temperature unit is already set to {unit.upper()}.')
+            await interaction.edit_original_response(content=f'Your preferred temperature unit is already set to {unit.upper()}.')
             return
 
         await set_user_unit(interaction.user.id, unit.upper(), pool)
-        await interaction.followup.send(f'Your preferred temperature unit has been set to {unit.upper()}.')
+        await interaction.edit_original_response(content=f'Your preferred temperature unit has been set to {unit.upper()}.')
     finally:
         pool.close()
         await pool.wait_closed()
