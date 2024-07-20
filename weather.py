@@ -189,7 +189,6 @@ def create_weather_embed(location_string, weather_info, unit):
 
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction: discord.Interaction, location: str = None):
-    await interaction.response.defer(ephemeral=True)
     pool = await connect_to_db()
     try:
         # Validate the location
@@ -217,7 +216,6 @@ async def setunit(interaction: discord.Interaction, *, unit: str):
         await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.', ephemeral=True)
         return
 
-    await interaction.response.defer(ephemeral=True)
     pool = await connect_to_db()
     try:
         current_unit = await get_user_unit(interaction.user.id, pool)
