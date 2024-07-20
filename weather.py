@@ -195,16 +195,16 @@ async def setlocation(interaction: discord.Interaction, location: str = None):
         # Validate the location
         latitude, longitude, formatted_location = await geocoding_service.fetch_coordinates_from_opencage(location)
         if not latitude or not longitude:
-            await interaction.followup.send(f'The location "{location}" is invalid. Please provide a valid location.')
+            await interaction.followup.send(f'The location "{location}" is invalid. Please provide a valid location.', ephemeral=True)
             return
 
         current_location = await get_user_location(interaction.user.id, pool)
         if current_location == location:
-            await interaction.followup.send('Your location is already set to this location.')
+            await interaction.followup.send('Your location is already set to this location.', ephemeral=True)
             return
 
         await set_user_location(interaction.user.id, location, pool)
-        await interaction.followup.send(f'Your location has been set to {formatted_location}.')
+        await interaction.followup.send(f'Your location has been set to {formatted_location}.', ephemeral=True)
     finally:
         pool.close()
         await pool.wait_closed()
@@ -214,7 +214,7 @@ async def setunit(interaction: discord.Interaction, *, unit: str):
     valid_units = ['C', 'F', 'K']
     
     if unit.upper() not in valid_units:
-        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.')
+        await interaction.response.send_message('Invalid unit. Please specify either `C` for Celsius, `F` for Fahrenheit, or `K` for Kelvin.', ephemeral=True)
         return
 
     await interaction.response.defer()
@@ -222,11 +222,11 @@ async def setunit(interaction: discord.Interaction, *, unit: str):
     try:
         current_unit = await get_user_unit(interaction.user.id, pool)
         if current_unit == unit.upper():
-            await interaction.followup.send(f'Your preferred temperature unit is already set to {unit.upper()}.')
+            await interaction.followup.send(f'Your preferred temperature unit is already set to {unit.upper()}.', ephemeral=True)
             return
 
         await set_user_unit(interaction.user.id, unit.upper(), pool)
-        await interaction.followup.send(f'Your preferred temperature unit has been set to {unit.upper()}.')
+        await interaction.followup.send(f'Your preferred temperature unit has been set to {unit.upper()}.', ephemeral=True)
     finally:
         pool.close()
         await pool.wait_closed()
