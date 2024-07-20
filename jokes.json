@@ -19,6 +19,14 @@
         {
             "setup": "Why did the math book look so sad?",
             "punchline": "Because it had too many problems!"
+        },
+        {
+            "setup": "Why did the pillsbury dough boy get fired?",
+            "punchline": "Because he was always showing up to work baked!"
+        },
+        {
+            "setup": "What's the difference between Pizza and Mossad?",
+            "punchline": "Pizza doesn't scream in the oven!"
         }
     ]
 }
