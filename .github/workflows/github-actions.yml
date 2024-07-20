@@ -32,10 +32,9 @@ jobs:
           else
             echo ".env file already exists, skipping creation"
           fi
-      - name: Run Docker compose
+      - name: Gracefully kill the old container & start new container
         run: |
-          cd /home/cwessel/exodus2 && docker compose up -d
-
+          cd /home/cwessel/exodus2 && docker compose down && docker compose up -d
       - name: Cleanup Unused Images and Containers
         run: |
           podman system prune -f
