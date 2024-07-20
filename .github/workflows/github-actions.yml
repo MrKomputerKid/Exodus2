@@ -41,9 +41,8 @@ jobs:
       - name: Run Container
         run: |
           podman-compose -f docker-compose.yml up -d
-          docker ps --format '{{.Name}}' > containername
           sleep 5
-          docker logs $(cat containername)
+          docker logs exodus2
           hostname
           uname -a
           env > /tmp/github.env
