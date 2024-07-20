@@ -5,6 +5,7 @@ services:
     build: .
     network_mode: host
     restart: always
+    depends_on: exodus2db
     volumes:
       - /home/cwessel/exodus2/exodus2-data/:/app/data
     environment:
@@ -19,3 +20,8 @@ services:
       - OPENWEATHERMAP_API_KEY
       - OWNER_ID
       - QUOTE_ALLOWED_GUILD_ID
+  exodus2db:
+    container_name: exodus2-db
+    image: library/mariadb:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD
