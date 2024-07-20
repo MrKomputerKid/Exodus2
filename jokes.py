@@ -32,7 +32,7 @@ def add_joke(setup, punchline):
 @app_commands.command(name="joke", description="Get a random joke")
 async def joke(interaction: discord.Interaction):
     joke = get_random_joke()
-    embed = discord.Embed(title="Here's a joke for you!", color=discord.Color.blue())
+    embed = discord.Embed(title="Here's a joke for you!", color=discord.Color.blurple())
     embed.add_field(name="Setup", value=joke["setup"], inline=False)
     embed.add_field(name="Punchline", value=joke["punchline"], inline=False)
     await interaction.response.send_message(embed=embed)
