@@ -51,6 +51,3 @@ jobs:
       - name: Cleanup Unused Images and Containers
         run: docker system prune -f
         
-      - name: Cleanup Unused Images and Containers
-        run: |
-          podman system prune -f
