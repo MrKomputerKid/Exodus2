@@ -13,24 +13,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create .env file
+      - name: Create .env file if not exists
         run: |
-          echo "MARIADB_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }}" >> /home/cwessel/exodus2/.env
-          echo "TOKEN=${{ secrets.TOKEN }}" >> /home/cwessel/exodus2/.env
-          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> /home/cwessel/exodus2/.env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> /home/cwessel/exodus2/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/cwessel/exodus2/.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> /home/cwessel/exodus2/.env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> /home/cwessel/exodus2/.env
-          echo "DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}" >> /home/cwessel/exodus2/.env
-          echo "OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}" >> /home/cwessel/exodus2/.env
-          echo "OPENWEATHERMAP_API_KEY=${{ secrets.OPENWEATHERMAP_API_KEY }}" >> /home/cwessel/exodus2/.env
-          echo "OWNER_ID=${{ secrets.OWNER_ID }}" >> /home/cwessel/exodus2/.env
-          echo "QUOTE_ALLOWED_GUILD_ID=${{ secrets.QUOTE_ALLOWED_GUILD_ID }}" >> /home/cwessel/exodus2/.env
-
-      - name: Execute podman-compose.sh
+          if [ ! -f /home/cwessel/exodus2/.env ]; then
+            echo "MARIADB_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }}" > /home/cwessel/exodus2/.env
+            echo "TOKEN=${{ secrets.TOKEN }}" >> /home/cwessel/exodus2/.env
+            echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> /home/cwessel/exodus2/.env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> /home/cwessel/exodus2/.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/cwessel/exodus2/.env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> /home/cwessel/exodus2/.env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> /home/cwessel/exodus2/.env
+            echo "DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}" >> /home/cwessel/exodus2/.env
+            echo "OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}" >> /home/cwessel/exodus2/.env
+            echo "OPENWEATHERMAP_API_KEY=${{ secrets.OPENWEATHERMAP_API_KEY }}" >> /home/cwessel/exodus2/.env
+            echo "OWNER_ID=${{ secrets.OWNER_ID }}" >> /home/cwessel/exodus2/.env
+            echo "QUOTE_ALLOWED_GUILD_ID=${{ secrets.QUOTE_ALLOWED_GUILD_ID }}" >> /home/cwessel/exodus2/.env
+            echo ".env file created"
+          else
+            echo ".env file already exists, skipping creation"
+          fi
+      - name: Run Docker compose
         run: |
-          bash /home/cwessel/exodus2/podman-compose.sh
+          cd /home/cwessel/exodus2 && docker compose up -d
 
       - name: Cleanup Unused Images and Containers
         run: |
