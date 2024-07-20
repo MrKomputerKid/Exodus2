@@ -10,8 +10,7 @@ jobs:
     environment: production
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Create .env file if not exists
         run: |
@@ -32,9 +31,26 @@ jobs:
           else
             echo ".env file already exists, skipping creation"
           fi
-      - name: Gracefully kill the old container & start new container
+
+      - name: Build Container
+        run: podman-compose -f docker-compose.yml build
+      
+      - name: Stop Container
+        run: podman-compose -f docker-compose.yml down
+        
+      - name: Run Container
         run: |
-          cd /home/cwessel/exodus2 && docker compose down && docker compose up -d
+          podman-compose -f docker-compose.yml up -d
+          docker ps --format '{{.Names}}' > containername
+          sleep 5
+          docker logs $(cat exodus2)
+          hostname
+          uname -a
+          env > /tmp/github.env
+
+      - name: Cleanup Unused Images and Containers
+        run: docker system prune -f
+        
       - name: Cleanup Unused Images and Containers
         run: |
           podman system prune -f
