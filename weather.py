@@ -154,7 +154,8 @@ def get_state_province_code(state_or_province, country):
     elif country == "Australia":
         return AUSTRALIA_STATE_CODES.get(state_or_province)
     # Add more countries as needed
-    return None
+    else:
+        return None
 
 def construct_location_string(formatted_location):
     parts = formatted_location.split(', ')
