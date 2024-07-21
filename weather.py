@@ -314,6 +314,3 @@ async def process_setunit(interaction: discord.Interaction, unit: str):
     finally:
         pool.close()
         await pool.wait_closed()
-
-# Add your bot token and run the bot
-client.run(os.getenv('DISCORD_TOKEN'))
