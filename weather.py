@@ -147,22 +147,28 @@ def get_state_province_code(state_or_province, country):
     state_or_province = state_or_province.title()  # Capitalize first letter of each word
     country = country.title()  # Capitalize first letter of each word
 
+    code_dict = None
     if country == "United States":
-        return US_STATE_CODES.get(state_or_province)
+        code_dict = US_STATE_CODES
     elif country == "United Kingdom":
-        return UK_COUNTRY_CODES.get(state_or_province)
+        code_dict = UK_COUNTRY_CODES
     elif country == "Canada":
-        return CANADA_PROVINCE_CODES.get(state_or_province)
+        code_dict = CANADA_PROVINCE_CODES
     elif country == "Australia":
-        return AUSTRALIA_STATE_CODES.get(state_or_province)
-    # Add more countries as needed
-    return None
+        code_dict = AUSTRALIA_STATE_CODES
+
+    if code_dict:
+        # Try to find the code, if not found, return the original state_or_province
+        return code_dict.get(state_or_province, state_or_province)
+    else:
+        # For countries not in our list, return the original state_or_province
+        return state_or_province
 
 def construct_location_string(formatted_location):
     parts = formatted_location.split(', ')
     
-    # Remove any zip codes or postal codes
-    parts = [part for part in parts if not re.match(r'^\d{5}(-\d{4})?$', part)]
+    # Remove any standalone zip codes, but keep postal codes that might be part of a city name
+    parts = [part for part in parts if not (part.isdigit() and len(part) == 5)]
     
     if len(parts) >= 3:
         city = parts[0]
@@ -177,6 +183,8 @@ def construct_location_string(formatted_location):
             postal_code = get_state_province_code(state_or_province, country)
             if postal_code:
                 return f"{city}, {postal_code}, {country}"
+            elif len(state_or_province) > 2:  # If it's a full state/province name, keep it
+                return f"{city}, {state_or_province}, {country}"
             else:
                 # If it's not a recognized state/province, it might be a county or other subdivision
                 # In this case, we'll just return city and country
