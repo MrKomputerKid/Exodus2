@@ -4,6 +4,7 @@ import aiomysql
 import logging
 import os
 import asyncio
+import re
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -107,6 +108,77 @@ class WeatherService:
 geocoding_service = GeocodingService()
 weather_service = WeatherService()
 
+# New code for location string processing
+
+US_STATE_CODES = {
+    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+    "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+    "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
+    "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
+    "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
+    "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+    "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
+    "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
+}
+
+UK_COUNTRY_CODES = {
+    "England": "ENG", "Scotland": "SCT", "Wales": "WLS", "Northern Ireland": "NIR"
+}
+
+CANADA_PROVINCE_CODES = {
+    "Alberta": "AB", "British Columbia": "BC", "Manitoba": "MB", "New Brunswick": "NB",
+    "Newfoundland and Labrador": "NL", "Northwest Territories": "NT", "Nova Scotia": "NS",
+    "Nunavut": "NU", "Ontario": "ON", "Prince Edward Island": "PE", "Quebec": "QC",
+    "Saskatchewan": "SK", "Yukon": "YT"
+}
+
+AUSTRALIA_STATE_CODES = {
+    "New South Wales": "NSW", "Victoria": "VIC", "Queensland": "QLD", "Western Australia": "WA",
+    "South Australia": "SA", "Tasmania": "TAS", "Australian Capital Territory": "ACT",
+    "Northern Territory": "NT"
+}
+
+def get_state_province_code(state_or_province, country):
+    if country == "United States":
+        return US_STATE_CODES.get(state_or_province)
+    elif country == "United Kingdom":
+        return UK_COUNTRY_CODES.get(state_or_province)
+    elif country == "Canada":
+        return CANADA_PROVINCE_CODES.get(state_or_province)
+    elif country == "Australia":
+        return AUSTRALIA_STATE_CODES.get(state_or_province)
+    # Add more countries as needed
+    return None
+
+def construct_location_string(formatted_location):
+    parts = formatted_location.split(', ')
+    
+    # Remove any zip codes or postal codes
+    parts = [part for part in parts if not re.match(r'^\d+$', part)]
+    
+    if len(parts) >= 3:
+        city, state_or_province, country = parts[:3]
+        
+        # Check if state_or_province is already a known postal code
+        if len(state_or_province) == 2 and state_or_province.isupper():
+            return f"{city}, {state_or_province}, {country}"
+        else:
+            # Try to find a postal code for the state/province
+            postal_code = get_state_province_code(state_or_province, country)
+            if postal_code:
+                return f"{city}, {postal_code}, {country}"
+            else:
+                return f"{city}, {country}"
+    elif len(parts) == 2:
+        city, country = parts
+        return f"{city}, {country}"
+    else:
+        return formatted_location  # Return as-is if we can't parse it
+
+# Updated weather command
+
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction: discord.Interaction, location: str = None, unit: str = None):
     await interaction.response.defer()  # Defer the interaction to allow for long-running tasks
@@ -164,9 +236,6 @@ async def get_coordinates(city, state_province, country):
     if city_details:
         return city_details[0], city_details[1], city_details[2]
     return None, None, None
-
-def construct_location_string(formatted_location):
-    return formatted_location
 
 def create_weather_embed(location_string, weather_info, unit):
     temperature = weather_info['temp']
@@ -245,3 +314,6 @@ async def process_setunit(interaction: discord.Interaction, unit: str):
     finally:
         pool.close()
         await pool.wait_closed()
+
+# Add your bot token and run the bot
+client.run(os.getenv('DISCORD_TOKEN'))
