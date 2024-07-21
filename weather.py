@@ -167,7 +167,7 @@ def get_state_province_code(state_or_province, country):
 def construct_location_string(formatted_location):
     parts = formatted_location.split(', ')
     
-    # Remove any standalone zip codes, but keep postal codes that might be part of a city name
+    # Remove any standalone zip codes
     parts = [part for part in parts if not (part.isdigit() and len(part) == 5)]
     
     if len(parts) >= 3:
@@ -175,20 +175,17 @@ def construct_location_string(formatted_location):
         country = parts[-1]
         state_or_province = parts[-2]  # Assume the second last part is state/province
         
-        # Check if state_or_province is already a known postal code
-        if len(state_or_province) == 2 and state_or_province.isupper():
-            return f"{city}, {state_or_province}, {country}"
-        else:
-            # Try to find a postal code for the state/province
+        # For US locations, always use the abbreviated state code
+        if country == "United States":
             postal_code = get_state_province_code(state_or_province, country)
-            if postal_code:
+            return f"{city}, {postal_code}, {country}"
+        else:
+            # For other countries, use the existing logic
+            postal_code = get_state_province_code(state_or_province, country)
+            if postal_code and len(postal_code) == 2:
                 return f"{city}, {postal_code}, {country}"
-            elif len(state_or_province) > 2:  # If it's a full state/province name, keep it
-                return f"{city}, {state_or_province}, {country}"
             else:
-                # If it's not a recognized state/province, it might be a county or other subdivision
-                # In this case, we'll just return city and country
-                return f"{city}, {country}"
+                return f"{city}, {state_or_province}, {country}"
     elif len(parts) == 2:
         city, country = parts
         return f"{city}, {country}"
