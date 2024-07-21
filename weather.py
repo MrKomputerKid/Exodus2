@@ -141,6 +141,10 @@ AUSTRALIA_STATE_CODES = {
 }
 
 def get_state_province_code(state_or_province, country):
+    # If it's already a 2-letter code, return it as is
+    if len(state_or_province) == 2 and state_or_province.isupper():
+        return state_or_province
+
     if country == "United States":
         return US_STATE_CODES.get(state_or_province)
     elif country == "United Kingdom":
@@ -159,7 +163,7 @@ def construct_location_string(formatted_location):
     parts = [part for part in parts if not re.match(r'^\d+$', part)]
     
     if len(parts) >= 3:
-        city, state_or_province, country = parts[:3]
+        city, state_or_province, country = parts[0], parts[1], parts[-1]
         
         # Check if state_or_province is already a known postal code
         if len(state_or_province) == 2 and state_or_province.isupper():
@@ -170,7 +174,7 @@ def construct_location_string(formatted_location):
             if postal_code:
                 return f"{city}, {postal_code}, {country}"
             else:
-                return f"{city}, {country}"
+                return f"{city}, {state_or_province}, {country}"
     elif len(parts) == 2:
         city, country = parts
         return f"{city}, {country}"
