@@ -108,8 +108,7 @@ class WeatherService:
 geocoding_service = GeocodingService()
 weather_service = WeatherService()
 
-# New code for location string processing
-
+# State and province codes
 US_STATE_CODES = {
     "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
     "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
@@ -145,6 +144,9 @@ def get_state_province_code(state_or_province, country):
     if len(state_or_province) == 2 and state_or_province.isupper():
         return state_or_province
 
+    state_or_province = state_or_province.title()  # Capitalize first letter of each word
+    country = country.title()  # Capitalize first letter of each word
+
     if country == "United States":
         return US_STATE_CODES.get(state_or_province)
     elif country == "United Kingdom":
@@ -154,17 +156,18 @@ def get_state_province_code(state_or_province, country):
     elif country == "Australia":
         return AUSTRALIA_STATE_CODES.get(state_or_province)
     # Add more countries as needed
-    else:
-        return None
+    return None
 
 def construct_location_string(formatted_location):
     parts = formatted_location.split(', ')
     
     # Remove any zip codes or postal codes
-    parts = [part for part in parts if not re.match(r'^\d+$', part)]
+    parts = [part for part in parts if not re.match(r'^\d{5}(-\d{4})?$', part)]
     
     if len(parts) >= 3:
-        city, state_or_province, country = parts[0], parts[1], parts[-1]
+        city = parts[0]
+        country = parts[-1]
+        state_or_province = parts[-2]  # Assume the second last part is state/province
         
         # Check if state_or_province is already a known postal code
         if len(state_or_province) == 2 and state_or_province.isupper():
@@ -175,14 +178,14 @@ def construct_location_string(formatted_location):
             if postal_code:
                 return f"{city}, {postal_code}, {country}"
             else:
-                return f"{city}, {state_or_province}, {country}"
+                # If it's not a recognized state/province, it might be a county or other subdivision
+                # In this case, we'll just return city and country
+                return f"{city}, {country}"
     elif len(parts) == 2:
         city, country = parts
         return f"{city}, {country}"
     else:
         return formatted_location  # Return as-is if we can't parse it
-
-# Updated weather command
 
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction: discord.Interaction, location: str = None, unit: str = None):
