@@ -47,7 +47,7 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
     embed.add_field(name="Reminder", value=reminder, inline=False)
     embed.add_field(name="Remind Time", value=str(remind_time), inline=False)
 
-    await interaction.response.send_message(embed=embed)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 def parse_reminder_time(reminder_time: str) -> datetime:
     hours, minutes, seconds = 0, 0, 0
