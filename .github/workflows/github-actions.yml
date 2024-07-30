@@ -27,6 +27,7 @@ jobs:
             echo "OPENWEATHERMAP_API_KEY=${{ secrets.OPENWEATHERMAP_API_KEY }}" >> /home/cwessel/exodus2/.env
             echo "OWNER_ID=${{ secrets.OWNER_ID }}" >> /home/cwessel/exodus2/.env
             echo "QUOTE_ALLOWED_GUILD_ID=${{ secrets.QUOTE_ALLOWED_GUILD_ID }}" >> /home/cwessel/exodus2/.env
+            echo "WAQI_API_KEY=${{ secrets.WAQI_API_KEY }}" >> /home/cwessel/exodus2/.env
             echo ".env file created"
           else
             echo ".env file already exists, skipping creation"
