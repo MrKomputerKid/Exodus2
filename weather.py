@@ -34,6 +34,7 @@ async def connect_to_db():
 
 openweathermap_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
 opencage_api_key = os.getenv('OPENCAGE_API_KEY')
+waqi_api_key = os.getenv('WAQI_API_KEY')
 
 async def set_user_location(user_id, location, pool):
     async with pool.acquire() as conn:
@@ -105,8 +106,30 @@ class WeatherService:
                     print(f"Failed to get weather data: {resp.status}")
                     return None
 
+class AQIService:
+    async def get_aqi(self, latitude, longitude):
+        async with aiohttp.ClientSession() as session:
+            url = f"https://api.waqi.info/feed/geo:{latitude};{longitude}/?token={waqi_api_key}"
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if 'data' in data and data['data']:
+                        measurements = data['data']['iaqi']
+                        aqi_info = {
+                            'location': data['data']['city']['name'],
+                            'measurements': measurements
+                        }
+                        return aqi_info
+                    else:
+                        print(f"No AQI data found for coordinates: {latitude}, {longitude}")
+                        return None
+                else:
+                    print(f"Failed to get AQI data: {resp.status}")
+                    return None
+
 geocoding_service = GeocodingService()
 weather_service = WeatherService()
+aqi_service = AQIService()
 
 # State and province codes
 US_STATE_CODES = {
@@ -169,7 +192,7 @@ def construct_location_string(formatted_location):
     
     # Remove any standalone zip codes
     parts = [part for part in parts if not (part.isdigit() and len(part) == 5)]
-    
+
     if len(parts) >= 3:
         city = parts[0]
         country = parts[-1]
@@ -191,7 +214,7 @@ def construct_location_string(formatted_location):
         return f"{city}, {country}"
     else:
         return formatted_location  # Return as-is if we can't parse it
-
+  
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction: discord.Interaction, location: str = None, unit: str = None):
     await interaction.response.defer()  # Defer the interaction to allow for long-running tasks
@@ -230,19 +253,13 @@ async def weather(interaction: discord.Interaction, location: str = None, unit: 
         pool.close()
         await pool.wait_closed()
 
-def process_location(location):
-    if ',' in location:
-        city, rest = location.split(',', 1)
-        if len(rest.strip()) == 2:
-            state_province = ''
-            country = ''
-        else:
-            state_province, country = rest.strip().split(',', 1)
-    else:
-        city = location
-        state_province = ''
-        country = ''
-    return city.strip(), state_province.strip(), country.strip()
+def process_location(location_string):
+    # Location string should be in "City, State/Province, Country" format
+    parts = location_string.split(',')
+    city = parts[0].strip() if len(parts) > 0 else ""
+    state_or_province = parts[1].strip() if len(parts) > 1 else ""
+    country = parts[2].strip() if len(parts) > 2 else ""
+    return city, state_or_province, country
 
 async def get_coordinates(city, state_province, country):
     city_details = await geocoding_service.fetch_coordinates_from_opencage(f'{city} {state_province} {country}')
@@ -270,6 +287,133 @@ def create_weather_embed(location_string, weather_info, unit):
     )
     return embed
 
+@tree.command(name="air", description="Fetch the Air Quality Index!")
+async def air(interaction: discord.Interaction, location: str = None):
+    await interaction.response.defer()
+    pool = await connect_to_db()
+    try:
+        if location is None:
+            location = await get_user_location(interaction.user.id, pool)
+            if not location:
+                await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.')
+                return
+
+        logging.debug(f"Location provided: {location}")
+        city, state_province, country = process_location(location)
+        logging.debug(f"Parsed location - City: {city}, State/Province: {state_province}, Country: {country}")
+
+        latitude, longitude, formatted_location = await get_coordinates(city, state_province, country)
+        logging.debug(f"Coordinates fetched - Latitude: {latitude}, Longitude: {longitude}, Formatted Location: {formatted_location}")
+
+        if latitude and longitude:
+            aqi_info = await aqi_service.get_aqi(latitude, longitude)  # Call using the instance
+            logging.debug(f"AQI info fetched: {aqi_info}")
+
+            if aqi_info:
+                location_string = construct_location_string(formatted_location)
+                embed = create_aqi_embed(location_string, aqi_info)
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send(f'Unable to fetch AQI information for {location}.')
+        else:
+            await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.')
+
+    except Exception as e:
+        error_message = f"Error in AQI command: {e}"
+        logging.error(error_message)
+        await interaction.followup.send(f"An error occurred while handling the AQI command: {e}")
+    finally:
+        pool.close()
+        await pool.wait_closed()
+
+
+# Ensure process_location, get_coordinates, and other necessary functions are also appropriately defined and tested
+
+def create_aqi_embed(location_string, aqi_info):
+    embed = discord.Embed(
+        title=f'Air Quality in {location_string}',
+        description=f'Measurements from: {aqi_info["location"]}',
+        color=0x3498db
+    )
+
+    overall_quality = "Good"
+    overall_color = discord.Color.green()
+
+    for parameter, value in aqi_info['measurements'].items():
+        if isinstance(value, dict):  # Handle AQI as nested dict
+            value = value.get('v', value)  # Get value or use the value itself
+
+        quality, color = interpret_aqi(parameter, value)
+
+        if color.value > overall_color.value:
+            overall_quality = quality
+            overall_color = color
+
+        embed.add_field(name=f"{parameter.upper()} - {quality}", value=f"{value}", inline=True)
+
+    embed.color = overall_color
+    embed.set_footer(text=f"Overall Air Quality: {overall_quality}")
+
+    return embed
+
+def interpret_aqi(parameter, value):
+    if parameter == 'pm25':
+        if value <= 12:
+            return "Good", discord.Color.green()
+        elif value <= 35.4:
+            return "Moderate", discord.Color.yellow()
+        elif value <= 55.4:
+            return "Bad", discord.Color.red()
+        elif value <= 150.4:
+            return "Unhealthy", discord.Color.purple()
+        else:
+            return "Extremely Unhealthy", discord.Color(0x04B0082)
+    elif parameter == 'pm10':
+        if value <= 54:
+            return "Good", discord.Color.green()
+        elif value <= 154:
+            return "Moderate", discord.Color.yellow()
+        elif value <= 254:
+            return "Bad", discord.Color.red()
+        elif value <= 354:
+            return "Unhealthy", discord.Color.purple()
+        else:
+            return "Extremely Unhealthy", discord.Color(0x04B0082)
+    elif parameter == 'o3':
+        if value <= 54:
+            return "Good", discord.Color.green()
+        elif value <= 70:
+            return "Moderate", discord.Color.yellow()
+        elif value <= 85:
+            return "Bad", discord.Color.red()
+        elif value <= 105:
+            return "Unhealthy", discord.Color.purple()
+        else:
+            return "Extremely Unhealthy", discord.Color(0x04B0082)
+    elif parameter == 'no2':
+        if value <= 53:
+            return "Good", discord.Color.green()
+        elif value <= 100:
+            return "Moderate", discord.Color.yellow()
+        elif value <= 360:
+            return "Bad", discord.Color.red()
+        elif value <= 649:
+            return "Unhealthy", discord.Color.purple()
+        else:
+            return "Extremely Unhealthy", discord.Color(0x04B0082)
+    else:
+        if value <= 50:
+            return "Good", discord.Color.green()
+        elif value <= 100:
+            return "Moderate", discord.Color.yellow()
+        elif value <= 150:
+            return "Bad", discord.Color.red()
+        elif value <= 200:
+            return "Unhealthy", discord.Color.purple()
+        else:
+            return "Extremely Unhealthy", discord.Color(0x04B0082)
+
+        
 @tree.command(name='setlocation', description='Set your preferred location')
 async def setlocation(interaction: discord.Interaction, location: str = None):
     await interaction.response.send_message("Processing your request...", ephemeral=True)
@@ -327,3 +471,8 @@ async def process_setunit(interaction: discord.Interaction, unit: str):
     finally:
         pool.close()
         await pool.wait_closed()
+
+@client.event
+async def on_ready():
+    await tree.sync()
+    print(f'We have logged in as {client.user}')

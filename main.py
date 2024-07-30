@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 import json
-from weather import weather, setlocation, setunit
+from weather import weather, setlocation, setunit, air
 from eightball import eightball
 from flip import flip
 from remind import remind
@@ -49,6 +49,7 @@ tree.add_command(quote)
 tree.add_command(eightball)
 tree.add_command(joke)
 tree.add_command(add_joke_command)
+tree.add_command(air)
 
 # Connect to the MariaDB database.
 
