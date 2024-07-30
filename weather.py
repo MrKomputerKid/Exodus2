@@ -228,7 +228,7 @@ async def weather(interaction: discord.Interaction, location: str = None, unit: 
         if location is None:
             location = await get_user_location(interaction.user.id, pool)
             if not location:
-                await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.')
+                await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.', ephemeral=True)
                 return
 
         city, state_province, country = process_location(location)
@@ -241,14 +241,14 @@ async def weather(interaction: discord.Interaction, location: str = None, unit: 
                 embed = create_weather_embed(location_string, weather_info, unit)
                 await interaction.followup.send(embed=embed)
             else:
-                await interaction.followup.send(f'Unable to fetch weather information for {location}.')
+                await interaction.followup.send(f'Unable to fetch weather information for {location}.', epehemeral=True)
         else:
-            await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.')
+            await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.', ephemeral=True)
     
     except Exception as e:
         error_message = f"Error in weather command: {e}"
         print(error_message)
-        await interaction.followup.send(f"An error occurred while handling the weather command: {e}")
+        await interaction.followup.send(f"An error occurred while handling the weather command: {e}", epehemral=True)
     finally:
         pool.close()
         await pool.wait_closed()
@@ -295,7 +295,7 @@ async def air(interaction: discord.Interaction, location: str = None):
         if location is None:
             location = await get_user_location(interaction.user.id, pool)
             if not location:
-                await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.')
+                await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.', ephemeral=True)
                 return
 
         logging.debug(f"Location provided: {location}")
@@ -314,14 +314,14 @@ async def air(interaction: discord.Interaction, location: str = None):
                 embed = create_aqi_embed(location_string, aqi_info)
                 await interaction.followup.send(embed=embed)
             else:
-                await interaction.followup.send(f'Unable to fetch AQI information for {location}.')
+                await interaction.followup.send(f'Unable to fetch AQI information for {location}.', ephemeral=True)
         else:
-            await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.')
+            await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.', ephemeral=True)
 
     except Exception as e:
         error_message = f"Error in AQI command: {e}"
         logging.error(error_message)
-        await interaction.followup.send(f"An error occurred while handling the AQI command: {e}")
+        await interaction.followup.send(f"An error occurred while handling the AQI command: {e}", ephemeral=True)
     finally:
         pool.close()
         await pool.wait_closed()
