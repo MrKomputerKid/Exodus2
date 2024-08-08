@@ -296,6 +296,7 @@ async def air(interaction: discord.Interaction, location: str = None):
             location = await get_user_location(interaction.user.id, pool)
             if not location:
                 await interaction.followup.send('Please specify a location or set your location using the `setlocation` command.', ephemeral=True)
+                logging.debug("Sent location prompt to user")
                 return
 
         logging.debug(f"Location provided: {location}")
