@@ -241,14 +241,14 @@ async def weather(interaction: discord.Interaction, location: str = None, unit: 
                 embed = create_weather_embed(location_string, weather_info, unit)
                 await interaction.followup.send(embed=embed)
             else:
-                await interaction.followup.send(f'Unable to fetch weather information for {location}.', epehemeral=True)
+                await interaction.followup.send(f'Unable to fetch weather information for {location}.', ephemeral=True)
         else:
             await interaction.followup.send(f'Unable to determine coordinates for {location}. Please check the location and try again.', ephemeral=True)
     
     except Exception as e:
         error_message = f"Error in weather command: {e}"
         print(error_message)
-        await interaction.followup.send(f"An error occurred while handling the weather command: {e}", epehemral=True)
+        await interaction.followup.send(f"An error occurred while handling the weather command: {e}", ephemral=True)
     finally:
         pool.close()
         await pool.wait_closed()
