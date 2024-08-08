@@ -220,7 +220,6 @@ async def weather(interaction: discord.Interaction, location: str = None, unit: 
     await interaction.response.defer()  # Defer the interaction to allow for long-running tasks
     pool = await connect_to_db()
     try:
-        await interaction.followup.send("Weather data processing...")
         if unit is None:
             unit = await get_user_unit(interaction.user.id, pool)
             if not unit:
@@ -293,7 +292,6 @@ async def air(interaction: discord.Interaction, location: str = None):
     await interaction.response.defer()
     pool = await connect_to_db()
     try:
-        await interaction.followup.send("Air data processing...")
         if location is None:
             location = await get_user_location(interaction.user.id, pool)
             if not location:
@@ -334,7 +332,6 @@ async def air(interaction: discord.Interaction, location: str = None):
 def create_aqi_embed(location_string, aqi_info):
     embed = discord.Embed(
         title=f'Air Quality in {location_string}',
-        description=f'Measurements from: {aqi_info["location"]}',
         color=0x3498db
     )
 
