@@ -217,7 +217,7 @@ def construct_location_string(formatted_location):
   
 @tree.command(name="weather", description="Fetch the weather!")
 async def weather(interaction: discord.Interaction, location: str = None, unit: str = None):
-    await interaction.response.defer()  # Defer the interaction to allow for long-running tasks
+    await interaction.response.defer()
     pool = await connect_to_db()
     try:
         if unit is None:
