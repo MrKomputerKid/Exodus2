@@ -293,7 +293,7 @@ async def air(interaction: discord.Interaction, location: str = None):
     await interaction.response.defer()
     pool = await connect_to_db()
     try:
-        await interaction.followup.send("AQI data processing...", epehemeral=True)
+        await interaction.followup.send("AQI data processing...", ephemeral=True)
         if location is None:
             location = await get_user_location(interaction.user.id, pool)
             if not location:
