@@ -49,6 +49,37 @@ async def remind(interaction, reminder_time: str, *, reminder: str):
 
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@tree.command(name='get_reminders', description='Get your reminders!')
+async def get_reminders(interaction):
+    pool, conn = await connect_to_db()
+    async with conn.cursor() as cur:
+        sql = "SELECT id, reminder, remind_time FROM reminders WHERE user_id = %s"
+        val = (interaction.user.id,)
+        await cur.execute(sql, val)
+        reminders = await cur.fetchall()
+
+    if not reminders:
+        await interaction.response.send_message("You have no reminders set.", ephemeral=True)
+        return
+
+    embed = discord.Embed(title="Your Reminders", color=discord.Color.blue())
+    for reminder_id, reminder, remind_time in reminders:
+        embed.add_field(name="Reminder ID", value=reminder_id, inline=False)
+        embed.add_field(name="Reminder", value=reminder, inline=False)
+        embed.add_field(name="Remind Time", value=str(remind_time), inline=False)
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@tree.command(name='remove_reminder', description='Remove a reminder by its ID')
+async def remove_reminder(interaction, reminder_id: int):
+    pool, conn = await connect_to_db()
+    async with conn.cursor() as cur:
+        sql = "DELETE FROM reminders WHERE id = %s AND user_id = %s"
+        val = (reminder_id, interaction.user.id)
+        await cur.execute(sql, val)
+
+    await interaction.response.send_message(f"Reminder with ID {reminder_id} has been removed.", ephemeral=True)
+
 def parse_reminder_time(reminder_time: str) -> datetime:
     hours, minutes, seconds = 0, 0, 0
     days, weeks = 0, 0

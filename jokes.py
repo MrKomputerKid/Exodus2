@@ -21,7 +21,7 @@ def get_random_joke():
     jokes = load_jokes()
     if jokes["jokes"]:
         return random.choice(jokes["jokes"])
-    return "No jokes available."
+    return None
 
 # Add a new joke
 def add_joke(setup, punchline):
@@ -32,10 +32,13 @@ def add_joke(setup, punchline):
 @app_commands.command(name="joke", description="Get a random joke")
 async def joke(interaction: discord.Interaction):
     joke = get_random_joke()
-    embed = discord.Embed(title="Here's a joke for you!", color=discord.Color.blurple())
-    embed.add_field(name="Setup", value=joke["setup"], inline=False)
-    embed.add_field(name="Punchline", value=joke["punchline"], inline=False)
-    await interaction.response.send_message(embed=embed)
+    if joke:
+        embed = discord.Embed(title="Here's a joke for you!", color=discord.Color.blurple())
+        embed.add_field(name="Setup", value=joke["setup"], inline=False)
+        embed.add_field(name="Punchline", value=joke["punchline"], inline=False)
+        await interaction.response.send_message(embed=embed)
+    else:
+        await interaction.response.send_message("No jokes available.", ephemeral=True)
 
 @app_commands.command(name="addjoke", description="Add a new joke")
 async def add_joke_command(interaction: discord.Interaction, setup: str, punchline: str):
