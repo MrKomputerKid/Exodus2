@@ -19,6 +19,7 @@ from errors import handle_error, on_error, on_command_error
 from discord import app_commands
 from discord.ext import tasks
 from jokes import joke, add_joke_command
+from reminders import get_reminders, remove_reminder
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
@@ -46,6 +47,8 @@ tree.add_command(eightball)
 tree.add_command(joke)
 tree.add_command(add_joke_command)
 tree.add_command(air)
+tree.add_command(get_reminders)
+tree.add_command(remove_reminder)
 
 # Connect to the MariaDB database.
 async def connect_to_db():
