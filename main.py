@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 import json
+import signal
 from weather import weather, setlocation, setunit, air
 from eightball import eightball
 from flip import flip
@@ -18,9 +19,6 @@ from errors import handle_error, on_error, on_command_error
 from discord import app_commands
 from discord.ext import tasks
 from jokes import joke, add_joke_command
-# from dotenv import load_dotenv
-
-# load_dotenv()
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
@@ -37,9 +35,7 @@ client.tree = tree
 # DB Definitions for the count.py game
 count_info_headers = ['guild_id', 'current_count', 'number_of_resets', 'last_user', 'message', 'channel_id','greedy_message']
 
-
 # Register each additional command
-
 tree.add_command(weather)
 tree.add_command(setlocation)
 tree.add_command(setunit)
@@ -52,7 +48,6 @@ tree.add_command(add_joke_command)
 tree.add_command(air)
 
 # Connect to the MariaDB database.
-
 async def connect_to_db():
     pool = await aiomysql.create_pool(
         host=os.getenv('DB_HOST'),
@@ -66,7 +61,6 @@ async def connect_to_db():
     return pool, connection
 
 # Create the users table if it doesn't already exist
-
 async def create_users_table(pool):
     async with pool.acquire() as connection:
         async with connection.cursor() as cur:
@@ -77,8 +71,8 @@ async def create_users_table(pool):
                     unit CHAR(1)
                 )
             ''')
-# Create the reminders table if it doesn't already exist
 
+# Create the reminders table if it doesn't already exist
 async def create_reminders_table(pool):
     async with pool.acquire() as connection:
         async with connection.cursor() as cur:
@@ -91,9 +85,7 @@ async def create_reminders_table(pool):
                 )
             ''')
 
-
 # Keep the MariaDB Connection Alive
-
 @tasks.loop(minutes=5)
 async def keep_alive(pool):
     async with pool.acquire() as conn:
@@ -101,7 +93,6 @@ async def keep_alive(pool):
             await cur.execute("SELECT 1")
 
 # Check reminders
-
 @tasks.loop(seconds=1)
 async def check_reminders(pool):
     while True:
@@ -141,7 +132,6 @@ async def check_reminders(pool):
                 await asyncio.sleep(1)
 
 # Events
-
 @client.event
 async def on_ready():
     pool, connection = await connect_to_db()
@@ -153,7 +143,6 @@ async def on_ready():
     print(f'We have logged in as {client.user}')
 
 # Shutdown cleanup commands
-
 async def cleanup_before_shutdown():
     await save_bot_state()
     await log_shutdown_event()
@@ -192,11 +181,8 @@ async def close_database_connection():
             pool.close()
             await pool.wait_closed()
 
-
 # Commands begin here.
-
 # About this bot.
-
 @tree.command(name='about', description='About this bot')
 async def about(interaction):
     embed = discord.Embed(title="About", color=discord.Color.blurple())
@@ -205,7 +191,6 @@ async def about(interaction):
     await interaction.response.send_message(embed=embed)
 
 # Ping.
-
 @tree.command(name='ping', description='Ping command')
 async def ping(interaction):
     embed = discord.Embed(title="Ping", color=discord.Color.blurple())
@@ -214,7 +199,6 @@ async def ping(interaction):
     await interaction.response.send_message(embed=embed)
 
 # Help
-
 @tree.command(name="help", description="Show help information")
 async def help(interaction):
     embed = discord.Embed(title="Help", color=discord.Color.blurple())
@@ -223,7 +207,6 @@ async def help(interaction):
     await interaction.response.send_message(embed=embed)
 
 # Sync Command! ONLY THE OWNER CAN DO THIS!
-
 @tree.command(name='sync', description='Owner only!')
 async def sync(interaction: discord.Interaction):
     owner_id = os.getenv('OWNER_ID')
@@ -238,7 +221,6 @@ async def sync(interaction: discord.Interaction):
         await interaction.response.send_message('You must be the owner to use this command!')
 
 # Shutdown command. ONLY THE OWNER CAN DO THIS!
-
 @tree.command(name='shutdown', description='Gracefully kill the bot. OWNER ONLY!')
 async def shutdown(interaction):
     # Get the owner ID from environment variable
@@ -252,7 +234,6 @@ async def shutdown(interaction):
         await interaction.response.send_message("You do not have permission to shut down the bot.")
 
 # Restart the bot. ONLY THE OWNER CAN DO THIS!
-
 @tree.command(name='restart', description='Gracefully reboot the bot. OWNER ONLY!')
 async def restart(interaction):
     # Get the owner ID from environment variable
@@ -268,4 +249,21 @@ async def restart(interaction):
     else:
         await interaction.response.send_message('You do not have permission to reboot the bot.')
 
-client.run(os.getenv('DISCORD_BOT_TOKEN'))
+async def main():
+    await client.start(os.getenv('DISCORD_BOT_TOKEN'))
+
+def shutdown(signal, frame):
+    loop = asyncio.get_event_loop()
+    loop.create_task(client.close())
+    loop.stop()
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, shutdown, sig, None)
+    try:
+        loop.run_until_complete(main())
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        loop.close()

@@ -37,17 +37,21 @@ jobs:
         run: podman-compose -f docker-compose.yml build
       
       - name: Stop Container
-        run: podman rm -f exodus2
+        run: |
+          if podman ps -a --format '{{.Names}}' | grep -Eq "^exodus2\$"; then
+            podman stop exodus2
+            podman rm exodus2
+          fi
         
       - name: Run Container
         run: |
           podman-compose -f docker-compose.yml up -d
           sleep 5
-          docker logs exodus2
+          podman logs exodus2
           hostname
           uname -a
           env > /tmp/github.env
 
       - name: Cleanup Unused Images and Containers
-        run: docker system prune -f
-        
+        run: podman system prune -f
+
