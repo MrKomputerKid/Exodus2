@@ -19,7 +19,7 @@ from errors import handle_error, on_error, on_command_error
 from discord import app_commands
 from discord.ext import tasks
 from jokes import joke, add_joke_command
-from reminders import get_reminders, remove_reminder
+from remind import get_reminders, remove_reminder
 
 logging.basicConfig(level=logging.DEBUG)
 discord_logger = logging.getLogger('discord')
